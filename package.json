@@ -12,9 +12,29 @@
   "bugs": {
     "url": "https://github.com/OpenSTFoundation/openst.js/issues"
   },
-  "scripts": {},
-  "dependencies": {},
-  "devDependencies": {
+  "scripts": {
+    "pre-commit": "lint-staged"
+  },
+  "dependencies": {
+    "bignumber.js": "4.1.0",
+    "path": "^0.12.7",
     "web3": "1.0.0-beta.33"
+  },
+  "devDependencies": {
+    "lint-staged": "7.2.0",
+    "pre-commit": "1.2.2",
+    "prettier": "1.13.7",
+    "shelljs": "0.8.1",
+    "node-cmd": "3.0.0",
+    "edit-json-file": "1.0.8"
+  },
+  "pre-commit": [
+    "pre-commit"
+  ],
+  "lint-staged": {
+    "*.js": [
+      "prettier --write --config .prettierrc.json",
+      "git add"
+    ]
   }
 }
