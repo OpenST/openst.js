@@ -16,6 +16,8 @@ const InitEconomy = function(params) {
 
   oThis.tokenRulesContractInstance = null;
 
+  oThis.erc20ContractInstance = null;
+
   oThis.tokenHolderContractInstance1 = null;
 
   oThis.transferRuleContractInstance = null;
@@ -37,8 +39,10 @@ InitEconomy.prototype = {
     // deploy and setup TokenHolder second user contract
     await oThis._setupTokenHolder2();
 
+    await oThis._fundERC20ToToken();
+
     // deploy Rule and register rule to TokenRule
-   await oThis._registerRule();
+    await oThis._registerRule();
 
     // Execute Rule
     // await oThis._executeRule();
@@ -72,6 +76,8 @@ InitEconomy.prototype = {
     oThis._addConfig({
       erc20TokenContractAddress: erc20TokenContractAddress
     });
+
+    oThis.erc20ContractInstance = contractDeploymentResponse.instance;
 
     return contractDeploymentResponse;
   },
@@ -270,6 +276,30 @@ InitEconomy.prototype = {
     return contractDeploymentResponse;
   },
 
+  _fundERC20ToToken: async function() {
+    const oThis = this;
+
+    let configFileContent = JSON.parse(fs.readFileSync(oThis.configJsonFilePath, 'utf8'));
+
+    console.log('Funding ERC20 tokens to token holder 1:', configFileContent.tokenHolderContractAddress1);
+    await oThis.erc20ContractInstance.methods
+      .transfer(configFileContent.tokenHolderContractAddress1, '1000000000000000000000')
+      .send({
+        from: configFileContent.deployerAddress,
+        gasPrice: configFileContent.gasprice,
+        gas: configFileContent.gasLimit
+      });
+
+    console.log('Funding ERC20 tokens to token holder 2:', configFileContent.tokenHolderContractAddress2);
+    await oThis.erc20ContractInstance.methods
+      .transfer(configFileContent.tokenHolderContractAddress2, '1000000000000000000000')
+      .send({
+        from: configFileContent.deployerAddress,
+        gasPrice: configFileContent.gasprice,
+        gas: configFileContent.gasLimit
+      });
+  },
+
   // deploys TransferRule contract
   // Registers TransferRule to TokenRules
   _registerRule: async function() {
@@ -278,23 +308,21 @@ InitEconomy.prototype = {
     let configFileContent = JSON.parse(fs.readFileSync(oThis.configJsonFilePath, 'utf8'));
 
     let web3Provider = new Web3(configFileContent.gethRpcEndPoint),
-        deployerAddress = configFileContent.deployerAddress,
-        gasPrice = configFileContent.gasPrice,
-        gasLimit = configFileContent.gasLimit;
+      deployerAddress = configFileContent.deployerAddress,
+      gasPrice = configFileContent.gasPrice,
+      gasLimit = configFileContent.gasLimit;
 
     let InitTransferRule = require('../lib/setup/InitTransferRule');
 
     console.log('* Deploying Transfer Rule Contract');
 
     let contractDeploymentResponse = await new InitTransferRule({
-        web3Provider: web3Provider,
-        deployerAddress: deployerAddress,
-        deployerPassphrase: passphrase,
-        gasPrice: gasPrice,
-        gasLimit: gasLimit,
-        args: [
-          configFileContent.tokenRulesContractAddress
-        ]
+      web3Provider: web3Provider,
+      deployerAddress: deployerAddress,
+      deployerPassphrase: passphrase,
+      gasPrice: gasPrice,
+      gasLimit: gasLimit,
+      args: [configFileContent.tokenRulesContractAddress]
     }).perform();
 
     let transferRuleContractAddress = contractDeploymentResponse.receipt.contractAddress;
@@ -304,7 +332,7 @@ InitEconomy.prototype = {
 
     // Register Rule in TokenRules Contract
     let registerRuleResponse = await oThis.tokenRulesContractInstance.instance.methods
-      .registerRule("TransferRule", configFileContent.tokenRulesContractAddress)
+      .registerRule('TransferRule', configFileContent.tokenRulesContractAddress)
       .send({
         from: configFileContent.organizationAddress,
         gasPrice: configFileContent.gasPrice
@@ -315,7 +343,7 @@ InitEconomy.prototype = {
     return registerRuleResponse;
   },
 
-  _executeRule: async function(){
+  _executeRule: async function() {
     const oThis = this;
 
     let configFileContent = JSON.parse(fs.readFileSync(oThis.configJsonFilePath, 'utf8'));
@@ -330,7 +358,7 @@ InitEconomy.prototype = {
       configFileContent.tokenHolderContractAddress1,
       configFileContent.tokenHolderContractAddress2,
       amountToTransfer
-      );
+    );
     // Get 0x + first 8(4 bytes) characters
     let callPrefix = executableData.substring(0, 9),
       web3Provider = new Web3(configFileContent.gethRpcEndPoint);
@@ -355,27 +383,35 @@ InitEconomy.prototype = {
     // configFileContent.ephemeralKey1 is signer here
     let signature = await web3Provider.eth.sign(messageToBeSigned, configFileContent.ephemeralKey1);
     signature = signature.slice(2);
-    console.log("ephemeralKey1Nonce:", ephemeralKey1Nonce,
-      "executableData:", executableData,
-      "callPrefix", callPrefix,
-      "messageToBeSigned", messageToBeSigned,
-      "signature", signature);
+    console.log(
+      'ephemeralKey1Nonce:',
+      ephemeralKey1Nonce,
+      'executableData:',
+      executableData,
+      'callPrefix',
+      callPrefix,
+      'messageToBeSigned',
+      messageToBeSigned,
+      'signature',
+      signature
+    );
 
     let r = '0x' + signature.slice(0, 64),
-     s = '0x' + signature.slice(64, 128),
-     v = web3Provider.utils.toDecimal('0x' + signature.slice(128, 130)) + 27;
+      s = '0x' + signature.slice(64, 128),
+      v = web3Provider.utils.toDecimal('0x' + signature.slice(128, 130)) + 27;
 
     let executeRuleResponse = await oThis.tokenHolderContractInstance1.methods
       .executeRule(
-        "TokenHolder",
+        'TokenHolder',
         configFileContent.tokenRulesContractAddress1,
         configFileContent.transferRuleContractAddress,
         ephemeralKey1Nonce,
         executableData,
         callPrefix,
         v,
-        r ,
-        s)
+        r,
+        s
+      )
       .send({
         from: configFileContent.facilitator,
         gasPrice: configFileContent.gasPrice
