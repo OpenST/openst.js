@@ -364,7 +364,7 @@ InitEconomy.prototype = {
     let ephemeralKey1Data = await oThis.tokenHolderContractInstance1.methods
       .ephemeralKeys(configFileContent.ephemeralKey1)
       .call({});
-    let ephemeralKey1Nonce = ephemeralKey1Data[1],
+    let ephemeralKey1Nonce = new BigNumber(ephemeralKey1Data[1]).toNumber(),
       amountToTransfer = new BigNumber(100);
 
     // let executableData = oThis.transferRuleContractInstance.methods.transferFrom.getData(
@@ -382,7 +382,7 @@ InitEconomy.prototype = {
     // Get 0x + first 8(4 bytes) characters
     let callPrefix = executableData.substring(0, 9),
       web3Provider = new Web3(configFileContent.gethRpcEndPoint);
-
+    console.log('ephemeralKey1Nonce:', ephemeralKey1Nonce);
     let messageToBeSigned = await web3Provider.utils.soliditySha3(
       { t: 'bytes', v: '0x19' }, // prefix
       { t: 'bytes', v: '0x00' }, // version control
