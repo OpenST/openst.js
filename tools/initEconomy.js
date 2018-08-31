@@ -364,27 +364,33 @@ InitEconomy.prototype = {
     let ephemeralKey1Data = await oThis.tokenHolderContractInstance1.methods
       .ephemeralKeys(configFileContent.ephemeralKey1)
       .call({});
-    let ephemeralKey1Nonce = ephemeralKey1Data[1].toNumber(),
+    let ephemeralKey1Nonce = ephemeralKey1Data[1],
       amountToTransfer = new BigNumber(100);
 
-    let executableData = oThis.transferRuleContractInstance.contract.transferFrom.getData(
-      configFileContent.tokenHolderContractAddress1,
-      configFileContent.tokenHolderContractAddress2,
-      amountToTransfer
-    );
+    // let executableData = oThis.transferRuleContractInstance.methods.transferFrom.getData(
+    //   configFileContent.tokenHolderContractAddress1,
+    //   configFileContent.tokenHolderContractAddress2,
+    //   amountToTransfer
+    // );
+    let executableData = await oThis.transferRuleContractInstance.methods
+      .transferFrom(
+        configFileContent.tokenHolderContractAddress1,
+        configFileContent.tokenHolderContractAddress2,
+        amountToTransfer
+      )
+      .encodeABI();
     // Get 0x + first 8(4 bytes) characters
     let callPrefix = executableData.substring(0, 9),
       web3Provider = new Web3(configFileContent.gethRpcEndPoint);
 
-    //web3Utils = require('web3-utils');
-    let messageToBeSigned = web3Provider.soliditySha3(
+    let messageToBeSigned = await web3Provider.utils.soliditySha3(
       { t: 'bytes', v: '0x19' }, // prefix
       { t: 'bytes', v: '0x00' }, // version control
       { t: 'address', v: configFileContent.tokenHolderContractAddress1 },
       { t: 'address', v: configFileContent.transferRuleContractAddress },
       { t: 'uint8', v: 0 },
       { t: 'bytes', v: executableData },
-      { t: 'uint256', v: ephemeralKey1Nonce },
+      { t: 'uint256', v: ephemeralKey1Nonce }, // nonce
       { t: 'uint8', v: 0 },
       { t: 'uint8', v: 0 },
       { t: 'uint8', v: 0 },
@@ -392,7 +398,7 @@ InitEconomy.prototype = {
       { t: 'uint8', v: 0 },
       { t: 'bytes', v: '' }
     );
-
+    console.log('messageToBeSigned:', messageToBeSigned);
     // configFileContent.ephemeralKey1 is signer here
     let signature = await web3Provider.eth.sign(messageToBeSigned, configFileContent.ephemeralKey1);
     signature = signature.slice(2);
