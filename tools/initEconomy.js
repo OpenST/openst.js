@@ -21,6 +21,18 @@ InitEconomy.prototype = {
     // deploy the ERC20 contract
     await oThis._deployERC20Token();
 
+    // deploy the TokenRule contract
+    await oThis._deployTokenRules();
+
+    // deploy the TokenHolder contract
+    // await oThis._setupTokenHolder();
+
+    // deploy Rule and register rule to TokenHolder
+    // await oThis._registerRule();
+
+    // Execute Rule
+    // await oThis._executeRule();
+
     console.log('Economy init DONE!');
   },
 
@@ -50,6 +62,70 @@ InitEconomy.prototype = {
     oThis._addConfig({
       erc20TokenContractAddress: erc20TokenContractAddress
     });
+
+    return contractDeploymentResponse;
+  },
+
+  _deployTokenRules: async function() {
+    const oThis = this;
+
+    let configFileContent = JSON.parse(fs.readFileSync(oThis.configJsonFilePath, 'utf8'));
+
+    let web3Provider = new Web3(configFileContent.gethRpcEndPoint),
+      deployerAddress = configFileContent.deployerAddress,
+      gasPrice = configFileContent.gasPrice,
+      gasLimit = configFileContent.gasLimit;
+
+    let InitTokenRules = require('../lib/setup/InitTokenRules');
+
+    console.log('* Deploying Token Rules Contract');
+
+    let contractDeploymentResponse = await new InitTokenRules({
+      web3Provider: web3Provider,
+      deployerAddress: deployerAddress,
+      deployerPassphrase: passphrase,
+      gasPrice: gasPrice,
+      gasLimit: gasLimit,
+      args: [configFileContent.organizationAddress, configFileContent.erc20TokenContractAddress]
+    }).perform();
+
+    let tokenRulesContractAddress = contractDeploymentResponse.receipt.contractAddress;
+    oThis._addConfig({
+      tokenRulesContractAddress: tokenRulesContractAddress
+    });
+
+    return contractDeploymentResponse;
+  },
+
+  _deployTokenHolder: async function() {
+    const oThis = this;
+
+    let configFileContent = JSON.parse(fs.readFileSync(oThis.configJsonFilePath, 'utf8'));
+
+    let web3Provider = new Web3(configFileContent.gethRpcEndPoint),
+      deployerAddress = configFileContent.deployerAddress,
+      gasPrice = configFileContent.gasPrice,
+      gasLimit = configFileContent.gasLimit;
+
+    let InitTokenRules = require('../lib/setup/InitTokenRules');
+
+    console.log('* Deploying Token Rules Contract');
+
+    let contractDeploymentResponse = await new InitTokenRules({
+      web3Provider: web3Provider,
+      deployerAddress: deployerAddress,
+      deployerPassphrase: passphrase,
+      gasPrice: gasPrice,
+      gasLimit: gasLimit,
+      args: [configFileContent.organizationAddress, configFileContent.erc20TokenContractAddress]
+    }).perform();
+
+    let tokenRulesContractAddress = contractDeploymentResponse.receipt.contractAddress;
+    oThis._addConfig({
+      tokenRulesContractAddress: tokenRulesContractAddress
+    });
+
+    return contractDeploymentResponse;
   },
 
   _addConfig: function(params) {
