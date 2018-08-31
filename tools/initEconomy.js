@@ -12,6 +12,8 @@ const InitEconomy = function(params) {
   oThis.setupRoot = params.setupRoot;
 
   oThis.configJsonFilePath = oThis.setupRoot + '/' + 'config.json';
+
+  oThis.tokenRulesContractInstance = null;
 };
 
 InitEconomy.prototype = {
@@ -31,7 +33,7 @@ InitEconomy.prototype = {
     await oThis._setupTokenHolder2();
 
     // deploy Rule and register rule to TokenRule
-    // await oThis._registerRule();
+   await oThis._registerRule();
 
     // Execute Rule
     // await oThis._executeRule();
@@ -96,6 +98,8 @@ InitEconomy.prototype = {
     oThis._addConfig({
       tokenRulesContractAddress: tokenRulesContractAddress
     });
+
+    oThis.tokenRulesContractInstance = contractDeploymentResponse.instance;
 
     return contractDeploymentResponse;
   },
@@ -259,7 +263,48 @@ InitEconomy.prototype = {
     return contractDeploymentResponse;
   },
 
-  _registerRule: function() {},
+  // deploys TransferRule contract
+  // Registers TransferRule to TokenRules
+  _registerRule: async function() {
+    const oThis = this;
+
+    let configFileContent = JSON.parse(fs.readFileSync(oThis.configJsonFilePath, 'utf8'));
+
+    let web3Provider = new Web3(configFileContent.gethRpcEndPoint),
+        deployerAddress = configFileContent.deployerAddress,
+        gasPrice = configFileContent.gasPrice,
+        gasLimit = configFileContent.gasLimit;
+
+    let InitTransferRule = require('../lib/setup/InitTransferRule');
+
+    console.log('* Deploying Transfer Rule Contract');
+
+    let contractDeploymentResponse = await new InitTransferRule({
+        web3Provider: web3Provider,
+        deployerAddress: deployerAddress,
+        deployerPassphrase: passphrase,
+        gasPrice: gasPrice,
+        gasLimit: gasLimit,
+        args: [
+          configFileContent.tokenRulesContractAddress
+        ]
+    }).perform();
+
+    let transferRuleContractAddress = contractDeploymentResponse.receipt.contractAddress;
+    oThis._addConfig({
+      transferRuleContractAddress: transferRuleContractAddress
+    });
+
+    // Register Rule in TokenRules Contract
+    let registerRuleResponse = await oThis.tokenRulesContractInstance.instance.methods
+      .registerRule("TransferRule", configFileContent.tokenRulesContractAddress)
+      .send({
+        from: configFileContent.organizationAddress,
+        gasPrice: configFileContent.gasPrice
+      });
+
+    return registerRuleResponse;
+  },
 
   _fundEthFor: function(web3Provider, senderAddr, recipient, amount) {
     return web3Provider.eth.personal.unlockAccount(senderAddr, passphrase).then(function() {
