@@ -331,8 +331,8 @@ InitEconomy.prototype = {
     });
 
     // Register Rule in TokenRules Contract
-    let registerRuleResponse = await oThis.tokenRulesContractInstance.instance.methods
-      .registerRule('TransferRule', configFileContent.tokenRulesContractAddress)
+    let registerRuleResponse = await oThis.tokenRulesContractInstance.instance
+      .registerRule('TransferRule', transferRuleContractAddress)
       .send({
         from: configFileContent.organizationAddress,
         gasPrice: configFileContent.gasPrice
