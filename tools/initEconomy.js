@@ -31,7 +31,7 @@ InitEconomy.prototype = {
     await oThis._setupTokenHolder2();
 
     // deploy Rule and register rule to TokenRule
-   // await oThis._registerRule();
+    // await oThis._registerRule();
 
     // Execute Rule
     // await oThis._executeRule();
@@ -172,7 +172,10 @@ InitEconomy.prototype = {
       .isAuthorizedEphemeralKey(configFileContent.ephemeralKey1)
       .call({});
 
-    console.log('isAuthorizedEphemeralKeyResponse', isAuthorizedEphemeralKeyResponse);
+    if (isAuthorizedEphemeralKeyResponse !== true) {
+      console.log('isAuthorizedEphemeralKeyResponse return false for key:', configFileContent.ephemeralKey1);
+      shell.exit(1);
+    }
 
     return contractDeploymentResponse;
   },
@@ -181,81 +184,82 @@ InitEconomy.prototype = {
   // Add two wallets as owners
   // Do authorize session for adding an ephemeral key2
   _setupTokenHolder2: async function() {
-      const oThis = this;
+    const oThis = this;
 
-      let configFileContent = JSON.parse(fs.readFileSync(oThis.configJsonFilePath, 'utf8'));
+    let configFileContent = JSON.parse(fs.readFileSync(oThis.configJsonFilePath, 'utf8'));
 
-      let web3Provider = new Web3(configFileContent.gethRpcEndPoint),
-          deployerAddress = configFileContent.deployerAddress,
-          gasPrice = configFileContent.gasPrice,
-          gasLimit = configFileContent.gasLimit;
+    let web3Provider = new Web3(configFileContent.gethRpcEndPoint),
+      deployerAddress = configFileContent.deployerAddress,
+      gasPrice = configFileContent.gasPrice,
+      gasLimit = configFileContent.gasLimit;
 
-      let InitTokenHolder = require('../lib/setup/InitTokenHolder');
+    let InitTokenHolder = require('../lib/setup/InitTokenHolder');
 
-      console.log('* Deploying Token Holder Contract2');
+    console.log('* Deploying Token Holder Contract2');
 
-      let requirement = 2,
-          wallets = [configFileContent.wallet1, configFileContent.wallet2];
+    let requirement = 2,
+      wallets = [configFileContent.wallet1, configFileContent.wallet2];
 
-      let contractDeploymentResponse = await new InitTokenHolder({
-          web3Provider: web3Provider,
-          deployerAddress: deployerAddress,
-          deployerPassphrase: passphrase,
-          gasPrice: gasPrice,
-          gasLimit: gasLimit,
-          args: [
-              configFileContent.erc20TokenContractAddress,
-              configFileContent.erc20TokenContractAddress,
-              configFileContent.tokenRulesContractAddress,
-              requirement,
-              wallets
-          ]
-      }).perform();
+    let contractDeploymentResponse = await new InitTokenHolder({
+      web3Provider: web3Provider,
+      deployerAddress: deployerAddress,
+      deployerPassphrase: passphrase,
+      gasPrice: gasPrice,
+      gasLimit: gasLimit,
+      args: [
+        configFileContent.erc20TokenContractAddress,
+        configFileContent.erc20TokenContractAddress,
+        configFileContent.tokenRulesContractAddress,
+        requirement,
+        wallets
+      ]
+    }).perform();
 
-      let tokenHolderContractAddress = contractDeploymentResponse.receipt.contractAddress;
-      oThis._addConfig({
-          tokenHolderContractAddress2: tokenHolderContractAddress
+    let tokenHolderContractAddress = contractDeploymentResponse.receipt.contractAddress;
+    oThis._addConfig({
+      tokenHolderContractAddress2: tokenHolderContractAddress
+    });
+
+    let spendingLimit = '10000000000000000000000000000',
+      expirationHeight = '10000000000000000000000000000';
+
+    await web3Provider.eth.personal.unlockAccount(configFileContent.wallet1, passphrase);
+
+    // Authorize an ephemeral public key
+    let authorizeSession1Response = await contractDeploymentResponse.instance.methods
+      .authorizeSession(configFileContent.ephemeralKey2, spendingLimit, expirationHeight)
+      .send({
+        from: configFileContent.wallet1,
+        gasPrice: configFileContent.gasPrice
       });
 
-      let spendingLimit = '10000000000000000000000000000',
-          expirationHeight = '10000000000000000000000000000';
+    console.log('authorizeSession1Response', JSON.stringify(authorizeSession1Response, null));
 
-      await web3Provider.eth.personal.unlockAccount(configFileContent.wallet1, passphrase);
+    await web3Provider.eth.personal.unlockAccount(configFileContent.wallet2, passphrase);
 
-      // Authorize an ephemeral public key
-      let authorizeSession1Response = await contractDeploymentResponse.instance.methods
-          .authorizeSession(configFileContent.ephemeralKey2, spendingLimit, expirationHeight)
-          .send({
-              from: configFileContent.wallet1,
-              gasPrice: configFileContent.gasPrice
-          });
+    // Authorize an ephemeral public key
+    let authorizeSession2Response = await contractDeploymentResponse.instance.methods
+      .authorizeSession(configFileContent.ephemeralKey2, spendingLimit, expirationHeight)
+      .send({
+        from: configFileContent.wallet2,
+        gasPrice: configFileContent.gasPrice
+      });
 
-      console.log('authorizeSession1Response', JSON.stringify(authorizeSession1Response, null));
+    console.log('authorizeSession2Response', JSON.stringify(authorizeSession2Response, null));
 
-      await web3Provider.eth.personal.unlockAccount(configFileContent.wallet2, passphrase);
+    let isAuthorizedEphemeralKeyResponse = await contractDeploymentResponse.instance.methods
+      .isAuthorizedEphemeralKey(configFileContent.ephemeralKey2)
+      .call({});
 
-      // Authorize an ephemeral public key
-      let authorizeSession2Response = await contractDeploymentResponse.instance.methods
-          .authorizeSession(configFileContent.ephemeralKey2, spendingLimit, expirationHeight)
-          .send({
-              from: configFileContent.wallet2,
-              gasPrice: configFileContent.gasPrice
-          });
+    if (isAuthorizedEphemeralKeyResponse !== true) {
+      console.log('isAuthorizedEphemeralKeyResponse return false for key:', configFileContent.ephemeralKey1);
+      shell.exit(1);
+    }
 
-      console.log('authorizeSession2Response', JSON.stringify(authorizeSession2Response, null));
-
-      let isAuthorizedEphemeralKeyResponse = await contractDeploymentResponse.instance.methods
-          .isAuthorizedEphemeralKey(configFileContent.ephemeralKey2)
-          .call({});
-
-      console.log('isAuthorizedEphemeralKeyResponse', isAuthorizedEphemeralKeyResponse);
-
-      return contractDeploymentResponse;
+    return contractDeploymentResponse;
   },
 
-  _registerRule: function() {
-
-  },
+  _registerRule: function() {},
 
   _fundEthFor: function(web3Provider, senderAddr, recipient, amount) {
     return web3Provider.eth.personal.unlockAccount(senderAddr, passphrase).then(function() {
