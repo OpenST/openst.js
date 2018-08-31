@@ -24,10 +24,15 @@ InitEconomy.prototype = {
     // deploy the TokenRule contract
     await oThis._deployTokenRules();
 
-    // deploy the TokenHolder contract
-    // await oThis._setupTokenHolder();
+    // deploy and setup TokenHolder first contract
+    await oThis._setupTokenHolder1();
 
-    // deploy Rule and register rule to TokenHolder
+    // deploy the TokenHolder contract
+    // Add two wallets as owners
+    // Do authorize session for adding an ephemeral key
+    // await oThis._setupTokenHolder2();
+
+    // deploy Rule and register rule to TokenRule
     // await oThis._registerRule();
 
     // Execute Rule
@@ -97,7 +102,11 @@ InitEconomy.prototype = {
     return contractDeploymentResponse;
   },
 
-  _deployTokenHolder: async function() {
+   // deploy the TokenHolder contract
+   // Add two wallets as owners
+   // Do authorize session for adding an ephemeral key
+   // Fund ERC20 tokens
+  _setupTokenHolder1: async function() {
     const oThis = this;
 
     let configFileContent = JSON.parse(fs.readFileSync(oThis.configJsonFilePath, 'utf8'));
@@ -107,23 +116,48 @@ InitEconomy.prototype = {
       gasPrice = configFileContent.gasPrice,
       gasLimit = configFileContent.gasLimit;
 
-    let InitTokenRules = require('../lib/setup/InitTokenRules');
+    let InitTokenHolder = require('../lib/setup/InitTokenHolder');
+    let TokenHolder = require('../lib/contract_interacts/TokenHolder');
 
-    console.log('* Deploying Token Rules Contract');
+    console.log('* Deploying Token Holder Contract1');
 
-    let contractDeploymentResponse = await new InitTokenRules({
+    let requirement = 2,
+      wallets = [configFileContent.wallet1, configFileContent.wallet2];
+
+    let contractDeploymentResponse = await new InitTokenHolder({
       web3Provider: web3Provider,
       deployerAddress: deployerAddress,
       deployerPassphrase: passphrase,
       gasPrice: gasPrice,
       gasLimit: gasLimit,
-      args: [configFileContent.organizationAddress, configFileContent.erc20TokenContractAddress]
+      args: [
+          configFileContent.erc20TokenContractAddress,
+          configFileContent.erc20TokenContractAddress,
+          configFileContent.tokenRulesContractAddress,
+          requirement,
+          wallets
+      ]
     }).perform();
 
-    let tokenRulesContractAddress = contractDeploymentResponse.receipt.contractAddress;
+    let tokenHolderContractAddress = contractDeploymentResponse.receipt.contractAddress;
     oThis._addConfig({
-      tokenRulesContractAddress: tokenRulesContractAddress
+        tokenHolderContractAddress1: tokenHolderContractAddress
     });
+
+    let spendingLimit = '10000000000000000000000000000'
+        , expirationHeight = '10000000000000000000000000000';
+
+    await web3Provider.eth.personal.unlockAccount(configFileContent.wallet1, passphrase);
+
+    // Authorize an ephemeral public key
+      contractDeploymentResponse.instance.methods.authorizeSession(
+          configFileContent.ephemeralKey1,
+          spendingLimit,
+          expirationHeight
+      ).send({
+          from: configFileContent.wallet1,
+          gasPrice: configFileContent.gasPrice
+      });
 
     return contractDeploymentResponse;
   },
