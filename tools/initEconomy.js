@@ -331,12 +331,25 @@ InitEconomy.prototype = {
     });
 
     // Register Rule in TokenRules Contract
-    let registerRuleResponse = await oThis.tokenRulesContractInstance.instance
-      .registerRule('TransferRule', transferRuleContractAddress)
+    let ruleName = 'TransferRule';
+    await web3Provider.eth.personal.unlockAccount(configFileContent.organizationAddress, passphrase);
+    let registerRuleResponse = await oThis.tokenRulesContractInstance.methods
+      .registerRule(ruleName, transferRuleContractAddress)
       .send({
         from: configFileContent.organizationAddress,
         gasPrice: configFileContent.gasPrice
       });
+    console.log('Transfer Rule registered response:', registerRuleResponse);
+
+    // let rulesByAddressResponse = await oThis.tokenRulesContractInstance.methods
+    //   .rulesByName(ruleName)
+    //   .call({});
+    //
+    // console.log("rulesByAddressResponse:", rulesByAddressResponse);
+    // if(rulesByAddressResponse[0] != ruleName) {
+    //   console.log("Rule registration failed");
+    //   shell.exit(1);
+    // }
 
     oThis.transferRuleContractInstance = contractDeploymentResponse.instance;
 
@@ -400,6 +413,7 @@ InitEconomy.prototype = {
       s = '0x' + signature.slice(64, 128),
       v = web3Provider.utils.toDecimal('0x' + signature.slice(128, 130)) + 27;
 
+    await web3Provider.eth.personal.unlockAccount(configFileContent.facilitator, passphrase);
     let executeRuleResponse = await oThis.tokenHolderContractInstance1.methods
       .executeRule(
         'TokenHolder',
