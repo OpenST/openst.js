@@ -13,7 +13,8 @@
     "url": "https://github.com/OpenSTFoundation/openst.js/issues"
   },
   "scripts": {
-    "pre-commit": "lint-staged"
+    "pre-commit": "lint-staged",
+    "init-economy": "node ./tools/initEconomy.js"
   },
   "dependencies": {
     "bignumber.js": "4.1.0",
