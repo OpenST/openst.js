@@ -2,7 +2,8 @@
 
 const fs = require('fs'),
   Web3 = require('web3'),
-  shell = require('shelljs');
+  shell = require('shelljs'),
+  BigNumber = require('bignumber.js');
 
 const passphrase = 'testtest';
 
@@ -14,6 +15,10 @@ const InitEconomy = function(params) {
   oThis.configJsonFilePath = oThis.setupRoot + '/' + 'config.json';
 
   oThis.tokenRulesContractInstance = null;
+
+  oThis.tokenHolderContractInstance1 = null;
+
+  oThis.transferRuleContractInstance = null;
 };
 
 InitEconomy.prototype = {
@@ -181,6 +186,8 @@ InitEconomy.prototype = {
       shell.exit(1);
     }
 
+    oThis.tokenHolderContractInstance1 = contractDeploymentResponse.instance;
+
     return contractDeploymentResponse;
   },
 
@@ -303,11 +310,83 @@ InitEconomy.prototype = {
         gasPrice: configFileContent.gasPrice
       });
 
+    oThis.transferRuleContractInstance = contractDeploymentResponse.instance;
+
     return registerRuleResponse;
   },
 
   _executeRule: async function(){
+    const oThis = this;
 
+    let configFileContent = JSON.parse(fs.readFileSync(oThis.configJsonFilePath, 'utf8'));
+
+    let ephemeralKey1Data = await oThis.tokenHolderContractInstance1.methods
+      .ephemeralKeys(configFileContent.ephemeralKey1)
+      .call({});
+    let ephemeralKey1Nonce = ephemeralKey1Data[1].toNumber(),
+      amountToTransfer = new BigNumber(100);
+
+    let executableData = oThis.transferRuleContractInstance.contract.transferFrom.getData(
+      configFileContent.tokenHolderContractAddress1,
+      configFileContent.tokenHolderContractAddress2,
+      amountToTransfer
+      );
+    // Get 0x + first 8(4 bytes) characters
+    let callPrefix = executableData.substring(0, 9),
+      web3Provider = new Web3(configFileContent.gethRpcEndPoint);
+
+    //web3Utils = require('web3-utils');
+    let messageToBeSigned = web3Provider.soliditySha3(
+      { t: 'bytes', v: '0x19' }, // prefix
+      { t: 'bytes', v: '0x00' }, // version control
+      { t: 'address', v: configFileContent.tokenHolderContractAddress1 },
+      { t: 'address', v: configFileContent.transferRuleContractAddress },
+      { t: 'uint8', v: 0 },
+      { t: 'bytes', v: executableData },
+      { t: 'uint256', v: ephemeralKey1Nonce },
+      { t: 'uint8', v: 0 },
+      { t: 'uint8', v: 0 },
+      { t: 'uint8', v: 0 },
+      { t: 'bytes4', v: callPrefix },
+      { t: 'uint8', v: 0 },
+      { t: 'bytes', v: '' }
+    );
+
+    // configFileContent.ephemeralKey1 is signer here
+    let signature = await web3Provider.eth.sign(messageToBeSigned, configFileContent.ephemeralKey1);
+    signature = signature.slice(2);
+    console.log("ephemeralKey1Nonce:", ephemeralKey1Nonce,
+      "executableData:", executableData,
+      "callPrefix", callPrefix,
+      "messageToBeSigned", messageToBeSigned,
+      "signature", signature);
+
+    let r = '0x' + signature.slice(0, 64),
+     s = '0x' + signature.slice(64, 128),
+     v = web3Provider.utils.toDecimal('0x' + signature.slice(128, 130)) + 27;
+
+    let executeRuleResponse = await oThis.tokenHolderContractInstance1.methods
+      .executeRule(
+        "TokenHolder",
+        configFileContent.tokenRulesContractAddress1,
+        configFileContent.transferRuleContractAddress,
+        ephemeralKey1Nonce,
+        executableData,
+        callPrefix,
+        v,
+        r ,
+        s)
+      .send({
+        from: configFileContent.facilitator,
+        gasPrice: configFileContent.gasPrice
+      });
+
+    if (executeRuleResponse !== true) {
+      console.log('executeRuleResponse return false', configFileContent);
+      shell.exit(1);
+    }
+
+    return executeRuleResponse;
   },
 
   _fundEthFor: function(web3Provider, senderAddr, recipient, amount) {
