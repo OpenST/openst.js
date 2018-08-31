@@ -45,7 +45,7 @@ InitEconomy.prototype = {
     await oThis._registerRule();
 
     // Execute Rule
-    // await oThis._executeRule();
+    await oThis._executeRule();
 
     console.log('Economy init DONE!');
   },
