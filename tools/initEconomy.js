@@ -306,6 +306,10 @@ InitEconomy.prototype = {
     return registerRuleResponse;
   },
 
+  _executeRule: async function(){
+
+  },
+
   _fundEthFor: function(web3Provider, senderAddr, recipient, amount) {
     return web3Provider.eth.personal.unlockAccount(senderAddr, passphrase).then(function() {
       return web3Provider.eth.sendTransaction({
