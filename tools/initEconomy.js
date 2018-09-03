@@ -364,7 +364,8 @@ InitEconomy.prototype = {
     let ephemeralKey1Data = await oThis.tokenHolderContractInstance1.methods
       .ephemeralKeys(configFileContent.ephemeralKey1)
       .call({});
-    let ephemeralKey1Nonce = new BigNumber(ephemeralKey1Data[1]).toNumber(),
+    let bigNumberNonce = new BigNumber(ephemeralKey1Data[1]),
+      ephemeralKey1Nonce = bigNumberNonce.add(1).toString(10),
       amountToTransfer = new BigNumber(100);
 
     // let executableData = oThis.transferRuleContractInstance.methods.transferFrom.getData(
@@ -380,26 +381,25 @@ InitEconomy.prototype = {
       )
       .encodeABI();
     // Get 0x + first 8(4 bytes) characters
-    let callPrefix = executableData.substring(0, 9),
+    let callPrefix = executableData.substring(0, 10),
       web3Provider = new Web3(configFileContent.gethRpcEndPoint);
-    console.log('ephemeralKey1Nonce:', ephemeralKey1Nonce);
     let messageToBeSigned = await web3Provider.utils.soliditySha3(
       { t: 'bytes', v: '0x19' }, // prefix
       { t: 'bytes', v: '0x00' }, // version control
       { t: 'address', v: configFileContent.tokenHolderContractAddress1 },
       { t: 'address', v: configFileContent.transferRuleContractAddress },
-      { t: 'uint8', v: 0 },
+      { t: 'uint8', v: '0' },
       { t: 'bytes', v: executableData },
       { t: 'uint256', v: ephemeralKey1Nonce }, // nonce
-      { t: 'uint8', v: 0 },
-      { t: 'uint8', v: 0 },
-      { t: 'uint8', v: 0 },
-      { t: 'bytes4', v: callPrefix },
-      { t: 'uint8', v: 0 },
-      { t: 'bytes', v: '' }
+      { t: 'uint8', v: '0' },
+      { t: 'uint8', v: '0' },
+      { t: 'uint8', v: '0' },
+      { t: 'bytes', v: callPrefix },
+      { t: 'uint8', v: '0' },
+      { t: 'bytes', v: '0xab' }
     );
-    console.log('messageToBeSigned:', messageToBeSigned);
     // configFileContent.ephemeralKey1 is signer here
+    await web3Provider.eth.personal.unlockAccount(configFileContent.ephemeralKey1, passphrase);
     let signature = await web3Provider.eth.sign(messageToBeSigned, configFileContent.ephemeralKey1);
     signature = signature.slice(2);
     console.log(
@@ -422,8 +422,7 @@ InitEconomy.prototype = {
     await web3Provider.eth.personal.unlockAccount(configFileContent.facilitator, passphrase);
     let executeRuleResponse = await oThis.tokenHolderContractInstance1.methods
       .executeRule(
-        'TokenHolder',
-        configFileContent.tokenRulesContractAddress1,
+        configFileContent.tokenHolderContractAddress1,
         configFileContent.transferRuleContractAddress,
         ephemeralKey1Nonce,
         executableData,
