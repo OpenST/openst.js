@@ -435,11 +435,12 @@ InitEconomy.prototype = {
         from: configFileContent.facilitator,
         gasPrice: configFileContent.gasPrice
       });
+    console.log('executeRuleResponse: ', executeRuleResponse);
 
-    if (executeRuleResponse !== true) {
-      console.log('executeRuleResponse return false', configFileContent);
-      shell.exit(1);
-    }
+    // if (executeRuleResponse !== true) {
+    //   console.log('executeRuleResponse return false', configFileContent);
+    //   shell.exit(1);
+    // }
 
     return executeRuleResponse;
   },
