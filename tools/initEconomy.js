@@ -451,7 +451,11 @@ InitEconomy.prototype = {
 
     let r = '0x' + signature.slice(0, 64),
       s = '0x' + signature.slice(64, 128),
-      v = web3Provider.utils.toDecimal('0x' + signature.slice(128, 130)) + 27;
+      v = web3Provider.utils.toDecimal('0x' + signature.slice(128, 130));
+    if (v < 27) {
+      v += 27;
+    }
+
     console.log(
       'signer',
       configFileContent.ephemeralKey1,
@@ -487,11 +491,6 @@ InitEconomy.prototype = {
       console.log('executeRuleResponse failed: ', JSON.stringify(executeRuleResponse));
       shell.exit(1);
     }
-
-    // if (executeRuleResponse !== true) {
-    //   console.log('executeRuleResponse return false', configFileContent);
-    //   shell.exit(1);
-    // }
 
     return executeRuleResponse;
   },
