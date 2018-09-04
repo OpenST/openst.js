@@ -2,26 +2,23 @@
 
 OpenST is a framework for building token economies. In here, we will go through a sample usage of OpenST.
 
-##### Initializing chain on developer machines
+##### Install all the dependent packages
 ```
 > npm install
+```
+
+##### Initializing chain on developer machines
+The below command creates a json file (~/openst-setup/config.json) having all the needed addresses and other constants. 
+It also starts GETH process for the chain. This is meant for developer to get going directly and try out the functionality 
+of openst.js as described in the following sections.
+
+```
 > npm run init-dev-env
 ```
 
-##### Creating an object of OpenST
-```js
-// Creating object of web3 js using the GETH endpoint
-const Web3 = require('web3');
-const gethEndpoint = 'http://127.0.0.1:8545';
-let web3Provider = new Web3(gethEndpoint);
-
-// Creating object of OpenST
-const OpenST = require('./index.js');
-let openST = new OpenST(web3Provider);
-```
-
 ##### Sample Constants
-In the following, we assume that keystore files of some addresses are present on the GETH servers with a common passphrase of the same of example usage.
+For running functionality of openst.js, following constants are needed. For developer machines, which were set up in 
+the previous section, one can find values of these in ~/openst-setup/config.json file.
 ```js
 // deployer address
 const deployerAddress = '0x01e56829663a5d920c55538086a9760ff215b2a6';
@@ -41,6 +38,18 @@ const facilitatorAddress = '0x66d0be510f3cac64f30eea359bda39717569ea4b';
 const passphrase = 'testtest';
 const gasPrice = '0x12A05F200';
 const gasLimit = 4700000;
+```
+
+##### Creating an object of OpenST
+```js
+// Creating object of web3 js using the GETH endpoint
+const Web3 = require('web3');
+const gethEndpoint = 'http://127.0.0.1:8545';
+let web3Provider = new Web3(gethEndpoint);
+
+// Creating object of OpenST
+const OpenST = require('./index.js');
+let openST = new OpenST(web3Provider);
 ```
 
 ##### Deploying ERC20 contract (Optional)
