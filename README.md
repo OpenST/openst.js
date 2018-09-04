@@ -4,6 +4,7 @@ OpenST is a framework for building token economies. In here, we will go through 
 
 ##### Initializing chain on developer machines
 ```
+> npm install
 > npm run init-dev-env
 ```
 
