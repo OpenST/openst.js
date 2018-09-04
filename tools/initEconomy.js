@@ -47,7 +47,7 @@ InitEconomy.prototype = {
     // Execute Rule
     await oThis._executeRule();
 
-    console.log('Economy init DONE!');
+    console.log('Yayy!!! Economy init DONE!');
   },
 
   _deployERC20Token: async function() {
@@ -186,22 +186,24 @@ InitEconomy.prototype = {
       .authorizeSession(configFileContent.ephemeralKey1, spendingLimit.toString(10), expirationHeight.toString(10))
       .send({
         from: configFileContent.wallet1,
-        gasPrice: configFileContent.gasPrice
+        gasPrice: configFileContent.gasPrice,
+        gasLimit: configFileContent.gasLimit
       });
 
-    console.log('authorizeSession1Response', JSON.stringify(authorizeSession1Response, null));
+    //console.log('authorizeSession1Response', JSON.stringify(authorizeSession1Response, null));
 
     await web3Provider.eth.personal.unlockAccount(configFileContent.wallet2, passphrase);
 
     // Authorize an ephemeral public key
     let authorizeSession2Response = await contractDeploymentResponse.instance.methods
-      .authorizeSession(configFileContent.ephemeralKey1, spendingLimit, expirationHeight)
+      .authorizeSession(configFileContent.ephemeralKey1, spendingLimit.toString(10), expirationHeight.toString(10))
       .send({
         from: configFileContent.wallet2,
-        gasPrice: configFileContent.gasPrice
+        gasPrice: configFileContent.gasPrice,
+        gasLimit: configFileContent.gasLimit
       });
 
-    console.log('authorizeSession2Response', JSON.stringify(authorizeSession2Response, null));
+    //console.log('authorizeSession2Response', JSON.stringify(authorizeSession2Response, null));
 
     let isAuthorizedEphemeralKeyResponse = await contractDeploymentResponse.instance.methods
       .isAuthorizedEphemeralKey(configFileContent.ephemeralKey1)
@@ -210,6 +212,8 @@ InitEconomy.prototype = {
     if (isAuthorizedEphemeralKeyResponse !== true) {
       console.log('isAuthorizedEphemeralKeyResponse return false for key:', configFileContent.ephemeralKey1);
       shell.exit(1);
+    } else {
+      console.log('Authorization of ephemeral key 1 done!!!');
     }
 
     oThis.tokenHolderContractInstance1 = contractDeploymentResponse.instance;
@@ -275,22 +279,24 @@ InitEconomy.prototype = {
       .authorizeSession(configFileContent.ephemeralKey2, spendingLimit.toString(10), expirationHeight.toString(10))
       .send({
         from: configFileContent.wallet1,
-        gasPrice: configFileContent.gasPrice
+        gasPrice: configFileContent.gasPrice,
+        gasLimit: configFileContent.gasLimit
       });
 
-    console.log('authorizeSession1Response', JSON.stringify(authorizeSession1Response, null));
+    //console.log('authorizeSession1Response', JSON.stringify(authorizeSession1Response, null));
 
     await web3Provider.eth.personal.unlockAccount(configFileContent.wallet2, passphrase);
 
     // Authorize an ephemeral public key
     let authorizeSession2Response = await contractDeploymentResponse.instance.methods
-      .authorizeSession(configFileContent.ephemeralKey2, spendingLimit, expirationHeight)
+      .authorizeSession(configFileContent.ephemeralKey2, spendingLimit.toString(10), expirationHeight.toString(10))
       .send({
         from: configFileContent.wallet2,
-        gasPrice: configFileContent.gasPrice
+        gasPrice: configFileContent.gasPrice,
+        gasLimit: configFileContent.gasLimit
       });
 
-    console.log('authorizeSession2Response', JSON.stringify(authorizeSession2Response, null));
+    //console.log('authorizeSession2Response', JSON.stringify(authorizeSession2Response, null));
 
     let isAuthorizedEphemeralKeyResponse = await contractDeploymentResponse.instance.methods
       .isAuthorizedEphemeralKey(configFileContent.ephemeralKey2)
@@ -299,6 +305,8 @@ InitEconomy.prototype = {
     if (isAuthorizedEphemeralKeyResponse !== true) {
       console.log('isAuthorizedEphemeralKeyResponse return false for key:', configFileContent.ephemeralKey1);
       shell.exit(1);
+    } else {
+      console.log('Authorization of ephemeral key 2 done!!!');
     }
 
     return contractDeploymentResponse;
@@ -316,7 +324,7 @@ InitEconomy.prototype = {
       .send({
         from: configFileContent.deployerAddress,
         gasPrice: configFileContent.gasprice,
-        gas: configFileContent.gasLimit
+        gasLimit: configFileContent.gasLimit
       });
     let tokenHolderBalance1 = await oThis.erc20ContractInstance.methods
       .balanceOf(configFileContent.tokenHolderContractAddress1)
@@ -332,7 +340,7 @@ InitEconomy.prototype = {
       .send({
         from: configFileContent.deployerAddress,
         gasPrice: configFileContent.gasprice,
-        gas: configFileContent.gasLimit
+        gasLimit: configFileContent.gasLimit
       });
   },
 
@@ -362,7 +370,7 @@ InitEconomy.prototype = {
       gasLimit: gasLimit,
       args: [configFileContent.tokenRulesContractAddress]
     }).perform();
-    //console.log("TransferRule contractDeploymentResponse:", contractDeploymentResponse);
+
     if (contractDeploymentResponse.receipt.status != '0x1') {
       console.log('Transfer Rule contract deployment failed: ', JSON.stringify(registerRuleResponse));
       shell.exit(1);
@@ -380,7 +388,8 @@ InitEconomy.prototype = {
       .registerRule(ruleName, transferRuleContractAddress)
       .send({
         from: configFileContent.organizationAddress,
-        gasPrice: configFileContent.gasPrice
+        gasPrice: configFileContent.gasPrice,
+        gasLimit: configFileContent.gasLimit
       });
     if (registerRuleResponse.status != '0x1') {
       console.log('Transfer Rule registration failed', JSON.stringify(registerRuleResponse));
@@ -396,7 +405,7 @@ InitEconomy.prototype = {
     //   console.log("Rule registration failed");
     //   shell.exit(1);
     // }
-
+    console.log('Registration of rule completed!!!');
     oThis.transferRuleContractInstance = contractDeploymentResponse.instance;
 
     return registerRuleResponse;
@@ -412,7 +421,7 @@ InitEconomy.prototype = {
       .call({});
     let bigNumberNonce = new BigNumber(ephemeralKey1Data[1]),
       ephemeralKey1Nonce = bigNumberNonce.add(1).toString(10),
-      amountToTransfer = new BigNumber(100);
+      amountToTransfer = new BigNumber(111111);
 
     let executableData = await oThis.transferRuleContractInstance.methods
       .transferFrom(
@@ -482,7 +491,8 @@ InitEconomy.prototype = {
       )
       .send({
         from: configFileContent.facilitator,
-        gasPrice: configFileContent.gasPrice
+        gasPrice: configFileContent.gasPrice,
+        gasLimit: configFileContent.gasLimit
       });
     //console.log('executeRuleResponse:', JSON.stringify(executeRuleResponse));
     if (executeRuleResponse.status != '0x1') {
@@ -494,7 +504,7 @@ InitEconomy.prototype = {
     );
     if (receiverBalanceBeforeExecuteRule.add(amountToTransfer).equals(receiverBalanceAfterExecuteRule)) {
       console.log(
-        'YAYY!!!!Execute Rule Worked Fine!',
+        'Execute Rule Worked Fine!',
         'receiverBalanceBeforeExecuteRule',
         receiverBalanceBeforeExecuteRule.toString(10),
         'receiverBalanceAfterExecuteRule',
@@ -515,7 +525,7 @@ InitEconomy.prototype = {
         to: recipient,
         value: amount,
         gasPrice: setUpConfig.chain.gasprice,
-        gas: setUpConfig.chain.gasLimit
+        gasLimit: setUpConfig.chain.gasLimit
       });
     });
   },
