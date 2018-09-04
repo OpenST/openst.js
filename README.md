@@ -2,6 +2,11 @@
 
 OpenST is a framework for building token economies. In here, we will go through a sample usage of OpenST.
 
+##### Initializing chain on developer machines
+```
+> npm run init-dev-env
+```
+
 ##### Creating an object of OpenST
 ```js
 // Creating object of web3 js using the GETH endpoint
