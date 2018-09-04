@@ -39,20 +39,55 @@ let ephemeralKey = '0x351011bba142328799af15b5ef15db26bb2a2aaf',
    });
 ```
 
+#### TokenRules Interface
+```js
+const tokenRulesAddress = '0x599d9A845C46761ecb9E17E74B266393Cc90B675';
+const organizationAddress = '0xb2a8f0bf51765b4b1eea682d79bf2c3d4cc9484c';
+const ruleName = 'transferFrom2';
+const transferRuleContractAddress = '0x5A0b54D5dc17e0AadC383d2db43B0a0D3E029c4c';
+
+let tokenRules = new openST.contracts.TokenRules(tokenRulesAddress);
+let passphrase = 'testtest';
+
+   web3Provider.eth.personal.unlockAccount(organizationAddress, passphrase).then(async function () {
+     let r = await tokenRules.registerRule(ruleName, transferRuleContractAddress).send({
+       from: organizationAddress,
+       gasPrice: '0x12A05F200'
+     });
+     
+     console.log(r);
+     
+     return r;
+   
+   });
+```
+
 #### Constructing executable transaction
 ```js
 const BigNumber = require('bignumber.js');
+const fs = require('fs');
 
+function parseFile(filePath, options) {
+  filePath = path.join(__dirname, '/' + filePath);
+  const fileContent = fs.readFileSync(filePath, options || 'utf8');
+  return JSON.parse(fileContent);
+}
+
+const transferRuleJsonInterface = parseFile('./contracts/abi/TransferRule.abi', 'utf8');
+
+// later on this will come from TokenRules contract and need not be present in openST.js
 const rulesInfo = {
-  action1: {
-    abi: {},
-    methodName: '',
-    ruleContractAddress: ''
+  transferFrom: {
+    abi: transferRuleJsonInterface,
+    methodName: 'transferFrom',
+    ruleContractAddress: '0xfD367dF3114B33DcdCb2378fe549b68B0e591DF5'
   }
 };
 
-let ruleContract = (new openST.contracts.TokenRules()).ruleByAction('action1');
+let ruleInfoFromTokenRules = (new openST.contracts.TokenRules()).ruleByName('transferFrom');
+let ruleContractAddress = ruleInfoFromTokenRules.contractAddress;
 
+let ruleContract = 
 
 const constructExecutableTransaction = async function (web3Provider, ruleContract, methodName, args) {
   let ephemeralKey1Data = await tokenHolder.ephemeralKeys(ephemeralKey).call({});
