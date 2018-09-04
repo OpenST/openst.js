@@ -2,6 +2,7 @@
 
 OpenST is a framework for building token economies. In here, we will go through a sample usage of OpenST.
 
+##### Creating an object of OpenST
 ```js
 // Creating object of web3 js using the GETH endpoint
 const Web3 = require('web3');
@@ -11,98 +12,261 @@ let web3Provider = new Web3(gethEndpoint);
 // Creating object of OpenST
 const OpenST = require('./index.js');
 let openST = new OpenST(web3Provider);
+```
 
-const ephemeralKey = '0x78c0a912cecbacf92d8f41fd8818f812109094d8';
-const wallet = '0x874ed94a8f564fa6071072ad431569d3ebfa914c';
-const facilitator = '0x6984a72fa02330d14c03ed3df0b8d4130ea80ea0';
-const organizationAddress = '0xe2457e48c658317c78d97fe4dbe6d3746c435763';
+##### Sample Constants
+In the following, we assume that keystore files of some addresses are present on the GETH servers with a common passphrase of the same of example usage.
+```js
+// deployer address
+const deployerAddress = '0x01e56829663a5d920c55538086a9760ff215b2a6';
 
+// organization address
+const organizationAddress = '0x9996b5de064f0d96f5602852de9637585f046a57';
 
+// wallet addresses
+const wallet1 = '0x7b3bfc5d1c90b13eadf4ef3b8135a7a4a3cca5db';
+const wallet2 = '0x4b79943cd91b80a82716004cbc9bb6f0e58a93e7';
 
-const tokenHolderAddress = '0x729CC130c8A146c621330035B4D8F6BFABe52204';
-const tokenHolder2Address = '0x44052188e1685Ef06a3315818FE8D8B2cC9529Dc';
-const tokenRulesContractAddress = '0x599d9A845C46761ecb9E17E74B266393Cc90B675';
-const transferRuleContractAddress = '0x5A0b54D5dc17e0AadC383d2db43B0a0D3E029c4c';
+const ephemeralKey = '0xe6b3ecb4377c637995889a9f2b952cedcaa8fae2';
 
-const spendingLimit = '10000000000000000000000000000';
-const expirationHeight = '10000000000000000000000000000';
+const facilitatorAddress = '0x66d0be510f3cac64f30eea359bda39717569ea4b';
+
+// some other constants
 const passphrase = 'testtest';
 const gasPrice = '0x12A05F200';
-const actionName = 'transferFrom';
-const ruleName = 'transferFrom';
+const gasLimit = 4700000;
+```
 
-// Helper function for reading json file
-const fs = require('fs');
-function parseFile(filePath, options) {
-  filePath = path.join(filePath);
-  const fileContent = fs.readFileSync(filePath, options || 'utf8');
-  return JSON.parse(fileContent);
-}
+##### Deploying ERC20 contract (Optional)
+Optionally, you will want ERC20 contract to be deployed. You can use a pre-deployed ERC20 contract address as well, instead.
 
-// Creating the interface for TokenHolder Contract
-let tokenHolder = new openST.contracts.TokenHolder(tokenHolderAddress);
+```js
+// deploy ERC20 - if needed. Not mandatory
+let erc20TokenContractAddress = null;
 
-// authorise session
-web3Provider.eth.personal.unlockAccount(wallet, passphrase).then(async function () {
- let r = await tokenHolder.authorizeSession(ephemeralKey, spendingLimit, expirationHeight).send({
-   from: wallet,
-   gasPrice: gasPrice
- });
- console.log(r);
- return r;
+let InitERC20Token = openST.setup.InitERC20Token;
+console.log('* Deploying ERC20 Token');
+  
+new InitERC20Token({
+  deployerAddress: deployerAddress,
+  deployerPassphrase: passphrase,
+  gasPrice: gasPrice,
+  gasLimit: gasLimit
+}).perform().then(function(response){
+  erc20TokenContractAddress = response.receipt.contractAddress;
+  console.log('erc20TokenContractAddress noted down:', erc20TokenContractAddress);
+});
+```
+
+##### Deploying TokenRules contract
+```js
+// deploy TokenRules contract
+let tokenRulesContractAddress = null;
+
+let InitTokenRules = openST.setup.InitTokenRules;
+console.log('* Deploying TokenRules');
+  
+new InitTokenRules({
+  deployerAddress: deployerAddress,
+  deployerPassphrase: passphrase,
+  gasPrice: gasPrice,
+  gasLimit: gasLimit,
+  args: [organizationAddress, erc20TokenContractAddress]
+}).perform().then(function(response){
+  tokenRulesContractAddress = response.receipt.contractAddress;
+  console.log('tokenRulesContractAddress noted down:', tokenRulesContractAddress);
 });
 
-// Creating the interface for TokenRules Contract
-let tokenRules = new openST.contracts.TokenRules(tokenRulesContractAddress);
+```
 
-// register rule
-web3Provider.eth.personal.unlockAccount(organizationAddress, passphrase).then(async function () {
- let r = await tokenRules.registerRule(ruleName, transferRuleContractAddress).send({
-   from: organizationAddress,
-   gasPrice: gasPrice
- });
- console.log(r); 
- return r;
+##### Deploying TokenHolder contract
+```js
+let requirement = 2;
+let wallets = [wallet1, wallet2];
+let tokenHolderContractAddress = null;
+
+// setting first token holder
+console.log('* Deploying Token Holder Contract1');
+let InitTokenHolder = openST.setup.InitTokenHolder;
+new InitTokenHolder({
+  deployerAddress: deployerAddress,
+  deployerPassphrase: passphrase,
+  gasPrice: gasPrice,
+  gasLimit: gasLimit,
+  args: [
+    erc20TokenContractAddress,
+    erc20TokenContractAddress, // this will be coGateway contract address. passing dummy value for now.
+    tokenRulesContractAddress,
+    requirement,
+    wallets
+  ]
+}).perform().then(function(response){
+  tokenHolderContractAddress = response.receipt.contractAddress;
+  console.log('tokenHolderContractAddress noted down:', tokenHolderContractAddress);
 });
 
-// Helper method for getting the execute rule params.
-getExecuteRuleParams = async function (
-    web3Provider,
-    tokenRules,
-    ruleName,
-    methodName,
-    ruleAbi,
-    tokenHolderAddress,
-    ruleMethodArgs
-  ) {
+```
+
+##### Authorize session
+```js
+let authorizeSession = async function (tokenHolderAddress, ephemeralKey, wallets) {
   const BigNumber = require('bignumber.js');
+  let currentBlockNumber = await web3Provider.eth.getBlockNumber(),
+    spendingLimit = new BigNumber('10000000000000000000000000000').toString(10),
+    expirationHeight = new BigNumber(currentBlockNumber).add('10000000000000000000000000000').toString(10);
   
-  // let ruleInfoFromTokenRules = await tokenRules.ruleByName(ruleName).call({});
-  // let ruleContractAddress = ruleInfoFromTokenRules.contractAddress;
+  let tokenHolder = new openST.contracts.TokenHolder(tokenHolderAddress);
   
-  // this is temporary. Need to remove this when Pro adds the rule by name map.
-  let ruleContractAddress = transferRuleContractAddress;
+  await web3Provider.eth.personal.unlockAccount(wallets[0], passphrase);
   
-  let ruleContract = new web3Provider.eth.Contract(ruleAbi, ruleContractAddress);
+  // Authorize an ephemeral public key
+  let authorizeSession1Response = await tokenHolder
+    .authorizeSession(ephemeralKey, spendingLimit, expirationHeight)
+    .send({
+      from: wallets[0],
+      gasPrice: gasPrice,
+      gas: gasLimit
+    });
   
-  let ephemeralKey1Data = await tokenHolder.ephemeralKeys(ephemeralKey).call({});
+  console.log('authorizeSession1Response:', JSON.stringify(authorizeSession1Response, null));
   
-  let bigNumberNonce = new BigNumber(ephemeralKey1Data[1]),
-    ephemeralKeyNonce = bigNumberNonce.add(1).toString(10);
+  await web3Provider.eth.personal.unlockAccount(wallets[1], passphrase);
   
-  let executableData = await ruleContract.methods[methodName].apply(ruleContract, ruleMethodArgs).encodeABI();
+  // Authorize an ephemeral public key
+  let authorizeSession2Response = await tokenHolder
+    .authorizeSession(ephemeralKey, spendingLimit, expirationHeight)
+    .send({
+      from: wallets[1],
+      gasPrice: gasPrice,
+      gas: gasLimit
+    });
+  
+  console.log('authorizeSession2Response', JSON.stringify(authorizeSession2Response, null));
+  
+  let isAuthorizedEphemeralKeyResponse = await tokenHolder
+    .isAuthorizedEphemeralKey(ephemeralKey).call({});
+  
+  console.log('isAuthorizedEphemeralKey:', isAuthorizedEphemeralKeyResponse);
+};
+authorizeSession(tokenHolderContractAddress, ephemeralKey, wallets);
+
+```
+
+##### Fund ERC20 tokens
+Now we will fund ERC20 tokens to token holder contract address for example execute rule to run.
+
+```js
+// Fund ERC20 tokens to the tokenHolderContractAddress
+// If you are using the MockToken, following method can help you.
+let fundERC20Tokens = async function() {
+  const BigNumber = require('bignumber.js');
+  let amountToTransfer = new BigNumber('1000000000000000000000');
+  
+  console.log('Funding ERC20 tokens to token holder:', tokenHolderContractAddress);
+  
+  // Helper function for reading json file
+  const fs = require('fs');
+  function parseFile(filePath, options) {
+    filePath = path.join(filePath);
+    const fileContent = fs.readFileSync(filePath, options || 'utf8');
+    return JSON.parse(fileContent);
+  }
+  
+  let mockTokenAbi = parseFile('./contracts/abi/MockToken.abi', 'utf8');
+  let mockToken = new web3Provider.eth.Contract(mockTokenAbi, erc20TokenContractAddress);
+  
+  await web3Provider.eth.personal.unlockAccount(deployerAddress, passphrase);
+  
+  return mockToken.methods
+    .transfer(tokenHolderContractAddress, amountToTransfer.toString(10))
+    .send({
+      from: deployerAddress,
+      gasPrice: gasPrice,
+      gas: gasLimit
+    });
+};
+fundERC20Tokens().then(console.log);
+
+```
+
+##### Deploy Rule contract
+```js
+// deploy rule contract
+let ruleContractAddress = null;
+
+let InitRule = openST.setup.InitTransferRule;
+console.log('* Deploying Rule');
+
+new InitRule({
+  deployerAddress: deployerAddress,
+  deployerPassphrase: passphrase,
+  gasPrice: gasPrice,
+  gasLimit: gasLimit,
+  args: [tokenRulesContractAddress]
+}).perform().then(function(response){
+  ruleContractAddress = response.receipt.contractAddress;
+  console.log('ruleContractAddress noted down:', ruleContractAddress);
+});
+
+```
+
+##### Register rule
+```js
+// register rule
+let registerRule = async function (ruleName, ruleContractAddress) {
+  await web3Provider.eth.personal.unlockAccount(organizationAddress, passphrase);
+  
+  let tokenRules = new openST.contracts.TokenRules(tokenRulesContractAddress);
+  
+  return tokenRules.registerRule(ruleName, ruleContractAddress)
+    .send({
+      from: organizationAddress,
+      gasPrice: gasPrice,
+      gas: gasLimit
+    })
+};
+registerRule('transferFrom', ruleContractAddress).then(console.log);
+
+```
+
+##### Execute sample rule
+```js
+let executeSampleRule = async function(tokenHolderAddress, ephemeralKey) {
+  const BigNumber = require('bignumber.js');
+  let tokenHolder = new openST.contracts.TokenHolder(tokenHolderAddress);
+  let ephemeralKeyData = await tokenHolder.ephemeralKeys(ephemeralKey).call({});
+  let bigNumberNonce = new BigNumber(ephemeralKeyData[1]),
+    ephemeralKey1Nonce = bigNumberNonce.add(1).toString(10),
+    amountToTransfer = new BigNumber(100);
+
+  // Helper function for reading json file
+  const fs = require('fs');
+  function parseFile(filePath, options) {
+      filePath = path.join(filePath);
+      const fileContent = fs.readFileSync(filePath, options || 'utf8');
+      return JSON.parse(fileContent);
+  }
+  
+  let transferRuleAbi = parseFile('./contracts/abi/TransferRule.abi', 'utf8');
+  let transferRule = new web3Provider.eth.Contract(transferRuleAbi, ruleContractAddress);
+    
+  let executableData = await transferRule.methods
+    .transferFrom(
+      tokenHolderAddress,
+      '0x66d0be510f3cac64f30eea359bda39717569ea4b',
+      amountToTransfer
+    ).encodeABI();
   
   // Get 0x + first 8(4 bytes) characters
   let callPrefix = executableData.substring(0, 10);
-  
   let messageToBeSigned = await web3Provider.utils.soliditySha3(
     { t: 'bytes', v: '0x19' }, // prefix
     { t: 'bytes', v: '0x00' }, // version control
     { t: 'address', v: tokenHolderAddress },
-    { t: 'address', v: ruleContractAddress},
+    { t: 'address', v: tokenRulesContractAddress },
     { t: 'uint8', v: '0' },
     { t: 'bytes', v: executableData },
-    { t: 'uint256', v: ephemeralKeyNonce }, // nonce
+    { t: 'uint256', v: ephemeralKey1Nonce }, // nonce
     { t: 'uint8', v: '0' },
     { t: 'uint8', v: '0' },
     { t: 'uint8', v: '0' },
@@ -110,47 +274,38 @@ getExecuteRuleParams = async function (
     { t: 'uint8', v: '0' },
     { t: 'bytes', v: '0x' }
   );
-        
+  // ephemeralKey is signer here
   await web3Provider.eth.personal.unlockAccount(ephemeralKey, passphrase);
   let signature = await web3Provider.eth.sign(messageToBeSigned, ephemeralKey);
   signature = signature.slice(2);
-  
+
   let r = '0x' + signature.slice(0, 64),
     s = '0x' + signature.slice(64, 128),
-    v = web3Provider.utils.toDecimal('0x' + signature.slice(128, 130)) + 27;
+    v = web3Provider.utils.toDecimal('0x' + signature.slice(128, 130));
+  if (v < 27) {
+    v += 27;
+  }
   
-  return [
-    tokenHolderAddress,
-    ruleContractAddress,
-    ephemeralKeyNonce,
-    executableData,
-    callPrefix,
-    v,
-    r,
-    s
-  ];
-};
-
-const transferRuleJsonInterface = parseFile('./contracts/abi/TransferRule.abi', 'utf8');
-
-// execute the rule
-getExecuteRuleParams(
-  web3Provider,
-  tokenRules,
-  ruleName,
-  actionName,
-  transferRuleJsonInterface,
-  tokenHolderAddress,
-  [tokenHolderAddress, tokenHolder2Address, '100']).then(
-    async function(executeRuleParams) {
-      await web3Provider.eth.personal.unlockAccount(facilitator, passphrase);
-      
-      let tokenHolder = new openST.contracts.TokenHolder(tokenHolderAddress);
-      let executeRuleReceipt = await tokenHolder.executeRule.apply(tokenHolder, executeRuleParams).send(
-        {from: facilitator, gasPrice: gasPrice});
-      
-      console.log('executeRuleReceipt:', JSON.stringify(executeRuleReceipt));
-      
-      return executeRuleReceipt;
+  await web3Provider.eth.personal.unlockAccount(facilitatorAddress, passphrase);
+  
+  let executeRuleResponse = await tokenHolder
+    .executeRule(
+      tokenHolderAddress,
+      tokenRulesContractAddress,
+      ephemeralKey1Nonce,
+      executableData,
+      callPrefix,
+      v,
+      r,
+      s
+    ).send({
+      from: facilitatorAddress,
+      gasPrice: gasPrice,
+      gas: gasLimit
     });
+
+    return executeRuleResponse;
+};
+  
+executeSampleRule(tokenHolderContractAddress, ephemeralKey).then(console.log);
 ```

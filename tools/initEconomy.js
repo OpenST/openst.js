@@ -359,11 +359,11 @@ InitEconomy.prototype = {
     let OpenST = require('../index.js');
     let openST = new OpenST(web3Provider);
 
-    let InitTransferRule = openST.setup.InitTransferRule;
+    let InitRule = openST.setup.InitTransferRule;
 
     console.log('* Deploying Transfer Rule Contract');
 
-    let contractDeploymentResponse = await new InitTransferRule({
+    let contractDeploymentResponse = await new InitRule({
       deployerAddress: deployerAddress,
       deployerPassphrase: passphrase,
       gasPrice: gasPrice,
