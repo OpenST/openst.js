@@ -28,7 +28,7 @@ DeployContract.prototype = {
       oThis.bin = '0x' + oThis.bin;
     }
 
-    console.log('oThis.bin', oThis.bin);
+    //console.log('oThis.bin', oThis.bin);
     const contract = new oThis.web3.eth.Contract(oThis.abi, null, txOptions);
 
     let deployOptions = {

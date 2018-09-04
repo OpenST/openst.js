@@ -72,6 +72,10 @@ InitEconomy.prototype = {
       gasLimit: gasLimit
     }).perform();
 
+    if (contractDeploymentResponse.receipt.status != '0x1') {
+      console.log('ERC20Token deployment failed');
+      shell.exit(1);
+    }
     let erc20TokenContractAddress = contractDeploymentResponse.receipt.contractAddress;
     oThis._addConfig({
       erc20TokenContractAddress: erc20TokenContractAddress
@@ -105,6 +109,10 @@ InitEconomy.prototype = {
       args: [configFileContent.organizationAddress, configFileContent.erc20TokenContractAddress]
     }).perform();
 
+    if (contractDeploymentResponse.receipt.status != '0x1') {
+      console.log('TokenRules deployment failed');
+      shell.exit(1);
+    }
     let tokenRulesContractAddress = contractDeploymentResponse.receipt.contractAddress;
     oThis._addConfig({
       tokenRulesContractAddress: tokenRulesContractAddress
@@ -151,19 +159,25 @@ InitEconomy.prototype = {
       ]
     }).perform();
 
+    if (contractDeploymentResponse.receipt.status != '0x1') {
+      console.log('TokenHolder1 Contract deployment failed');
+      shell.exit(1);
+    }
+
     let tokenHolderContractAddress = contractDeploymentResponse.receipt.contractAddress;
     oThis._addConfig({
       tokenHolderContractAddress1: tokenHolderContractAddress
     });
 
-    let spendingLimit = '10000000000000000000000000000',
-      expirationHeight = '10000000000000000000000000000';
+    let currentBlockNumber = await web3Provider.eth.getBlockNumber(),
+      spendingLimit = new BigNumber('10000000000000000000000000000'),
+      expirationHeight = new BigNumber(currentBlockNumber).add('10000000000000000000000000000');
 
     await web3Provider.eth.personal.unlockAccount(configFileContent.wallet1, passphrase);
 
     // Authorize an ephemeral public key
     let authorizeSession1Response = await contractDeploymentResponse.instance.methods
-      .authorizeSession(configFileContent.ephemeralKey1, spendingLimit, expirationHeight)
+      .authorizeSession(configFileContent.ephemeralKey1, spendingLimit.toString(10), expirationHeight.toString(10))
       .send({
         from: configFileContent.wallet1,
         gasPrice: configFileContent.gasPrice
@@ -232,19 +246,25 @@ InitEconomy.prototype = {
       ]
     }).perform();
 
+    if (contractDeploymentResponse.receipt.status != '0x1') {
+      console.log('TokenHolder2 Contract deployment failed');
+      shell.exit(1);
+    }
+
     let tokenHolderContractAddress = contractDeploymentResponse.receipt.contractAddress;
     oThis._addConfig({
       tokenHolderContractAddress2: tokenHolderContractAddress
     });
 
-    let spendingLimit = '10000000000000000000000000000',
-      expirationHeight = '10000000000000000000000000000';
+    let currentBlockNumber = await web3Provider.eth.getBlockNumber(),
+      spendingLimit = new BigNumber('10000000000000000000000000000'),
+      expirationHeight = new BigNumber('10000000000000000000000000000').add(currentBlockNumber);
 
     await web3Provider.eth.personal.unlockAccount(configFileContent.wallet1, passphrase);
 
     // Authorize an ephemeral public key
     let authorizeSession1Response = await contractDeploymentResponse.instance.methods
-      .authorizeSession(configFileContent.ephemeralKey2, spendingLimit, expirationHeight)
+      .authorizeSession(configFileContent.ephemeralKey2, spendingLimit.toString(10), expirationHeight.toString(10))
       .send({
         from: configFileContent.wallet1,
         gasPrice: configFileContent.gasPrice
@@ -279,20 +299,28 @@ InitEconomy.prototype = {
   _fundERC20ToToken: async function() {
     const oThis = this;
 
-    let configFileContent = JSON.parse(fs.readFileSync(oThis.configJsonFilePath, 'utf8'));
+    let configFileContent = JSON.parse(fs.readFileSync(oThis.configJsonFilePath, 'utf8')),
+      amountToTransfer = new BigNumber('1000000000000000000000');
 
     console.log('Funding ERC20 tokens to token holder 1:', configFileContent.tokenHolderContractAddress1);
     await oThis.erc20ContractInstance.methods
-      .transfer(configFileContent.tokenHolderContractAddress1, '1000000000000000000000')
+      .transfer(configFileContent.tokenHolderContractAddress1, amountToTransfer.toString(10))
       .send({
         from: configFileContent.deployerAddress,
         gasPrice: configFileContent.gasprice,
         gas: configFileContent.gasLimit
       });
+    let tokenHolderBalance1 = await oThis.erc20ContractInstance.methods
+      .balanceOf(configFileContent.tokenHolderContractAddress1)
+      .call({});
+    if (tokenHolderBalance1.toString(10) != amountToTransfer.toString(10)) {
+      console.log('Funding of tokenholder1 contracts failed!');
+      shell.exit(1);
+    }
 
     console.log('Funding ERC20 tokens to token holder 2:', configFileContent.tokenHolderContractAddress2);
     await oThis.erc20ContractInstance.methods
-      .transfer(configFileContent.tokenHolderContractAddress2, '1000000000000000000000')
+      .transfer(configFileContent.tokenHolderContractAddress2, amountToTransfer.toString(10))
       .send({
         from: configFileContent.deployerAddress,
         gasPrice: configFileContent.gasprice,
@@ -324,6 +352,11 @@ InitEconomy.prototype = {
       gasLimit: gasLimit,
       args: [configFileContent.tokenRulesContractAddress]
     }).perform();
+    //console.log("TransferRule contractDeploymentResponse:", contractDeploymentResponse);
+    if (contractDeploymentResponse.receipt.status != '0x1') {
+      console.log('Transfer Rule contract deployment failed: ', JSON.stringify(registerRuleResponse));
+      shell.exit(1);
+    }
 
     let transferRuleContractAddress = contractDeploymentResponse.receipt.contractAddress;
     oThis._addConfig({
@@ -339,7 +372,10 @@ InitEconomy.prototype = {
         from: configFileContent.organizationAddress,
         gasPrice: configFileContent.gasPrice
       });
-    console.log('Transfer Rule registered response:', registerRuleResponse);
+    if (registerRuleResponse.status != '0x1') {
+      console.log('Transfer Rule registration failed', JSON.stringify(registerRuleResponse));
+      shell.exit(1);
+    }
 
     // let rulesByAddressResponse = await oThis.tokenRulesContractInstance.methods
     //   .rulesByName(ruleName)
@@ -396,13 +432,19 @@ InitEconomy.prototype = {
       { t: 'uint8', v: '0' },
       { t: 'bytes', v: callPrefix },
       { t: 'uint8', v: '0' },
-      { t: 'bytes', v: '0xab' }
+      { t: 'bytes', v: '0x' }
     );
     // configFileContent.ephemeralKey1 is signer here
     await web3Provider.eth.personal.unlockAccount(configFileContent.ephemeralKey1, passphrase);
     let signature = await web3Provider.eth.sign(messageToBeSigned, configFileContent.ephemeralKey1);
     signature = signature.slice(2);
+
+    let r = '0x' + signature.slice(0, 64),
+      s = '0x' + signature.slice(64, 128),
+      v = web3Provider.utils.toDecimal('0x' + signature.slice(128, 130)) + 27;
     console.log(
+      'signer',
+      configFileContent.ephemeralKey1,
       'ephemeralKey1Nonce:',
       ephemeralKey1Nonce,
       'executableData:',
@@ -414,11 +456,6 @@ InitEconomy.prototype = {
       'signature',
       signature
     );
-
-    let r = '0x' + signature.slice(0, 64),
-      s = '0x' + signature.slice(64, 128),
-      v = web3Provider.utils.toDecimal('0x' + signature.slice(128, 130)) + 27;
-
     await web3Provider.eth.personal.unlockAccount(configFileContent.facilitator, passphrase);
     let executeRuleResponse = await oThis.tokenHolderContractInstance1.methods
       .executeRule(
@@ -435,7 +472,11 @@ InitEconomy.prototype = {
         from: configFileContent.facilitator,
         gasPrice: configFileContent.gasPrice
       });
-    console.log('executeRuleResponse: ', executeRuleResponse);
+    console.log('executeRuleResponse:', JSON.stringify(executeRuleResponse));
+    if (executeRuleResponse.status != '0x1') {
+      console.log('executeRuleResponse failed: ', JSON.stringify(executeRuleResponse));
+      shell.exit(1);
+    }
 
     // if (executeRuleResponse !== true) {
     //   console.log('executeRuleResponse return false', configFileContent);
