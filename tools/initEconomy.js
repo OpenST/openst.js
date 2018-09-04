@@ -414,11 +414,6 @@ InitEconomy.prototype = {
       ephemeralKey1Nonce = bigNumberNonce.add(1).toString(10),
       amountToTransfer = new BigNumber(100);
 
-    // let executableData = oThis.transferRuleContractInstance.methods.transferFrom.getData(
-    //   configFileContent.tokenHolderContractAddress1,
-    //   configFileContent.tokenHolderContractAddress2,
-    //   amountToTransfer
-    // );
     let executableData = await oThis.transferRuleContractInstance.methods
       .transferFrom(
         configFileContent.tokenHolderContractAddress1,
@@ -456,19 +451,22 @@ InitEconomy.prototype = {
       v += 27;
     }
 
-    console.log(
-      'signer',
-      configFileContent.ephemeralKey1,
-      'ephemeralKey1Nonce:',
-      ephemeralKey1Nonce,
-      'executableData:',
-      executableData,
-      'callPrefix',
-      callPrefix,
-      'messageToBeSigned',
-      messageToBeSigned,
-      'signature',
-      signature
+    // console.log(
+    //   'signer',
+    //   configFileContent.ephemeralKey1,
+    //   'ephemeralKey1Nonce:',
+    //   ephemeralKey1Nonce,
+    //   'executableData:',
+    //   executableData,
+    //   'callPrefix',
+    //   callPrefix,
+    //   'messageToBeSigned',
+    //   messageToBeSigned,
+    //   'signature',
+    //   signature
+    // );
+    let receiverBalanceBeforeExecuteRule = new BigNumber(
+      await oThis.erc20ContractInstance.methods.balanceOf(configFileContent.tokenHolderContractAddress2).call({})
     );
     await web3Provider.eth.personal.unlockAccount(configFileContent.facilitator, passphrase);
     let executeRuleResponse = await oThis.tokenHolderContractInstance1.methods
@@ -486,9 +484,24 @@ InitEconomy.prototype = {
         from: configFileContent.facilitator,
         gasPrice: configFileContent.gasPrice
       });
-    console.log('executeRuleResponse:', JSON.stringify(executeRuleResponse));
+    //console.log('executeRuleResponse:', JSON.stringify(executeRuleResponse));
     if (executeRuleResponse.status != '0x1') {
       console.log('executeRuleResponse failed: ', JSON.stringify(executeRuleResponse));
+      shell.exit(1);
+    }
+    let receiverBalanceAfterExecuteRule = new BigNumber(
+      await oThis.erc20ContractInstance.methods.balanceOf(configFileContent.tokenHolderContractAddress2).call({})
+    );
+    if (receiverBalanceBeforeExecuteRule.add(amountToTransfer).equals(receiverBalanceAfterExecuteRule)) {
+      console.log(
+        'YAYY!!!!Execute Rule Worked Fine!',
+        'receiverBalanceBeforeExecuteRule',
+        receiverBalanceBeforeExecuteRule.toString(10),
+        'receiverBalanceAfterExecuteRule',
+        receiverBalanceAfterExecuteRule.toString(10)
+      );
+    } else {
+      console.log('Balance mismatch after execute rule!');
       shell.exit(1);
     }
 
