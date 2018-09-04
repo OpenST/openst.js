@@ -11,12 +11,12 @@ require('./lib/Signers');
 require('./lib/Setup');
 require('./lib/Contracts');
 
-const OpenST = function(web3Provider, erc20ContractAddress, tokenRulesContractAddress) {
+const OpenST = function(web3Provider) {
   const oThis = this;
 
   oThis.version = version;
 
-  oThis.configurations = Object.assign({}, { web3Provider: web3Provider, erc20ContractAddress: erc20ContractAddress });
+  oThis.configurations = Object.assign({}, { web3Provider: web3Provider });
 
   const _instanceComposer = new InstanceComposer(oThis.configurations);
   oThis.ic = function() {

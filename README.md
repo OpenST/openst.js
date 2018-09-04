@@ -1,20 +1,27 @@
 # openst.js
 
-OpenST is a framework for building token economies
+OpenST is a framework for building token economies. In here, we will go through a sample usage of OpenST.
 
 ```js
+// Creating object of web3 js using the GETH endpoint
 const Web3 = require('web3');
+const gethEndpoint = 'http://127.0.0.1:8545';
+let web3Provider = new Web3(gethEndpoint);
 
-const ephemeralKey = '0x49b2245a1c4ae9de81d603693eb0e468e5b5f085';
-const wallet = '0x9355d063d0283cc15927ae18d574eecef880dc00';
+// Creating object of OpenST
+const OpenST = require('./index.js');
+let openST = new OpenST(web3Provider);
+
+const ephemeralKey = '0x78c0a912cecbacf92d8f41fd8818f812109094d8';
+const wallet = '0x874ed94a8f564fa6071072ad431569d3ebfa914c';
+const facilitator = '0x6984a72fa02330d14c03ed3df0b8d4130ea80ea0';
+const organizationAddress = '0xe2457e48c658317c78d97fe4dbe6d3746c435763';
+
+
+
 const tokenHolderAddress = '0x729CC130c8A146c621330035B4D8F6BFABe52204';
-const facilitator = '0x265aed931d8add0308b558f2bf0054c711d7b21a';
 const tokenHolder2Address = '0x44052188e1685Ef06a3315818FE8D8B2cC9529Dc';
-
-const erc20ContractAddress = '0xE8DFFa760042019A47e8D50B68EcF09F01CbF2cC';
 const tokenRulesContractAddress = '0x599d9A845C46761ecb9E17E74B266393Cc90B675';
-const tokenRulesAddress = '0x599d9A845C46761ecb9E17E74B266393Cc90B675';
-const organizationAddress = '0xb2a8f0bf51765b4b1eea682d79bf2c3d4cc9484c';
 const transferRuleContractAddress = '0x5A0b54D5dc17e0AadC383d2db43B0a0D3E029c4c';
 
 const spendingLimit = '10000000000000000000000000000';
@@ -32,13 +39,6 @@ function parseFile(filePath, options) {
   return JSON.parse(fileContent);
 }
 
-const web3Provider = new Web3('http://127.0.0.1:8545');
-
-const OpenST = require('./index.js');
-
-// Creating object of OpenST
-let openST = new OpenST(web3Provider, erc20ContractAddress, tokenRulesContractAddress);
-
 // Creating the interface for TokenHolder Contract
 let tokenHolder = new openST.contracts.TokenHolder(tokenHolderAddress);
 
@@ -53,7 +53,7 @@ web3Provider.eth.personal.unlockAccount(wallet, passphrase).then(async function 
 });
 
 // Creating the interface for TokenRules Contract
-let tokenRules = new openST.contracts.TokenRules(tokenRulesAddress);
+let tokenRules = new openST.contracts.TokenRules(tokenRulesContractAddress);
 
 // register rule
 web3Provider.eth.personal.unlockAccount(organizationAddress, passphrase).then(async function () {

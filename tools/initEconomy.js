@@ -60,12 +60,14 @@ InitEconomy.prototype = {
       gasPrice = configFileContent.gasPrice,
       gasLimit = configFileContent.gasLimit;
 
-    let InitERC20Token = require('../lib/setup/InitERC20Token');
+    let OpenST = require('../index.js');
+    let openST = new OpenST(web3Provider);
+
+    let InitERC20Token = openST.setup.InitERC20Token;
 
     console.log('* Deploying ERC20 Token');
 
     let contractDeploymentResponse = await new InitERC20Token({
-      web3Provider: web3Provider,
       deployerAddress: deployerAddress,
       deployerPassphrase: passphrase,
       gasPrice: gasPrice,
@@ -92,12 +94,14 @@ InitEconomy.prototype = {
       gasPrice = configFileContent.gasPrice,
       gasLimit = configFileContent.gasLimit;
 
-    let InitTokenRules = require('../lib/setup/InitTokenRules');
+    let OpenST = require('../index.js');
+    let openST = new OpenST(web3Provider);
+
+    let InitTokenRules = openST.setup.InitTokenRules;
 
     console.log('* Deploying Token Rules Contract');
 
     let contractDeploymentResponse = await new InitTokenRules({
-      web3Provider: web3Provider,
       deployerAddress: deployerAddress,
       deployerPassphrase: passphrase,
       gasPrice: gasPrice,
@@ -129,7 +133,10 @@ InitEconomy.prototype = {
       gasPrice = configFileContent.gasPrice,
       gasLimit = configFileContent.gasLimit;
 
-    let InitTokenHolder = require('../lib/setup/InitTokenHolder');
+    let OpenST = require('../index.js');
+    let openST = new OpenST(web3Provider);
+
+    let InitTokenHolder = openST.setup.InitTokenHolder;
 
     console.log('* Deploying Token Holder Contract1');
 
@@ -137,7 +144,6 @@ InitEconomy.prototype = {
       wallets = [configFileContent.wallet1, configFileContent.wallet2];
 
     let contractDeploymentResponse = await new InitTokenHolder({
-      web3Provider: web3Provider,
       deployerAddress: deployerAddress,
       deployerPassphrase: passphrase,
       gasPrice: gasPrice,
@@ -210,7 +216,10 @@ InitEconomy.prototype = {
       gasPrice = configFileContent.gasPrice,
       gasLimit = configFileContent.gasLimit;
 
-    let InitTokenHolder = require('../lib/setup/InitTokenHolder');
+    let OpenST = require('../index.js');
+    let openST = new OpenST(web3Provider);
+
+    let InitTokenHolder = openST.setup.InitTokenHolder;
 
     console.log('* Deploying Token Holder Contract2');
 
@@ -218,7 +227,6 @@ InitEconomy.prototype = {
       wallets = [configFileContent.wallet1, configFileContent.wallet2];
 
     let contractDeploymentResponse = await new InitTokenHolder({
-      web3Provider: web3Provider,
       deployerAddress: deployerAddress,
       deployerPassphrase: passphrase,
       gasPrice: gasPrice,
@@ -312,12 +320,14 @@ InitEconomy.prototype = {
       gasPrice = configFileContent.gasPrice,
       gasLimit = configFileContent.gasLimit;
 
-    let InitTransferRule = require('../lib/setup/InitTransferRule');
+    let OpenST = require('../index.js');
+    let openST = new OpenST(web3Provider);
+
+    let InitTransferRule = openST.setup.InitTransferRule;
 
     console.log('* Deploying Transfer Rule Contract');
 
     let contractDeploymentResponse = await new InitTransferRule({
-      web3Provider: web3Provider,
       deployerAddress: deployerAddress,
       deployerPassphrase: passphrase,
       gasPrice: gasPrice,
