@@ -21,18 +21,18 @@ For running functionality of openst.js, following constants are needed. For deve
 the previous section, one can find values of these in ~/openst-setup/config.json file.
 ```js
 // deployer address
-const deployerAddress = '0x01e56829663a5d920c55538086a9760ff215b2a6';
+const deployerAddress = '0xebf7e755ffa726621fe629d87efcc905668440ba';
 
 // organization address
-const organizationAddress = '0x9996b5de064f0d96f5602852de9637585f046a57';
+const organizationAddress = '0xd5f8b8732537487fa842d90afa4cbd3c93dc08bc';
 
 // wallet addresses
-const wallet1 = '0x7b3bfc5d1c90b13eadf4ef3b8135a7a4a3cca5db';
-const wallet2 = '0x4b79943cd91b80a82716004cbc9bb6f0e58a93e7';
+const wallet1 = '0x4e6de4b3e4187e85c0afd4b3502a9f448f1ad6e2';
+const wallet2 = '0xd69228f40b9ad396a2e280619cd137b95367f7ff';
 
-const ephemeralKey = '0xe6b3ecb4377c637995889a9f2b952cedcaa8fae2';
+const ephemeralKey = '0xd0dda870fc5cd2ad36208f52dde182523857b8a9';
 
-const facilitatorAddress = '0x66d0be510f3cac64f30eea359bda39717569ea4b';
+const facilitatorAddress = '0x216454eece25a64c1ce86da0066841a95f2b6fb6';
 
 // some other constants
 const passphrase = 'testtest';
@@ -43,13 +43,11 @@ const gasLimit = 4700000;
 ##### Creating an object of OpenST
 ```js
 // Creating object of web3 js using the GETH endpoint
-const Web3 = require('web3');
 const gethEndpoint = 'http://127.0.0.1:8545';
-let web3Provider = new Web3(gethEndpoint);
 
 // Creating object of OpenST
 const OpenST = require('./index.js');
-let openST = new OpenST(web3Provider);
+let openST = new OpenST(gethEndpoint);
 ```
 
 ##### Deploying ERC20 contract (Optional)
@@ -126,13 +124,13 @@ new InitTokenHolder({
 ```js
 let authorizeSession = async function (tokenHolderAddress, ephemeralKey, wallets) {
   const BigNumber = require('bignumber.js');
-  let currentBlockNumber = await web3Provider.eth.getBlockNumber(),
+  let currentBlockNumber = await openST.web3Provider().eth.getBlockNumber(),
     spendingLimit = new BigNumber('10000000000000000000000000000').toString(10),
     expirationHeight = new BigNumber(currentBlockNumber).add('10000000000000000000000000000').toString(10);
   
   let tokenHolder = new openST.contracts.TokenHolder(tokenHolderAddress);
   
-  await web3Provider.eth.personal.unlockAccount(wallets[0], passphrase);
+  await openST.web3Provider().eth.personal.unlockAccount(wallets[0], passphrase);
   
   // Authorize an ephemeral public key
   let authorizeSession1Response = await tokenHolder
@@ -145,7 +143,7 @@ let authorizeSession = async function (tokenHolderAddress, ephemeralKey, wallets
   
   console.log('authorizeSession1Response:', JSON.stringify(authorizeSession1Response, null));
   
-  await web3Provider.eth.personal.unlockAccount(wallets[1], passphrase);
+  await openST.web3Provider().eth.personal.unlockAccount(wallets[1], passphrase);
   
   // Authorize an ephemeral public key
   let authorizeSession2Response = await tokenHolder
@@ -188,9 +186,9 @@ let fundERC20Tokens = async function() {
   }
   
   let mockTokenAbi = parseFile('./contracts/abi/MockToken.abi', 'utf8');
-  let mockToken = new web3Provider.eth.Contract(mockTokenAbi, erc20TokenContractAddress);
+  let mockToken = new (openST.web3Provider()).eth.Contract(mockTokenAbi, erc20TokenContractAddress);
   
-  await web3Provider.eth.personal.unlockAccount(deployerAddress, passphrase);
+  await (openST.web3Provider()).eth.personal.unlockAccount(deployerAddress, passphrase);
   
   return mockToken.methods
     .transfer(tokenHolderContractAddress, amountToTransfer.toString(10))
@@ -205,6 +203,7 @@ fundERC20Tokens().then(console.log);
 ```
 
 ##### Deploy Rule contract
+
 ```js
 // deploy rule contract
 let ruleContractAddress = null;
@@ -229,7 +228,7 @@ new InitRule({
 ```js
 // register rule
 let registerRule = async function (ruleName, ruleContractAddress) {
-  await web3Provider.eth.personal.unlockAccount(organizationAddress, passphrase);
+  await openST.web3Provider().eth.personal.unlockAccount(organizationAddress, passphrase);
   
   let tokenRules = new openST.contracts.TokenRules(tokenRulesContractAddress);
   
@@ -263,7 +262,7 @@ let executeSampleRule = async function(tokenHolderAddress, ephemeralKey) {
   }
   
   let transferRuleAbi = parseFile('./contracts/abi/TransferRule.abi', 'utf8');
-  let transferRule = new web3Provider.eth.Contract(transferRuleAbi, ruleContractAddress);
+  let transferRule = new (openST.web3Provider()).eth.Contract(transferRuleAbi, ruleContractAddress);
     
   let executableData = await transferRule.methods
     .transferFrom(
@@ -274,7 +273,7 @@ let executeSampleRule = async function(tokenHolderAddress, ephemeralKey) {
   
   // Get 0x + first 8(4 bytes) characters
   let callPrefix = executableData.substring(0, 10);
-  let messageToBeSigned = await web3Provider.utils.soliditySha3(
+  let messageToBeSigned = await openST.web3Provider().utils.soliditySha3(
     { t: 'bytes', v: '0x19' }, // prefix
     { t: 'bytes', v: '0x00' }, // version control
     { t: 'address', v: tokenHolderAddress },
@@ -290,18 +289,18 @@ let executeSampleRule = async function(tokenHolderAddress, ephemeralKey) {
     { t: 'bytes', v: '0x' }
   );
   // ephemeralKey is signer here
-  await web3Provider.eth.personal.unlockAccount(ephemeralKey, passphrase);
-  let signature = await web3Provider.eth.sign(messageToBeSigned, ephemeralKey);
+  await openST.web3Provider().eth.personal.unlockAccount(ephemeralKey, passphrase);
+  let signature = await openST.web3Provider().eth.sign(messageToBeSigned, ephemeralKey);
   signature = signature.slice(2);
 
   let r = '0x' + signature.slice(0, 64),
     s = '0x' + signature.slice(64, 128),
-    v = web3Provider.utils.toDecimal('0x' + signature.slice(128, 130));
+    v = openST.web3Provider().utils.toDecimal('0x' + signature.slice(128, 130));
   if (v < 27) {
     v += 27;
   }
   
-  await web3Provider.eth.personal.unlockAccount(facilitatorAddress, passphrase);
+  await openST.web3Provider().eth.personal.unlockAccount(facilitatorAddress, passphrase);
   
   let executeRuleResponse = await tokenHolder
     .executeRule(
@@ -324,3 +323,7 @@ let executeSampleRule = async function(tokenHolderAddress, ephemeralKey) {
   
 executeSampleRule(tokenHolderContractAddress, ephemeralKey).then(console.log);
 ```
+
+
+
+Confirm the change in balance.
