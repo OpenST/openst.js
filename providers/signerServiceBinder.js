@@ -121,7 +121,7 @@ module.exports = function(OpenSTWeb3Prototype) {
         //Check if signerService is available.
         let signerInteract = oWeb3.signerServiceInteract();
         if (!signerInteract) {
-          console.log('signerInteract not found');
+          console.log('WARNING! signerInteract not found');
           //Lets execute the original send method.
           return org_send.apply(oTxObject, arguments);
         }
@@ -153,7 +153,7 @@ module.exports = function(OpenSTWeb3Prototype) {
       //Check if signerService is available.
       let signerInteract = oWeb3.signerServiceInteract();
       if (!signerInteract) {
-        console.log('signerInteract not found');
+        console.log('WARNING! signerInteract not found');
         //Lets execute the original send method.
         return org_sendTransaction.apply(oEth, arguments);
       }
