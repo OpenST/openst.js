@@ -46,7 +46,8 @@ OpenST.prototype = {
 };
 
 OpenST.utils = {
-  GethSignerService: require('./utils/GethSignerService')
+  GethSignerService: require('./utils/GethSignerService'),
+  ExecutableTransaction: require('./utils/ExecutableTransaction')
 };
 
 module.exports = OpenST;

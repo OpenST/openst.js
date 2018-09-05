@@ -21,18 +21,18 @@ For running functionality of openst.js, following constants are needed. For deve
 the previous section, one can find values of these in ~/openst-setup/config.json file.
 ```js
 // deployer address
-const deployerAddress = '0xebf7e755ffa726621fe629d87efcc905668440ba';
+const deployerAddress = '0xc786cf11c514762ae6cb02dcd7e77500076ec9a0';
 
 // organization address
-const organizationAddress = '0xd5f8b8732537487fa842d90afa4cbd3c93dc08bc';
+const organizationAddress = '0x9d717daa2efbeeaca383ffeda2c65baf31b6ad59';
 
 // wallet addresses
-const wallet1 = '0x4e6de4b3e4187e85c0afd4b3502a9f448f1ad6e2';
-const wallet2 = '0xd69228f40b9ad396a2e280619cd137b95367f7ff';
+const wallet1 = '0xfa21246b49146fa2b34d8c9dbcb36c944da5194f';
+const wallet2 = '0x857962440f978d94225aa06309045f2c4d1da943';
 
-const ephemeralKey = '0xd0dda870fc5cd2ad36208f52dde182523857b8a9';
+const ephemeralKey = '0x8aef49773419525b667b98120e141b205ccc3ba1';
 
-const facilitatorAddress = '0x216454eece25a64c1ce86da0066841a95f2b6fb6';
+const facilitatorAddress = '0x18f57cfc1ce9ec053500314a483ea70a27f6824e';
 
 // some other constants
 const passphrase = 'testtest';
@@ -261,10 +261,7 @@ registerRule('transferFrom', ruleContractAddress).then(console.log);
 ```js
 let executeSampleRule = async function(tokenHolderAddress, ephemeralKey) {
   const BigNumber = require('bignumber.js');
-  let tokenHolder = new openST.contracts.TokenHolder(tokenHolderAddress);
-  let ephemeralKeyData = await tokenHolder.ephemeralKeys(ephemeralKey).call({});
-  let bigNumberNonce = new BigNumber(ephemeralKeyData[1]),
-    ephemeralKey1Nonce = bigNumberNonce.add(1).toString(10),
+  let tokenHolder = new openST.contracts.TokenHolder(tokenHolderAddress),
     amountToTransfer = new BigNumber(100);
 
   // Helper function for reading json file
@@ -278,54 +275,35 @@ let executeSampleRule = async function(tokenHolderAddress, ephemeralKey) {
   let transferRuleAbi = parseFile('./contracts/abi/TransferRule.abi', 'utf8');
   let transferRule = new (openST.web3Provider()).eth.Contract(transferRuleAbi, ruleContractAddress);
     
-  let executableData = await transferRule.methods
+  let methodEncodedAbi = await transferRule.methods
     .transferFrom(
       tokenHolderAddress,
       '0x66d0be510f3cac64f30eea359bda39717569ea4b',
-      amountToTransfer
+      amountToTransfer.toString(10)
     ).encodeABI();
   
-  // Get 0x + first 8(4 bytes) characters
-  let callPrefix = executableData.substring(0, 10);
-  let messageToBeSigned = await openST.web3Provider().utils.soliditySha3(
-    { t: 'bytes', v: '0x19' }, // prefix
-    { t: 'bytes', v: '0x00' }, // version control
-    { t: 'address', v: tokenHolderAddress },
-    { t: 'address', v: tokenRulesContractAddress },
-    { t: 'uint8', v: '0' },
-    { t: 'bytes', v: executableData },
-    { t: 'uint256', v: ephemeralKey1Nonce }, // nonce
-    { t: 'uint8', v: '0' },
-    { t: 'uint8', v: '0' },
-    { t: 'uint8', v: '0' },
-    { t: 'bytes', v: callPrefix },
-    { t: 'uint8', v: '0' },
-    { t: 'bytes', v: '0x' }
-  );
-  // ephemeralKey is signer here
-  await openST.web3Provider().eth.personal.unlockAccount(ephemeralKey, passphrase);
-  let signature = await openST.web3Provider().eth.sign(messageToBeSigned, ephemeralKey);
-  signature = signature.slice(2);
-
-  let r = '0x' + signature.slice(0, 64),
-    s = '0x' + signature.slice(64, 128),
-    v = openST.web3Provider().utils.toDecimal('0x' + signature.slice(128, 130));
-  if (v < 27) {
-    v += 27;
-  }
-  
+    let executableTransactionObject = new openST.utils.ExecutableTransaction({
+        web3Provider: openST.web3Provider(),
+        tokenHolderContractAddress: tokenHolderAddress,
+        ruleContractAddress: ruleContractAddress,
+        methodEncodedAbi: methodEncodedAbi,
+        signer: ephemeralKey,
+        signerPassphrase: passphrase,
+        tokenHolderInstance: tokenHolder
+    });
+    let executableTransactionData = await executableTransactionObject.get();
+    
   await openST.web3Provider().eth.personal.unlockAccount(facilitatorAddress, passphrase);
-  
   let executeRuleResponse = await tokenHolder
     .executeRule(
       tokenHolderAddress,
-      tokenRulesContractAddress,
-      ephemeralKey1Nonce,
-      executableData,
-      callPrefix,
-      v,
-      r,
-      s
+      ruleContractAddress,
+      executableTransactionData.ephemeralKeyNonce,
+      methodEncodedAbi,
+      executableTransactionData.callPrefix,
+      executableTransactionData.v,
+      executableTransactionData.r,
+      executableTransactionData.s
     ).send({
       from: facilitatorAddress,
       gasPrice: gasPrice,
@@ -334,7 +312,6 @@ let executeSampleRule = async function(tokenHolderAddress, ephemeralKey) {
 
     return executeRuleResponse;
 };
-  
 executeSampleRule(tokenHolderContractAddress, ephemeralKey).then(console.log);
 ```
 
