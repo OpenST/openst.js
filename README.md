@@ -50,6 +50,20 @@ const OpenST = require('./index.js');
 let openST = new OpenST(gethEndpoint);
 ```
 
+##### Add signer
+```js
+let gethSigner = new openST.utils.GethSignerService(openST.web3Provider());
+
+gethSigner.addAccount(deployerAddress, passphrase);
+gethSigner.addAccount(organizationAddress, passphrase);
+gethSigner.addAccount(wallet1, passphrase);
+gethSigner.addAccount(wallet2, passphrase);
+gethSigner.addAccount(ephemeralKey, passphrase);
+gethSigner.addAccount(facilitatorAddress, passphrase);
+
+openST.signers.setSignerService(gethSigner);
+```
+
 ##### Deploying ERC20 contract (Optional)
 Optionally, you will want ERC20 contract to be deployed. You can use a pre-deployed ERC20 contract address as well, instead.
 

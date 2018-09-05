@@ -41,7 +41,7 @@ DeployContract.prototype = {
       receipt = null;
 
     console.log('Deploying contract ' + oThis.contractName);
-    const instance = await tx
+    let instance = await tx
       .send(txOptions)
       .on('receipt', function(value) {
         receipt = value;
@@ -54,14 +54,24 @@ DeployContract.prototype = {
         return Promise.reject(error);
       });
 
+    let contractAddress = null;
+
+    // Temporary patch
+    if (instance.contractAddress) {
+      contractAddress = instance.contractAddress;
+      instance = new oThis.web3.eth.Contract(oThis.abi, contractAddress);
+    } else {
+      contractAddress = instance.options.address;
+    }
+
     // checking if the contract was deployed at all.
-    const code = await oThis.web3.eth.getCode(instance.options.address);
+    const code = await oThis.web3.eth.getCode(contractAddress);
 
     if (code.length <= 2) {
       return Promise.reject('Contract deployment failed. oThis.web3.eth.getCode returned empty code.');
     }
 
-    console.log('Address  : ' + instance.options.address);
+    console.log('Address  : ' + contractAddress);
     console.log('Gas used : ' + receipt.gasUsed);
 
     return Promise.resolve({
