@@ -52,17 +52,7 @@ ExecutableTransaction.prototype = {
     if (v < 27) {
       v += 27;
     }
-    // console.log(
-    //   "oThis.ruleContractAddress:", oThis.ruleContractAddress,
-    //   "oThis.tokenHolderContractAddress:", oThis.tokenHolderContractAddress,
-    //   "signer:", oThis.signer,
-    //   "callPrefix:", callPrefix,
-    //   "ephemeralKeyNonce:", ephemeralKeyNonce,
-    //   "ephemeralKeyData", ephemeralKeyData,
-    //   "r:", r,
-    //   "s:", s,
-    //   "v:", v
-    // );
+
     return {
       callPrefix: callPrefix,
       ephemeralKeyNonce: ephemeralKeyNonce,

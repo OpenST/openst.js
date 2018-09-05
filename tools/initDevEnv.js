@@ -200,14 +200,12 @@ InitDevEnv.prototype = {
   },
 
   _fundEthFor: function(web3Provider, senderAddr, recipient, amount) {
-    return web3Provider.eth.personal.unlockAccount(senderAddr, passphrase).then(function() {
-      return web3Provider.eth.sendTransaction({
-        from: senderAddr,
-        to: recipient,
-        value: amount,
-        gasPrice: setUpConfig.chain.gasprice,
-        gas: setUpConfig.chain.gasLimit
-      });
+    return web3Provider.eth.sendTransaction({
+      from: senderAddr,
+      to: recipient,
+      value: amount,
+      gasPrice: setUpConfig.chain.gasprice,
+      gas: setUpConfig.chain.gasLimit
     });
   },
 

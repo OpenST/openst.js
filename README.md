@@ -21,18 +21,18 @@ For running functionality of openst.js, following constants are needed. For deve
 the previous section, one can find values of these in ~/openst-setup/config.json file.
 ```js
 // deployer address
-const deployerAddress = '0xc786cf11c514762ae6cb02dcd7e77500076ec9a0';
+const deployerAddress = '0xebf7e755ffa726621fe629d87efcc905668440ba';
 
 // organization address
-const organizationAddress = '0x9d717daa2efbeeaca383ffeda2c65baf31b6ad59';
+const organizationAddress = '0xd5f8b8732537487fa842d90afa4cbd3c93dc08bc';
 
 // wallet addresses
-const wallet1 = '0xfa21246b49146fa2b34d8c9dbcb36c944da5194f';
-const wallet2 = '0x857962440f978d94225aa06309045f2c4d1da943';
+const wallet1 = '0x4e6de4b3e4187e85c0afd4b3502a9f448f1ad6e2';
+const wallet2 = '0xd69228f40b9ad396a2e280619cd137b95367f7ff';
 
-const ephemeralKey = '0x8aef49773419525b667b98120e141b205ccc3ba1';
+const ephemeralKey = '0xd0dda870fc5cd2ad36208f52dde182523857b8a9';
 
-const facilitatorAddress = '0x18f57cfc1ce9ec053500314a483ea70a27f6824e';
+const facilitatorAddress = '0x216454eece25a64c1ce86da0066841a95f2b6fb6';
 
 // some other constants
 const passphrase = 'testtest';
@@ -144,7 +144,7 @@ let authorizeSession = async function (tokenHolderAddress, ephemeralKey, wallets
   
   let tokenHolder = new openST.contracts.TokenHolder(tokenHolderAddress);
   
-  await openST.web3Provider().eth.personal.unlockAccount(wallets[0], passphrase);
+  // await openST.web3Provider().eth.personal.unlockAccount(wallets[0], passphrase);
   
   // Authorize an ephemeral public key
   let authorizeSession1Response = await tokenHolder
@@ -157,7 +157,7 @@ let authorizeSession = async function (tokenHolderAddress, ephemeralKey, wallets
   
   console.log('authorizeSession1Response:', JSON.stringify(authorizeSession1Response, null));
   
-  await openST.web3Provider().eth.personal.unlockAccount(wallets[1], passphrase);
+  // await openST.web3Provider().eth.personal.unlockAccount(wallets[1], passphrase);
   
   // Authorize an ephemeral public key
   let authorizeSession2Response = await tokenHolder
@@ -202,7 +202,7 @@ let fundERC20Tokens = async function() {
   let mockTokenAbi = parseFile('./contracts/abi/MockToken.abi', 'utf8');
   let mockToken = new (openST.web3Provider()).eth.Contract(mockTokenAbi, erc20TokenContractAddress);
   
-  await (openST.web3Provider()).eth.personal.unlockAccount(deployerAddress, passphrase);
+  // await (openST.web3Provider()).eth.personal.unlockAccount(deployerAddress, passphrase);
   
   return mockToken.methods
     .transfer(tokenHolderContractAddress, amountToTransfer.toString(10))
@@ -242,7 +242,7 @@ new InitRule({
 ```js
 // register rule
 let registerRule = async function (ruleName, ruleContractAddress) {
-  await openST.web3Provider().eth.personal.unlockAccount(organizationAddress, passphrase);
+  // await openST.web3Provider().eth.personal.unlockAccount(organizationAddress, passphrase);
   
   let tokenRules = new openST.contracts.TokenRules(tokenRulesContractAddress);
   
@@ -293,7 +293,8 @@ let executeSampleRule = async function(tokenHolderAddress, ephemeralKey) {
     });
     let executableTransactionData = await executableTransactionObject.get();
     
-  await openST.web3Provider().eth.personal.unlockAccount(facilitatorAddress, passphrase);
+  // await openST.web3Provider().eth.personal.unlockAccount(facilitatorAddress, passphrase);
+  
   let executeRuleResponse = await tokenHolder
     .executeRule(
       tokenHolderAddress,
