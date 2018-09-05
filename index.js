@@ -36,11 +36,17 @@ const OpenST = function(gethEndPoint) {
   oThis.setup = oThis.ic().Setup();
 
   oThis.signers = oThis.ic().Signers();
+
+  oThis.utils = OpenST.utils;
 };
 
 OpenST.prototype = {
   constructor: OpenST,
   configurations: null
+};
+
+OpenST.utils = {
+  GethSignerService: require('./utils/GethSignerService')
 };
 
 module.exports = OpenST;
