@@ -22,8 +22,6 @@ Below is overview of different components and their roles:
 ```
 
 ##### Prerequisite
-    
-- Language: nodejs   
 
 - Web3 documentation for reference: https://web3js.readthedocs.io/en/1.0/web3-eth.html  
     
