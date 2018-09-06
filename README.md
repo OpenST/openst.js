@@ -78,9 +78,9 @@ of openst.js as described in the following sections.
     
 ##### Sample Constants
 
-For running functionality of openst.js, following constants are needed. For developer machines, which were set up in 
-the previous section, one can find values of these in ~/openst-setup/config.json file.
+To seemlessly execute the example code provided in this file, please use below code if you have setup development environment using init-dev-env.
 ```js
+
 const os = require('os');
 let configFilePath = os.homedir() + '/openst-setup/config.json';
 let devEnvConfig = require(configFilePath);
@@ -99,25 +99,43 @@ let wallet2 = devEnvConfig.wallet2;
 let ephemeralKey = devEnvConfig.ephemeralKey1;
 
 let facilitatorAddress = devEnvConfig.facilitator;
+let passphrase = 'testtest';
 
-// ------------------------------ OR -------------------------------- //
+// some other constants
+const gasPrice = '0x12A05F200';
+const gasLimit = 4700000;
+
+// Helper function for reading json file
+const fs = require('fs');
+ function parseFile(filePath, options) {
+ filePath = path.join(filePath);
+ const fileContent = fs.readFileSync(filePath, options || 'utf8');
+ return JSON.parse(fileContent);
+ }
+  
+let mockTokenAbi = parseFile('./contracts/abi/MockToken.abi', 'utf8');
+```
+
+Optionally, you can set these constants as you wish to.
+
+```js
 
 // deployer address
-let deployerAddress = '0xebf7e755ffa726621fe629d87efcc905668440ba';
+let deployerAddress = '0xaabb1122....................';
 
 // organization address
-let organizationAddress = '0xd5f8b8732537487fa842d90afa4cbd3c93dc08bc';
+let organizationAddress = '0xaabb1122....................';
 
 // wallet addresses
-let wallet1 = '0x4e6de4b3e4187e85c0afd4b3502a9f448f1ad6e2';
-let wallet2 = '0xd69228f40b9ad396a2e280619cd137b95367f7ff';
+let wallet1 = '0xaabb1122....................';
+let wallet2 = '0xaabb1122....................';
 
-let ephemeralKey = '0xd0dda870fc5cd2ad36208f52dde182523857b8a9';
+let ephemeralKey = '0xaabb1122....................';
 
-let facilitatorAddress = '0x216454eece25a64c1ce86da0066841a95f2b6fb6';
-// ------------------------------ END ------------------------------ //
+let facilitatorAddress = '0xaabb1122....................';
 
-let passphrase = 'testtest';
+
+let passphrase = 'some passphrase.....';
 
 // some other constants
 const gasPrice = '0x12A05F200';
