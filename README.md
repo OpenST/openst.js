@@ -189,9 +189,9 @@ let addToWalletByKeystoreContent = function (encryptedPrivateKey, password) {
 ##### OpenST Signers Service
 OpenST.js makes it easy for developers to build custom and secure key-management solutions.
 
-Thats right! You can build your own custom signer service. Once the signer service is set, you can continue to use Contract.methods.myMethod.send (https://web3js.readthedocs.io/en/1.0/web3-eth-contract.html#methods-mymethod-send) & web3.eth.sendTransaction (https://web3js.readthedocs.io/en/1.0/web3-eth.html#sendtransaction) without worrying about unlocking/signing the transactions. 
+Thats right! You can build your own custom signer service. Once the signer service is set, you can continue to use Contract.methods.myMethod.send (https://web3js.readthedocs.io/en/1.0/web3-eth-contract.html#methods-mymethod-send) & web3.eth.sendTransaction (https://web3js.readthedocs.io/en/1.0/web3-eth.html#sendtransaction) without worrying about unlocking/signing the transactions. You can set the signer service using `openST.signers.setSignerService` method.
 
-OpenST.js will call your service to determine the nonce of the sender, ask your service to sign the transaction and then submit the transaction. You can set the signer service using `openST.signers.setSignerService` method.
+OpenST.js will call your service to determine the nonce of the sender, ask your service to sign the transaction and then submit the transaction. 
 
 All you need to do is provide the instance of openST with an object that exposes three functions:
 ```js
