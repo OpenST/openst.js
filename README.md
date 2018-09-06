@@ -1,46 +1,118 @@
 # openst.js
 
-OpenST is a framework for building token economies. In here, we will go through a sample usage of OpenST.
+OpenST is a framework for building token economies. Here, we will go through a sample usage of OpenST. 
+
+Below is overview of different components and their roles:
+
+- One Economy will have one TokenRules Contract deployed on it.
+  TokenRules Contract keeps a list of all the registered Custom Rules Contracts with their properties and helps in interacting with them.
+  
+- Each user in a token economy internally will be represented by a contract address. This contract is Token Holder contract. 
+  Token Holder contract will hold user’s tokens. It’s a multisig contract. This means a Token Holder can have multiple owners.
+  
+- Each partner company will write at least one Custom Rules Contract. They can write multiple based on requirement / economy design.
+  Each economy has actions and the logic around these actions will be defined as rules in this contract. 
 
 ##### Install all the dependent packages
 ```
-> npm install
+> sudo apt-get update
+  sudo apt-get install nodejs
+  sudo apt-get install npm
+  sudo apt-get install software-properties-common
 ```
 
-##### Initializing chain on developer machines
+##### Prerequisite
+    
+- Language: nodejs   
+
+- Web3 documentation for reference: https://web3js.readthedocs.io/en/1.0/web3-eth.html  
+    
+- Install openst.js in your project
+
+  npm install https://github.com/OpenSTFoundation/openst.js#setup-mvp --save
+  
+- Geth Installation on mac machine  
+
+    Below code tested with geth version: 1.7.3-stable. However any higher version of geth should also work. 
+    
+    curl https://gethstore.blob.core.windows.net/builds/geth-linux-amd64-1.7.3-4bb3c89d.tar.gz | tar xvz
+    mv geth-linux-amd64-1.7.3-4bb3c89d /usr/local/bin
+    ln -s /usr/local/bin/geth-linux-amd64-1.7.3-4bb3c89d/geth /usr/local/bin/geth
+    export PATH="$PATH:/usr/local/bin/geth-linux-amd64-1.7.3-4bb3c89d"
+    
+- Make sure your development machine is synced with a any of below test environments. 
+
+  https://ropsten.etherscan.io/
+  https://kovan.etherscan.io/
+  https://rinkeby.etherscan.io/  
+ 
+
+- Below addresses should already be created in the test environment and funded with gas.
+ 
+    deployerAddress - address which deploy ERC20Token, TokenRules, TokenHolder, Custom Rules contracts 
+    organizationAddress - Address which will register custome rules contract to TokenRules
+    wallet1 - Owner1 of TokenHolder contract.
+    wallet2 - Owner2 of TokenHolder contract.
+    ephemeralKey - Key which will be authorized by owners in TokenHolder contract. This key will sign execute custom rule transactions.
+    facilitatorAddress - Address which will facilitate custom rule transactions.
+
+##### Initializing chain on developer machines for development testing
+
 The below command creates a json file (~/openst-setup/config.json) having all the needed addresses and other constants. 
 It also starts GETH process for the chain. This is meant for developer to get going directly and try out the functionality 
 of openst.js as described in the following sections.
 
 ```
+> Clone openst.js
+
+    git clone git@github.com:OpenSTFoundation/openst.js.git
+    
+> Install npm packages
+   
+  cd openst.js
+  git checkout setup-mvp 
+  npm install
+  
 > npm run init-dev-env
 ```
-
+    
 ##### Sample Constants
+
 For running functionality of openst.js, following constants are needed. For developer machines, which were set up in 
 the previous section, one can find values of these in ~/openst-setup/config.json file.
 ```js
 // deployer address
-const deployerAddress = '0xebf7e755ffa726621fe629d87efcc905668440ba';
+const deployerAddress = '0xc786cf11c514762ae6cb02dcd7e77500076ec9a0';
 
 // organization address
-const organizationAddress = '0xd5f8b8732537487fa842d90afa4cbd3c93dc08bc';
+const organizationAddress = '0x9d717daa2efbeeaca383ffeda2c65baf31b6ad59';
 
 // wallet addresses
-const wallet1 = '0x4e6de4b3e4187e85c0afd4b3502a9f448f1ad6e2';
-const wallet2 = '0xd69228f40b9ad396a2e280619cd137b95367f7ff';
+const wallet1 = '0xfa21246b49146fa2b34d8c9dbcb36c944da5194f';
+const wallet2 = '0x857962440f978d94225aa06309045f2c4d1da943';
 
-const ephemeralKey = '0xd0dda870fc5cd2ad36208f52dde182523857b8a9';
+const ephemeralKey = '0x8aef49773419525b667b98120e141b205ccc3ba1';
 
-const facilitatorAddress = '0x216454eece25a64c1ce86da0066841a95f2b6fb6';
+const facilitatorAddress = '0x18f57cfc1ce9ec053500314a483ea70a27f6824e';
 
 // some other constants
 const passphrase = 'testtest';
 const gasPrice = '0x12A05F200';
 const gasLimit = 4700000;
+
+// Helper function for reading json file
+const fs = require('fs');
+ function parseFile(filePath, options) {
+ filePath = path.join(filePath);
+ const fileContent = fs.readFileSync(filePath, options || 'utf8');
+ return JSON.parse(fileContent);
+ }
+  
+let mockTokenAbi = parseFile('./contracts/abi/MockToken.abi', 'utf8');
 ```
 
 ##### Creating an object of OpenST
+
 ```js
 // Creating object of web3 js using the GETH endpoint
 const gethEndpoint = 'http://127.0.0.1:8545';
@@ -51,6 +123,10 @@ let openST = new OpenST(gethEndpoint);
 ```
 
 ##### Add signer
+
+Signer service makes sure you don't have to unlock addresses everytime a transaction needs to be done.
+For this we need to register addresses to signer service. 
+
 ```js
 let gethSigner = new openST.utils.GethSignerService(openST.web3Provider());
 
@@ -65,6 +141,7 @@ openST.signers.setSignerService(gethSigner);
 ```
 
 ##### Deploying ERC20 contract (Optional)
+
 Optionally, you will want ERC20 contract to be deployed. You can use a pre-deployed ERC20 contract address as well, instead.
 
 ```js
@@ -86,6 +163,9 @@ new InitERC20Token({
 ```
 
 ##### Deploying TokenRules contract
+
+TokenRules contract is deployed per organization. Organization needs register custom rules contract in TokenRules contract.
+
 ```js
 // deploy TokenRules contract
 let tokenRulesContractAddress = null;
@@ -107,6 +187,9 @@ new InitTokenRules({
 ```
 
 ##### Deploying TokenHolder contract
+
+Per user TokenHolder contract is deployed. TokenHolder contract holds Utility tokens of user.
+
 ```js
 let requirement = 2;
 let wallets = [wallet1, wallet2];
@@ -135,6 +218,9 @@ new InitTokenHolder({
 ```
 
 ##### Authorize session
+
+Using TH authorize session function, owners can register an ephemeral key. Authorize session is a multisig operation.
+ 
 ```js
 let authorizeSession = async function (tokenHolderAddress, ephemeralKey, wallets) {
   const BigNumber = require('bignumber.js');
@@ -143,8 +229,6 @@ let authorizeSession = async function (tokenHolderAddress, ephemeralKey, wallets
     expirationHeight = new BigNumber(currentBlockNumber).add('10000000000000000000000000000').toString(10);
   
   let tokenHolder = new openST.contracts.TokenHolder(tokenHolderAddress);
-  
-  // await openST.web3Provider().eth.personal.unlockAccount(wallets[0], passphrase);
   
   // Authorize an ephemeral public key
   let authorizeSession1Response = await tokenHolder
@@ -156,8 +240,6 @@ let authorizeSession = async function (tokenHolderAddress, ephemeralKey, wallets
     });
   
   console.log('authorizeSession1Response:', JSON.stringify(authorizeSession1Response, null));
-  
-  // await openST.web3Provider().eth.personal.unlockAccount(wallets[1], passphrase);
   
   // Authorize an ephemeral public key
   let authorizeSession2Response = await tokenHolder
@@ -180,6 +262,7 @@ authorizeSession(tokenHolderContractAddress, ephemeralKey, wallets);
 ```
 
 ##### Fund ERC20 tokens
+
 Now we will fund ERC20 tokens to token holder contract address for example execute rule to run.
 
 ```js
@@ -191,18 +274,7 @@ let fundERC20Tokens = async function() {
   
   console.log('Funding ERC20 tokens to token holder:', tokenHolderContractAddress);
   
-  // Helper function for reading json file
-  const fs = require('fs');
-  function parseFile(filePath, options) {
-    filePath = path.join(filePath);
-    const fileContent = fs.readFileSync(filePath, options || 'utf8');
-    return JSON.parse(fileContent);
-  }
-  
-  let mockTokenAbi = parseFile('./contracts/abi/MockToken.abi', 'utf8');
   let mockToken = new (openST.web3Provider()).eth.Contract(mockTokenAbi, erc20TokenContractAddress);
-  
-  // await (openST.web3Provider()).eth.personal.unlockAccount(deployerAddress, passphrase);
   
   return mockToken.methods
     .transfer(tokenHolderContractAddress, amountToTransfer.toString(10))
@@ -217,6 +289,8 @@ fundERC20Tokens().then(console.log);
 ```
 
 ##### Deploy Rule contract
+
+Here we are deploying custom rules contract. The rules contract is registered inside TokenRules contract by organization.
 
 ```js
 // deploy rule contract
@@ -239,10 +313,12 @@ new InitRule({
 ```
 
 ##### Register rule
+
+Here organization is registering rules contract in TokenRules. TokenHolder execute rule can called for whitelisted rules contract only.
+
 ```js
 // register rule
 let registerRule = async function (ruleName, ruleContractAddress) {
-  // await openST.web3Provider().eth.personal.unlockAccount(organizationAddress, passphrase);
   
   let tokenRules = new openST.contracts.TokenRules(tokenRulesContractAddress);
   
@@ -254,23 +330,18 @@ let registerRule = async function (ruleName, ruleContractAddress) {
     })
 };
 registerRule('transferFrom', ruleContractAddress).then(console.log);
-
 ```
 
 ##### Execute sample rule
+
+Here executable transaction is signed by ephemeral key. Facilitator calls TokenHolder execute rule method to execute custom rule.
+TokenHolder approves Token rules for transfer. Transfers are done in TokenRules contract.
+
 ```js
 let executeSampleRule = async function(tokenHolderAddress, ephemeralKey) {
   const BigNumber = require('bignumber.js');
   let tokenHolder = new openST.contracts.TokenHolder(tokenHolderAddress),
     amountToTransfer = new BigNumber(100);
-
-  // Helper function for reading json file
-  const fs = require('fs');
-  function parseFile(filePath, options) {
-      filePath = path.join(filePath);
-      const fileContent = fs.readFileSync(filePath, options || 'utf8');
-      return JSON.parse(fileContent);
-  }
   
   let transferRuleAbi = parseFile('./contracts/abi/TransferRule.abi', 'utf8');
   let transferRule = new (openST.web3Provider()).eth.Contract(transferRuleAbi, ruleContractAddress);
@@ -282,18 +353,16 @@ let executeSampleRule = async function(tokenHolderAddress, ephemeralKey) {
       amountToTransfer.toString(10)
     ).encodeABI();
   
-    let executableTransactionObject = new openST.utils.ExecutableTransaction({
-        web3Provider: openST.web3Provider(),
-        tokenHolderContractAddress: tokenHolderAddress,
-        ruleContractAddress: ruleContractAddress,
-        methodEncodedAbi: methodEncodedAbi,
-        signer: ephemeralKey,
-        signerPassphrase: passphrase,
-        tokenHolderInstance: tokenHolder
-    });
-    let executableTransactionData = await executableTransactionObject.get();
-    
-  // await openST.web3Provider().eth.personal.unlockAccount(facilitatorAddress, passphrase);
+  let executableTransactionObject = new openST.utils.ExecutableTransaction({
+    web3Provider: openST.web3Provider(),
+    tokenHolderContractAddress: tokenHolderAddress,
+    ruleContractAddress: ruleContractAddress,
+    methodEncodedAbi: methodEncodedAbi,
+    signer: ephemeralKey,
+    signerPassphrase: passphrase,
+    tokenHolderInstance: tokenHolder
+  });
+  let executableTransactionData = await executableTransactionObject.get();
   
   let executeRuleResponse = await tokenHolder
     .executeRule(
@@ -316,6 +385,14 @@ let executeSampleRule = async function(tokenHolderAddress, ephemeralKey) {
 executeSampleRule(tokenHolderContractAddress, ephemeralKey).then(console.log);
 ```
 
+##### Balance verification after execute rule
 
+```js
+let checkBalance = async function (address) {
+  
+  let mockToken = new (openST.web3Provider()).eth.Contract(mockTokenAbi, erc20TokenContractAddress);
+  return mockToken.methods.balanceOf(address).call({});
+};
+checkBalance(tokenHolderContractAddress).then(console.log)
+```
 
-Confirm the change in balance.
