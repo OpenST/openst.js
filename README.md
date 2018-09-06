@@ -81,22 +81,45 @@ of openst.js as described in the following sections.
 For running functionality of openst.js, following constants are needed. For developer machines, which were set up in 
 the previous section, one can find values of these in ~/openst-setup/config.json file.
 ```js
+const os = require('os');
+let configFilePath = os.homedir() + '/openst-setup/config.json';
+let devEnvConfig = require(configFilePath);
+
 // deployer address
-const deployerAddress = '0xebf7e755ffa726621fe629d87efcc905668440ba';
+let deployerAddress = devEnvConfig.deployerAddress;
 
 // organization address
-const organizationAddress = '0xd5f8b8732537487fa842d90afa4cbd3c93dc08bc';
+let organizationAddress = devEnvConfig.organizationAddress;
 
 // wallet addresses
-const wallet1 = '0x4e6de4b3e4187e85c0afd4b3502a9f448f1ad6e2';
-const wallet2 = '0xd69228f40b9ad396a2e280619cd137b95367f7ff';
+let wallet1 = devEnvConfig.wallet1;
+let wallet2 = devEnvConfig.wallet2;
 
-const ephemeralKey = '0xd0dda870fc5cd2ad36208f52dde182523857b8a9';
+//Ephemeral Key Address
+let ephemeralKey = devEnvConfig.ephemeralKey1;
 
-const facilitatorAddress = '0x216454eece25a64c1ce86da0066841a95f2b6fb6';
+let facilitatorAddress = devEnvConfig.facilitator;
+
+// ------------------------------ OR -------------------------------- //
+
+// deployer address
+let deployerAddress = '0xebf7e755ffa726621fe629d87efcc905668440ba';
+
+// organization address
+let organizationAddress = '0xd5f8b8732537487fa842d90afa4cbd3c93dc08bc';
+
+// wallet addresses
+let wallet1 = '0x4e6de4b3e4187e85c0afd4b3502a9f448f1ad6e2';
+let wallet2 = '0xd69228f40b9ad396a2e280619cd137b95367f7ff';
+
+let ephemeralKey = '0xd0dda870fc5cd2ad36208f52dde182523857b8a9';
+
+let facilitatorAddress = '0x216454eece25a64c1ce86da0066841a95f2b6fb6';
+// ------------------------------ END ------------------------------ //
+
+let passphrase = 'testtest';
 
 // some other constants
-const passphrase = 'testtest';
 const gasPrice = '0x12A05F200';
 const gasLimit = 4700000;
 
@@ -131,26 +154,77 @@ Remember to add all of deployerAddress, organizationAddress, wallet1, wallet2, e
 For adding to web3 wallet, there are 2 ways. We can add using the keystore file OR by private key.
 In detail documentation can be found here - https://web3js.readthedocs.io/en/1.0/web3-eth-accounts.html
 ```js
+
 // fetch the web3 object to add to the wallet.
 // add all your accounts to this openST web3 object.
 let web3 = openST.web3();
 
-// helper method for the developers to add account to wallet using keystore content.
-let addToWalletByKeystoreContent = function (keystoreContent, password) {
-  let account = web3.eth.accounts.decrypt(keystoreContent, password);
+// Here is a sample helper method for the developers to add account to wallet using keystore content.
+// Read more about web3.eth.accounts.decrypt here: https://web3js.readthedocs.io/en/1.0/web3-eth-accounts.html#id22
+let addToWalletByKeystoreContent = function (encryptedPrivateKey, password) {
+  let account = web3.eth.accounts.decrypt(encryptedPrivateKey, password);
   web3.eth.accounts.wallet.add(account);
 };
-addToWalletByKeystoreContent(deployerKeyStore, deployerPassphrase);
-addToWalletByKeystoreContent(organizationKeyStore, organizationPassphrase);
-addToWalletByKeystoreContent(wallet1KeyStore, wallet1Passphrase);
-addToWalletByKeystoreContent(wallet2KeyStore, wallet2Passphrase);
-addToWalletByKeystoreContent(ephemeralKeyKeyStore, ephemeralKeyPassphrase);
-addToWalletByKeystoreContent(facilitatorKeyStore, facilitatorPassphrase);
+
 ```
 
-##### Add account to signer
-Signer service makes sure you don't have to unlock addresses everytime a transaction needs to be done.
-For this we need to register addresses to signer service. 
+##### OpenST Signers Service
+OpenST.js makes it easy for developers to build custom and secure key-management solutions.
+
+Thats right! You can build your own custom signer service. Once the signer service is set, you can continue to use Contract.methods.myMethod.send (https://web3js.readthedocs.io/en/1.0/web3-eth-contract.html#methods-mymethod-send) & web3.eth.sendTransaction (https://web3js.readthedocs.io/en/1.0/web3-eth.html#sendtransaction) without worrying about unlocking/signing the transactions. 
+
+OpenST.js will call your service to determine the nonce of the sender, ask your service to sign the transaction and then submit the transaction. 
+
+All you need to do is provide the instance of openST with an object that exposes three functions:
+```js
+
+let signerServiceObject = {
+  // nonce - method to provide nonce of the address.
+  nonce: function ( address ) {
+    return new Promise( function (resolve, reject) {
+      //Your code here
+      //...
+      //...
+      //...
+      //resolve the promise with the nonce of the address
+    });
+  },
+
+  // signTransaction - method to provide openSt with signed raw transaction.
+  signTransaction: function (txObj, address) {
+    // txObj - web3 transaction object.
+    // address - address which needs to sign the transaction.
+
+    return new Promise( function (resolve, reject) {
+      // Your code here
+      // ...
+      // ...
+      // ...
+      // resolve the promise with the signed txObj that confirms to web3 standards: 
+      // https://web3js.readthedocs.io/en/1.0/web3-eth-accounts.html#id5
+      //
+      // OR
+      //
+      // resolve the promise with signed rawTransaction (String).
+    });
+  },
+  // sign - method to sign raw data.
+  sign: function (dataToSign, address) {
+    //dataToSign - raw data to sign.
+    //address - address that needs to sign the transaction.
+    return new Promise( function (resolve, reject) {
+      // Your code here
+      // ...
+      // ...
+      // ...
+
+      // resolve the promise with the signed data.
+    });
+  }
+};
+```
+
+openst.js comes with a sample geth signer service that you can use for development purpose.
 
 ```js
 let gethSigner = new openST.utils.GethSignerService(openST.web3());
