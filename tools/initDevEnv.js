@@ -173,7 +173,7 @@ InitDevEnv.prototype = {
     let configFileContent = JSON.parse(fs.readFileSync(oThis.configJsonFilePath, 'utf8'));
 
     let senderAddr = configFileContent.chainOwnerAddress,
-      web3Provider = new Web3(oThis._rpcEndpoint()),
+      web3Instance = new Web3(oThis._rpcEndpoint()),
       amount = '100000000000000000000';
 
     let ethRecipients = [
@@ -194,13 +194,13 @@ InitDevEnv.prototype = {
       let recipientName = ethRecipients[len];
       let recipient = configFileContent[recipientName];
       console.log(`* Funding ${recipientName} (${recipient}) with ${amount} Wei`);
-      await oThis._fundEthFor(web3Provider, senderAddr, recipient, amount);
+      await oThis._fundEthFor(web3Instance, senderAddr, recipient, amount);
       console.log(`----- ${recipientName} (${recipient}) has received ${amount} Wei`);
     }
   },
 
-  _fundEthFor: function(web3Provider, senderAddr, recipient, amount) {
-    return web3Provider.eth.sendTransaction({
+  _fundEthFor: function(web3, senderAddr, recipient, amount) {
+    return web3.eth.sendTransaction({
       from: senderAddr,
       to: recipient,
       value: amount,

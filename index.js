@@ -25,9 +25,9 @@ const OpenST = function(gethEndPoint) {
     return _instanceComposer;
   };
 
-  let _web3Provider = oThis.ic().chainWeb3();
-  oThis.web3Provider = function() {
-    return _web3Provider;
+  let _web3 = oThis.ic().chainWeb3();
+  oThis.web3 = function() {
+    return _web3;
   };
 
   oThis.contracts = oThis.ic().Contracts();

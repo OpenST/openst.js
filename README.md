@@ -128,10 +128,12 @@ One can add accounts to web3 wallet or to our custom signer service. You should 
 Remember to add all of deployerAddress, organizationAddress, wallet1, wallet2, ephemeralKey and facilitatorAddress to use the functionality given in this readme. In general, add only those accounts which are being used in the transactions in your use cases.
 
 ##### Add accounts to web3 wallet
-For adding to web3 wallet, there are 2 ways. We can add using the keystore file OR by private key. In detail documentation can be found here - https://web3js.readthedocs.io/en/1.0/web3-eth-accounts.html
+For adding to web3 wallet, there are 2 ways. We can add using the keystore file OR by private key.
+In detail documentation can be found here - https://web3js.readthedocs.io/en/1.0/web3-eth-accounts.html
 ```js
 // fetch the web3 object to add to the wallet.
-let web3 = openST.web3Provider();
+// add all your accounts to this openST web3 object.
+let web3 = openST.web3();
 
 // helper method for the developers to add account to wallet using keystore content.
 let addToWalletByKeystoreContent = function (keystoreContent, password) {
@@ -151,7 +153,7 @@ Signer service makes sure you don't have to unlock addresses everytime a transac
 For this we need to register addresses to signer service. 
 
 ```js
-let gethSigner = new openST.utils.GethSignerService(openST.web3Provider());
+let gethSigner = new openST.utils.GethSignerService(openST.web3());
 
 gethSigner.addAccount(deployerAddress, passphrase);
 gethSigner.addAccount(organizationAddress, passphrase);
@@ -247,7 +249,7 @@ Using TH authorize session function, owners can register an ephemeral key. Autho
 ```js
 let authorizeSession = async function (tokenHolderAddress, ephemeralKey, wallets) {
   const BigNumber = require('bignumber.js');
-  let currentBlockNumber = await openST.web3Provider().eth.getBlockNumber(),
+  let currentBlockNumber = await openST.web3().eth.getBlockNumber(),
     spendingLimit = new BigNumber('10000000000000000000000000000').toString(10),
     expirationHeight = new BigNumber(currentBlockNumber).add('10000000000000000000000000000').toString(10);
   
@@ -297,7 +299,7 @@ let fundERC20Tokens = async function() {
   
   console.log('Funding ERC20 tokens to token holder:', tokenHolderContractAddress);
   
-  let mockToken = new (openST.web3Provider()).eth.Contract(mockTokenAbi, erc20TokenContractAddress);
+  let mockToken = new (openST.web3()).eth.Contract(mockTokenAbi, erc20TokenContractAddress);
   
   return mockToken.methods
     .transfer(tokenHolderContractAddress, amountToTransfer.toString(10))
@@ -367,7 +369,7 @@ let executeSampleRule = async function(tokenHolderAddress, ephemeralKey) {
     amountToTransfer = new BigNumber(100);
   
   let transferRuleAbi = parseFile('./contracts/abi/TransferRule.abi', 'utf8');
-  let transferRule = new (openST.web3Provider()).eth.Contract(transferRuleAbi, ruleContractAddress);
+  let transferRule = new (openST.web3()).eth.Contract(transferRuleAbi, ruleContractAddress);
     
   let methodEncodedAbi = await transferRule.methods
     .transferFrom(
@@ -377,7 +379,7 @@ let executeSampleRule = async function(tokenHolderAddress, ephemeralKey) {
     ).encodeABI();
   
   let executableTransactionObject = new openST.utils.ExecutableTransaction({
-    web3Provider: openST.web3Provider(),
+    web3: openST.web3(),
     tokenHolderContractAddress: tokenHolderAddress,
     ruleContractAddress: ruleContractAddress,
     methodEncodedAbi: methodEncodedAbi,
@@ -413,7 +415,7 @@ executeSampleRule(tokenHolderContractAddress, ephemeralKey).then(console.log);
 ```js
 let checkBalance = async function (address) {
   
-  let mockToken = new (openST.web3Provider()).eth.Contract(mockTokenAbi, erc20TokenContractAddress);
+  let mockToken = new (openST.web3()).eth.Contract(mockTokenAbi, erc20TokenContractAddress);
   return mockToken.methods.balanceOf(address).call({});
 };
 checkBalance(tokenHolderContractAddress).then(console.log)
