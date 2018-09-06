@@ -4,6 +4,8 @@ const _ = require('underscore'),
   Method = require('web3-core-method'),
   utils = require('web3-utils');
 
+const DEBUG = false;
+
 module.exports = function(Web3Prototype) {
   if (typeof Web3Prototype.signerServiceInteract !== 'function') {
     let err = new Error('Web3Prototype MUST implement signerServiceInteract method');
@@ -121,7 +123,7 @@ module.exports = function(Web3Prototype) {
       // make sure receipt logs are decoded
       var extraFormatters = {
         receiptFormatter: function(receipt) {
-          console.log('receiptFormatter called!!!');
+          DEBUG && console.log('receiptFormatter called!!!');
           if (_.isArray(receipt.logs)) {
             // decode logs
             var events = _.map(receipt.logs, function(log) {
@@ -160,7 +162,7 @@ module.exports = function(Web3Prototype) {
           return receipt;
         },
         contractDeployFormatter: function(receipt) {
-          console.log('contractDeployFormatter called!!!');
+          DEBUG && console.log('contractDeployFormatter called!!!');
           var newContract = _this._parent.clone();
           newContract.options.address = receipt.contractAddress;
           return newContract;
@@ -200,7 +202,7 @@ module.exports = function(Web3Prototype) {
         };
 
         let sendSignedTransaction = sendSignedTransactionMethod.createFunction();
-        console.log('Using custom sendSignedTransaction');
+        DEBUG && console.log('Using custom sendSignedTransaction');
 
         let sendSignedPromiEvent = sendSignedTransaction(signedTxPayload, callback);
         oWeb3._bindPromieEvents(sendSignedPromiEvent, defer);
@@ -257,7 +259,7 @@ module.exports = function(Web3Prototype) {
       //Check if signerService is available.
       let signerInteract = oWeb3.signerServiceInteract();
       if (!signerInteract) {
-        console.log('signerInteract not found');
+        DEBUG && console.log('signerInteract not found');
         //Lets execute the original send method.
         return org_sendTransaction.apply(oEth, arguments);
       }
@@ -290,13 +292,13 @@ module.exports = function(Web3Prototype) {
       let signerInteract = oWeb3.signerServiceInteract();
 
       if (!signerInteract) {
-        console.log('signerInteract not found');
+        DEBUG && console.log('signerInteract not found');
         //Lets execute the original send method.
         return org_sign.apply(oEth, arguments);
       }
 
       let signerService = signerInteract.service();
-      console.log('signerService', signerService);
+      DEBUG && console.log('signerService', signerService);
 
       return signerService
         .sign(dataToSign, address)

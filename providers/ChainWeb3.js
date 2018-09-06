@@ -4,9 +4,9 @@ const Web3 = require('web3');
 const signerServiceBinder = require('../providers/signerServiceBinder');
 const InstanceComposer = require('../instance_composer');
 
-const ChainWeb3 = function() {
+const ChainWeb3 = function(config, ic) {
   const oThis = this,
-    provider = oThis.ic().configStrategy.gethEndPoint;
+    provider = ic.configStrategy.gethEndPoint;
 
   console.log('ChainWeb3 provider', provider);
 
@@ -31,6 +31,6 @@ ChainWeb3.prototype.signerServiceInteract = function() {
 };
 
 signerServiceBinder(ChainWeb3.prototype);
-InstanceComposer.registerShadowableClass(ChainWeb3, 'ChainWeb3');
+InstanceComposer.register(ChainWeb3, 'chainWeb3', true);
 
 module.exports = ChainWeb3;

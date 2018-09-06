@@ -25,8 +25,7 @@ const OpenST = function(gethEndPoint) {
     return _instanceComposer;
   };
 
-  let ChainWeb3 = oThis.ic().ChainWeb3();
-  let _web3Provider = new ChainWeb3();
+  let _web3Provider = oThis.ic().chainWeb3();
   oThis.web3Provider = function() {
     return _web3Provider;
   };

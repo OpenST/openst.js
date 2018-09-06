@@ -82,18 +82,18 @@ For running functionality of openst.js, following constants are needed. For deve
 the previous section, one can find values of these in ~/openst-setup/config.json file.
 ```js
 // deployer address
-const deployerAddress = '0xc786cf11c514762ae6cb02dcd7e77500076ec9a0';
+const deployerAddress = '0xebf7e755ffa726621fe629d87efcc905668440ba';
 
 // organization address
-const organizationAddress = '0x9d717daa2efbeeaca383ffeda2c65baf31b6ad59';
+const organizationAddress = '0xd5f8b8732537487fa842d90afa4cbd3c93dc08bc';
 
 // wallet addresses
-const wallet1 = '0xfa21246b49146fa2b34d8c9dbcb36c944da5194f';
-const wallet2 = '0x857962440f978d94225aa06309045f2c4d1da943';
+const wallet1 = '0x4e6de4b3e4187e85c0afd4b3502a9f448f1ad6e2';
+const wallet2 = '0xd69228f40b9ad396a2e280619cd137b95367f7ff';
 
-const ephemeralKey = '0x8aef49773419525b667b98120e141b205ccc3ba1';
+const ephemeralKey = '0xd0dda870fc5cd2ad36208f52dde182523857b8a9';
 
-const facilitatorAddress = '0x18f57cfc1ce9ec053500314a483ea70a27f6824e';
+const facilitatorAddress = '0x216454eece25a64c1ce86da0066841a95f2b6fb6';
 
 // some other constants
 const passphrase = 'testtest';
@@ -122,8 +122,23 @@ const OpenST = require('./index.js');
 let openST = new OpenST(gethEndpoint);
 ```
 
-##### Add signer
+### Adding accounts
+One can add accounts to web3 wallet or to our custom signer service. You should do only one of these and not both.
 
+##### Add accounts to web3 wallet
+For adding to web3 wallet, there are 2 ways. We can add using the keystore file OR by private key. In detail documentation can be found here - https://web3js.readthedocs.io/en/1.0/web3-eth-accounts.html
+```js
+// fetch the web3 object to add to the wallet.
+let web3 = openST.web3Provider();
+
+// helper method for the developers to add account to wallet using keystore content.
+let addToWalletByKeystoreContent = function (keystoreContent, password) {
+  let account = web3.eth.accounts.decrypt(keystoreContent, password);
+  web3.eth.accounts.wallet.add(account);
+};
+```
+
+##### Add account to signer
 Signer service makes sure you don't have to unlock addresses everytime a transaction needs to be done.
 For this we need to register addresses to signer service. 
 
