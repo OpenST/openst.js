@@ -138,6 +138,12 @@ let addToWalletByKeystoreContent = function (keystoreContent, password) {
   let account = web3.eth.accounts.decrypt(keystoreContent, password);
   web3.eth.accounts.wallet.add(account);
 };
+addToWalletByKeystoreContent(deployerKeyStore, deployerPassphrase);
+addToWalletByKeystoreContent(organizationKeyStore, organizationPassphrase);
+addToWalletByKeystoreContent(wallet1KeyStore, wallet1Passphrase);
+addToWalletByKeystoreContent(wallet2KeyStore, wallet2Passphrase);
+addToWalletByKeystoreContent(ephemeralKeyKeyStore, ephemeralKeyPassphrase);
+addToWalletByKeystoreContent(facilitatorKeyStore, facilitatorPassphrase);
 ```
 
 ##### Add account to signer
