@@ -13,7 +13,7 @@ const ChainWeb3 = function() {
   Web3.call(oThis, provider);
 
   // Bind send method with signer.
-  oThis.bindSigner();
+  oThis.bindSignerService();
 };
 
 if (Web3.prototype) {

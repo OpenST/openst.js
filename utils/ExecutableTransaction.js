@@ -42,7 +42,7 @@ ExecutableTransaction.prototype = {
       { t: 'bytes', v: '0x' }
     );
     // configFileContent.ephemeralKey1 is signer here
-    await oThis.web3Provider.eth.personal.unlockAccount(oThis.signer, oThis.signerPassphrase);
+    // await oThis.web3Provider.eth.personal.unlockAccount(oThis.signer, oThis.signerPassphrase);
     let signature = await oThis.web3Provider.eth.sign(messageToBeSigned, oThis.signer);
     signature = signature.slice(2);
     let r = '0x' + signature.slice(0, 64),

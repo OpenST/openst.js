@@ -56,13 +56,7 @@ DeployContract.prototype = {
 
     let contractAddress = null;
 
-    // Temporary patch
-    if (instance.contractAddress) {
-      contractAddress = instance.contractAddress;
-      instance = new oThis.web3.eth.Contract(oThis.abi, contractAddress);
-    } else {
-      contractAddress = instance.options.address;
-    }
+    contractAddress = instance.options.address;
 
     // checking if the contract was deployed at all.
     const code = await oThis.web3.eth.getCode(contractAddress);
