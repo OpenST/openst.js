@@ -125,6 +125,8 @@ let openST = new OpenST(gethEndpoint);
 ### Adding accounts
 One can add accounts to web3 wallet or to our custom signer service. You should do only one of these and not both.
 
+Remember to add all of deployerAddress, organizationAddress, wallet1, wallet2, ephemeralKey and facilitatorAddress to use the functionality given in this readme. In general, add only those accounts which are being used in the transactions in your use cases.
+
 ##### Add accounts to web3 wallet
 For adding to web3 wallet, there are 2 ways. We can add using the keystore file OR by private key. In detail documentation can be found here - https://web3js.readthedocs.io/en/1.0/web3-eth-accounts.html
 ```js
