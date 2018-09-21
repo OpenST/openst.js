@@ -5,7 +5,6 @@ branches:
   only:
   - master
   - develop
-  - test-cases-init
 notifications:
   email:
     recipients:
