@@ -26,13 +26,13 @@ before_install:
 install:
   - npm install
   - npm install -g mocha
-  - mocha --timeout 120000 test/* --exit
 before_script:
   - echo 'inside before_script before sleep'
   - sleep 30
   - echo 'inside before_script after sleep'
 script:
   - node tools/initDevEnv.js
+  - mocha --timeout 120000 test/* --exit
 after_script:
   - echo 'inside after_script before sleep'
   - sleep 30
