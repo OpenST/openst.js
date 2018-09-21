@@ -58,7 +58,9 @@ GethChecker.prototype = {
         if (chainTimer['retryCounter'] <= retryAttempts) {
           provider.eth.getBlockNumber(function(err, blocknumber) {
             if (err) {
+              console.log('Error in getBlockNumber on endPoint', endPoint);
             } else {
+              console.log('getBlockNumber on endPoint', endPoint, 'returned block number =', blocknumber);
               if (chainTimer['blockNumber'] != 0 && chainTimer['blockNumber'] != blocknumber) {
                 console.log('* Geth Checker - endPoint ' + endPoint + ' has new blocks.');
                 clearInterval(chainTimer['timer']);

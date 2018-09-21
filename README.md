@@ -27,7 +27,7 @@ Below is overview of different components and their roles:
     
 - Install openst.js in your project
 
-  npm install https://github.com/OpenSTFoundation/openst.js#setup-mvp --save
+  npm install https://github.com/OpenSTFoundation/openst.js#develop --save
   
 - Geth Installation on mac machine  
 
@@ -68,7 +68,7 @@ of openst.js as described in the following sections.
 > Install npm packages
    
   cd openst.js
-  git checkout setup-mvp 
+  git checkout develop
   npm install
   
 > npm run init-dev-env
