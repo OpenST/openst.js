@@ -3,8 +3,10 @@
 const shell = require('shelljs'),
   BigNumber = require('bignumber.js'),
   fs = require('fs'),
+  path = require('path'),
   Web3 = require('web3'),
-  shellAsyncCmd = require('node-cmd');
+  shellAsyncCmd = require('node-cmd'),
+  program = require('commander');
 
 const setUpConfig = require('./config.js');
 
@@ -52,8 +54,6 @@ InitDevEnv.prototype = {
 
     // fund ETH
     await oThis._fundEth();
-
-    console.log('Dev env init DONE!');
   },
 
   _initConfigFile: function() {
@@ -287,16 +287,39 @@ InitDevEnv.prototype = {
 };
 
 // commander
-const os = require('os');
-new InitDevEnv({
-  setupRoot: os.homedir() + '/openst-setup' // later to come as argument for this script
-})
-  .perform()
-  .then(function() {
-    console.log('Exiting initDevEnv with exit code 0');
+(function() {
+  let defaultSetupPath = path.join(process.cwd(), './');
+  program
+    .version('0.1.0')
+    .usage(`<path_to_setup_directory> (default: ${defaultSetupPath})`)
+    .parse(process.argv);
+
+  let setupRoot = program.args[0] || defaultSetupPath;
+  setupRoot = path.resolve(setupRoot);
+
+  try {
+    let setupRootStats = fs.statSync(setupRoot);
+    if (!setupRootStats.isDirectory()) {
+      throw 'Invalid setup directory path.';
+    }
+  } catch (e) {
+    console.log(e.message);
     process.exit(0);
+  }
+
+  setupRoot = path.resolve(setupRoot, './openst-setup');
+  console.log('Creating openst-setup folder. path = ', setupRoot);
+
+  new InitDevEnv({
+    setupRoot: setupRoot
   })
-  .catch(function() {
-    console.log('Exiting initDevEnv with error');
-    process.exit(1);
-  });
+    .perform()
+    .then(function() {
+      console.log('openst-setup development environment setup is complete');
+      process.exit(0);
+    })
+    .catch(function(reason) {
+      console.log('openst-setup development environment setup could not be completed.');
+      process.exit(1);
+    });
+})();

@@ -13,9 +13,7 @@
     "url": "https://github.com/OpenSTFoundation/openst.js/issues"
   },
   "scripts": {
-    "pre-commit": "lint-staged",
-    "init-dev-env": "node ./tools/initDevEnv.js",
-    "init-economy": "node ./tools/initEconomy.js"
+    "pre-commit": "lint-staged"
   },
   "dependencies": {
     "bignumber.js": "4.1.0",
@@ -31,7 +29,8 @@
     "node-cmd": "3.0.0",
     "edit-json-file": "1.0.8",
     "chai": "4.1.2",
-    "mocha": "5.0.0"
+    "mocha": "5.0.0",
+    "commander": "2.8.1"
   },
   "pre-commit": [
     "pre-commit"

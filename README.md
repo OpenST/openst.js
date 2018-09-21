@@ -60,18 +60,20 @@ The below command creates a json file (~/openst-setup/config.json) having all th
 It also starts GETH process for the chain. This is meant for developer to get going directly and try out the functionality 
 of openst.js as described in the following sections.
 
-```
-> Clone openst.js
 
-    git clone git@github.com:OpenSTFoundation/openst.js.git
-    
-> Install npm packages
-   
-  cd openst.js
-  git checkout develop
-  npm install
-  
-> npm run init-dev-env
+###### Clone openst.js
+```
+git clone git@github.com:OpenSTFoundation/openst.js.git
+``` 
+###### Install npm packages
+```   
+cd openst.js
+git checkout develop
+npm install
+```
+###### Setup Development Environment
+```
+node ./tools/initDevEnv.js ~
 ```
     
 ##### Sample Constants
