@@ -45,8 +45,7 @@ InitDevEnv.prototype = {
     oThis._initGeth();
 
     // start services
-    let startWithZeroGas = true;
-    await oThis._startServices(startWithZeroGas);
+    await oThis._startServices();
 
     // geth checker
     await oThis._checkForServicesReady();
@@ -138,7 +137,7 @@ InitDevEnv.prototype = {
 
     //Create shell script
     let shellScriptPath = oThis.setupRoot + '/bin/run-chain.sh';
-    oThis._executeInShell('echo #!/bin/sh > ' + shellScriptPath);
+    oThis._executeInShell(`echo '#!/bin/sh' > ${shellScriptPath}`);
     oThis._executeInShell(`echo "${startCmd}" >> ${shellScriptPath}`);
 
     oThis.gethShellPath = shellScriptPath;
@@ -291,4 +290,13 @@ InitDevEnv.prototype = {
 const os = require('os');
 new InitDevEnv({
   setupRoot: os.homedir() + '/openst-setup' // later to come as argument for this script
-}).perform();
+})
+  .perform()
+  .then(function() {
+    console.log('Exiting initDevEnv with exit code 0');
+    process.exit(0);
+  })
+  .catch(function() {
+    console.log('Exiting initDevEnv with error');
+    process.exit(1);
+  });
