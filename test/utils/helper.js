@@ -2,10 +2,12 @@
 
 const os = require('os');
 
-const TestHelper = function () {};
+const TestHelper = function() {};
 
 TestHelper.prototype = {
-  configFilePath: os.homedir() + '/openst-setup/config.json'
+  configFilePath: os.homedir() + '/openst-setup/config.json',
+
+  gethDataDir: os.homedir() + '/openst-setup/origin-geth'
 };
 
 module.exports = new TestHelper();
