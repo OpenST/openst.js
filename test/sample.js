@@ -1,6 +1,6 @@
 /**
  *
- * Test for Approve Branded Token balance Service
+ * Sample Test
  *
  */
 
