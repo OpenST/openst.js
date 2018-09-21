@@ -26,6 +26,7 @@ before_install:
 install:
   - npm install
   - npm install -g mocha
+  - mocha --timeout 120000 test/* --exit
 before_script:
   - echo 'inside before_script before sleep'
   - sleep 30
