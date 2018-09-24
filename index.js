@@ -32,7 +32,7 @@ const OpenST = function(gethEndPoint) {
 
   oThis.contracts = oThis.ic().Contracts();
 
-  oThis.setup = oThis.ic().Setup();
+  oThis.Setup = oThis.ic().Setup();
 
   oThis.signers = oThis.ic().Signers();
 

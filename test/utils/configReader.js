@@ -4,7 +4,7 @@ const testHelper = require('./helper');
 
 let devEnvConfig = require(testHelper.configFilePath);
 
-const ConfigReader = function () {};
+const ConfigReader = function() {};
 
 ConfigReader.prototype = {
   deployerAddress: devEnvConfig.deployerAddress,
@@ -13,6 +13,7 @@ ConfigReader.prototype = {
   wallet2: devEnvConfig.wallet2,
   ephemeralKey: devEnvConfig.ephemeralKey1,
   facilitatorAddress: devEnvConfig.facilitator,
+  gethRpcEndPoint: devEnvConfig.gethRpcEndPoint,
   passphrase: 'testtest',
   gasPrice: '0x12A05F200',
   gasLimit: 4700000

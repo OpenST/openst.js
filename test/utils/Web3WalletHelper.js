@@ -30,9 +30,6 @@ Web3WalletHelper.prototype = {
 
       oThis.web3Object.eth.accounts.wallet.add(account);
     }
-
-    console.log('a', a);
-
     console.log('Web3 Wallet Account Add DONE!');
   }
 };

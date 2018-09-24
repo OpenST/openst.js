@@ -1,13 +1,19 @@
 'use strict';
 
-const os = require('os');
+const TestHelper = function(homeDir) {
+  const oThis = this;
 
-const TestHelper = function() {};
+  oThis.homeDir = homeDir;
 
-TestHelper.prototype = {
-  configFilePath: os.homedir() + '/openst-setup/config.json',
-
-  gethDataDir: os.homedir() + '/openst-setup/origin-geth'
+  oThis.configFilePath = homeDir + '/openst-setup/config.json';
+  oThis.gethDataDir = homeDir + '/openst-setup/origin-geth';
 };
 
-module.exports = new TestHelper();
+TestHelper.prototype = {
+  constructor: TestHelper,
+  configFilePath: null,
+  gethDataDir: null
+};
+
+const os = require('os');
+module.exports = new TestHelper(os.homedir());
