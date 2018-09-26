@@ -1,6 +1,7 @@
 'use strict';
 
 const Web3 = require('web3');
+require('../providers/Web3EthAccountsEIP191');
 const signerServiceBinder = require('../providers/signerServiceBinder');
 const InstanceComposer = require('../instance_composer');
 

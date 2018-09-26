@@ -16,7 +16,8 @@ let openST,
   erc20TokenContractAddress,
   tokenRulesContractAddress,
   tokenHolderContractAddress,
-  sampleCustomRuleContractAddress;
+  sampleCustomRuleContractAddress,
+  ephemeralKeyAccount;
 
 let authorizeSession = async function(openST, tokenHolderAddress, ephemeralKey, wallets) {
   const BigNumber = require('bignumber.js');
@@ -26,32 +27,56 @@ let authorizeSession = async function(openST, tokenHolderAddress, ephemeralKey, 
 
   let tokenHolder = new openST.contracts.TokenHolder(tokenHolderAddress);
 
-  let len = wallets.length;
+  let len = wallets.length - 1;
+
+  let currWallet = wallets[len];
+
+  console.log('* submitAuthorizeSession from wallet:', currWallet);
+  // Authorize an ephemeral public key
+  let submitAuthorizeSession1Response = await tokenHolder
+    .submitAuthorizeSession(ephemeralKey, spendingLimit, expirationHeight)
+    .send({
+      from: currWallet,
+      gasPrice: config.gasPrice,
+      gas: config.gasLimit
+    });
+
+  assert.isOk(
+    submitAuthorizeSession1Response.events.SessionAuthorizationSubmitted,
+    'SessionAuthorizationSubmitted event not obtained.'
+  );
+
+  console.log('** SessionAuthorizationSubmitted event obtained.');
+
+  assert.isOk(submitAuthorizeSession1Response.events.TransactionConfirmed, 'TransactionConfirmed event not obtained.');
+
+  console.log('** TransactionConfirmed event obtained.');
+
+  let transactionId = submitAuthorizeSession1Response.events.SessionAuthorizationSubmitted.returnValues._transactionId;
+
+  console.log('transactionId:', transactionId);
 
   while (len--) {
     let currWallet = wallets[len];
 
-    // Authorize an ephemeral public key
-    let authorizeSession1Response = await tokenHolder
-      .authorizeSession(ephemeralKey, spendingLimit, expirationHeight)
-      .send({
-        from: currWallet,
-        gasPrice: config.gasPrice,
-        gas: config.gasLimit
-      });
+    console.log('* confirmTransaction from wallet:', currWallet);
 
-    console.log(
-      'authorizeSession: {from: ',
-      currWallet,
-      ', response: ',
-      JSON.stringify(authorizeSession1Response, null),
-      '}'
-    );
+    // Authorize an ephemeral public key
+    let confirmTransactionResponse = await tokenHolder.confirmTransaction(transactionId).send({
+      from: currWallet,
+      gasPrice: config.gasPrice,
+      gas: config.gasLimit
+    });
+
+    assert.isOk(confirmTransactionResponse.events.TransactionConfirmed, 'TransactionConfirmed event not obtained.');
+
+    console.log('** TransactionConfirmed event obtained.');
   }
 
-  let isAuthorizedEphemeralKeyResponse = await tokenHolder.isAuthorizedEphemeralKey(ephemeralKey).call({});
+  let isEphemeralKeyActiveResponse = await tokenHolder.isEphemeralKeyActive(ephemeralKey).call({});
 
-  console.log('isAuthorizedEphemeralKey:', isAuthorizedEphemeralKeyResponse);
+  assert.isTrue(isEphemeralKeyActiveResponse, 'isEphemeralKeyActive response not true');
+  console.log('** Ephemeral key', ephemeralKey, 'is active.');
 };
 
 let fundERC20Tokens = async function(openST, erc20TokenContractAddress, tokenHolderContractAddress) {
@@ -69,17 +94,32 @@ let fundERC20Tokens = async function(openST, erc20TokenContractAddress, tokenHol
   });
 };
 
-let registerRule = async function(openST, tokenRulesContractAddress, ruleName, ruleContractAddress) {
+let registerRule = async function(openST, tokenRulesContractAddress, ruleName, ruleContractAddress, ruleAbi) {
+  ruleAbi = ruleAbi || 'a';
+
   let tokenRules = new openST.contracts.TokenRules(tokenRulesContractAddress);
 
-  return tokenRules.registerRule(ruleName, ruleContractAddress).send({
+  console.log('* registerRule with _ruleName:', ruleName, '_ruleAddress:', ruleContractAddress, '_ruleAbi:', ruleAbi);
+
+  let registerRuleResponse = await tokenRules.registerRule(ruleName, ruleContractAddress, ruleAbi).send({
     from: config.organizationAddress,
     gasPrice: config.gasPrice,
     gas: config.gasLimit
   });
+
+  assert.isOk(registerRuleResponse.events.RuleRegistered, 'RuleRegistered event not obtained.');
+
+  console.log('** RuleRegistered event obtained.');
 };
 
-let executeSampleRule = async function(openST, ruleContractAddress, tokenHolderAddress, ephemeralKey) {
+let executeSampleRule = async function(
+  openST,
+  ruleContractAddress,
+  tokenHolderAddress,
+  ephemeralKeyAccount,
+  ephemeralKey,
+  ephemeralKeyPrivateKey
+) {
   const BigNumber = require('bignumber.js');
   let tokenHolder = new openST.contracts.TokenHolder(tokenHolderAddress),
     amountToTransfer = new BigNumber(100);
@@ -87,6 +127,7 @@ let executeSampleRule = async function(openST, ruleContractAddress, tokenHolderA
   let transferRuleAbi = abis.sampleCustomRule;
   let transferRule = new (openST.web3()).eth.Contract(transferRuleAbi, ruleContractAddress);
 
+  // TODO:: transferRule obj to be prepared in a different way
   let methodEncodedAbi = await transferRule.methods
     .transferFrom(tokenHolderAddress, '0x66d0be510f3cac64f30eea359bda39717569ea4b', amountToTransfer.toString(10))
     .encodeABI();
@@ -96,28 +137,49 @@ let executeSampleRule = async function(openST, ruleContractAddress, tokenHolderA
     tokenHolderContractAddress: tokenHolderAddress,
     ruleContractAddress: ruleContractAddress,
     methodEncodedAbi: methodEncodedAbi,
-    signer: ephemeralKey,
-    signerPassphrase: 'dummy',
+    ephemeralKeyAddress: ephemeralKey,
     tokenHolderInstance: tokenHolder
   });
-  let executableTransactionData = await executableTransactionObject.get();
 
-  return tokenHolder
+  let keyNonce = await executableTransactionObject.getNonce();
+  console.log('keyNonce', keyNonce);
+
+  let web3 = openST.web3();
+  let callPrefix = await tokenHolder.EXECUTE_RULE_CALLPREFIX().call({});
+
+  console.log('testcase callPrefix', callPrefix);
+  let eip1077SignedData = ephemeralKeyAccount.signEIP1077Transaction({
+    from: tokenHolderAddress,
+    to: ruleContractAddress,
+    value: 0,
+    gasPrice: 0,
+    gas: 0,
+    data: methodEncodedAbi,
+    nonce: keyNonce,
+    callPrefix: callPrefix
+  });
+  console.log('eip1077SignedData (ephemeralKeyAccount.signEIP1077Transaction)', eip1077SignedData);
+
+  //Sign the data and put it in executableTransactionData.
+  // let executableTransactionData =
+
+  let executeRuleResponse = await tokenHolder
     .executeRule(
-      tokenHolderAddress,
       ruleContractAddress,
-      executableTransactionData.ephemeralKeyNonce,
       methodEncodedAbi,
-      executableTransactionData.callPrefix,
-      executableTransactionData.v,
-      executableTransactionData.r,
-      executableTransactionData.s
+      keyNonce,
+      eip1077SignedData.v,
+      eip1077SignedData.r,
+      eip1077SignedData.s
     )
     .send({
       from: config.facilitatorAddress,
       gasPrice: config.gasPrice,
       gas: config.gasLimit
     });
+
+  // TODO - assert for event received
+  return;
 };
 
 let checkBalance = async function(openST, erc20TokenContractAddress, address) {
@@ -160,15 +222,16 @@ describe('test/sampleRuleExecute', function() {
     console.log('* Deploying Token Holder Contract');
     let tokenHolderDeployReceipt = await setup.deployTokenHolder(
       erc20TokenContractAddress,
-      erc20TokenContractAddress, // this will be coGateway contract address. passing dummy value for now.
       tokenRulesContractAddress,
       requirement,
       wallets
     );
     tokenHolderContractAddress = tokenHolderDeployReceipt.contractAddress;
 
-    console.log('* Authorize session called');
-    await authorizeSession(openST, tokenHolderContractAddress, config.ephemeralKey, wallets);
+    // create a ephemeralKey
+    ephemeralKeyAccount = openST.web3().eth.accounts.create();
+
+    await authorizeSession(openST, tokenHolderContractAddress, ephemeralKeyAccount.address, wallets);
 
     console.log('* Funding ERC20 tokens from deployer address');
     await fundERC20Tokens(openST, erc20TokenContractAddress, tokenHolderContractAddress);
@@ -185,7 +248,14 @@ describe('test/sampleRuleExecute', function() {
     let beforeBalance = await checkBalance(openST, erc20TokenContractAddress, tokenHolderContractAddress);
 
     console.log('* Execute Sample Custom Rule');
-    await executeSampleRule(openST, sampleCustomRuleContractAddress, tokenHolderContractAddress, config.ephemeralKey);
+    await executeSampleRule(
+      openST,
+      sampleCustomRuleContractAddress,
+      tokenHolderContractAddress,
+      ephemeralKeyAccount,
+      ephemeralKeyAccount.address,
+      ephemeralKeyAccount.privateKey
+    );
 
     let afterBalance = await checkBalance(openST, erc20TokenContractAddress, tokenHolderContractAddress);
 

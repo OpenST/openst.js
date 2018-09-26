@@ -21,16 +21,32 @@ Web3WalletHelper.prototype = {
 
     let items = fs.readdirSync(keystoreFolder);
 
-    for (let i = 0; i < items.length; i++) {
-      let fileContent = fs.readFileSync(keystoreFolder + '/' + items[i], 'utf8');
+    return new Promise(function(resolve, reject) {
+      let resolved = items.length,
+        isRejected = false;
+      for (let i = 0; i < items.length; i++) {
+        fs.readFile(keystoreFolder + '/' + items[i], 'utf8', function(err, fileContent) {
+          if (err) {
+            isRejected = true;
+            reject(err);
+          }
 
-      let account = oThis.web3Object.eth.accounts.decrypt(fileContent, passphrase);
+          if (isRejected) {
+            return;
+          }
 
-      console.log('account', account);
-
-      oThis.web3Object.eth.accounts.wallet.add(account);
-    }
-    console.log('Web3 Wallet Account Add DONE!');
+          let account = oThis.web3Object.eth.accounts.decrypt(fileContent, passphrase);
+          console.log('account', account);
+          oThis.web3Object.eth.accounts.wallet.add(account);
+          resolved--;
+          if (!resolved) {
+            //All are done.
+            console.log('Web3 Wallet Account Add DONE!');
+            resolve();
+          }
+        });
+      }
+    });
   }
 };
 
