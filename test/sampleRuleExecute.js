@@ -168,8 +168,6 @@ let executeSampleRule = async function(openST, tokenRulesContractAddress, tokenH
       gas: config.gasLimit
     });
 
-  console.log('executeRuleResponse\n', JSON.stringify(executeRuleResponse, null, 2));
-
   assert.isOk(executeRuleResponse.events.RuleExecuted, 'RuleExecuted event not obtained.');
 
   console.log('** RuleExecuted event obtained.');
