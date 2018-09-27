@@ -36,7 +36,6 @@ Web3WalletHelper.prototype = {
           }
 
           let account = oThis.web3Object.eth.accounts.decrypt(fileContent, passphrase);
-          console.log('account', account);
           oThis.web3Object.eth.accounts.wallet.add(account);
           resolved--;
           if (!resolved) {

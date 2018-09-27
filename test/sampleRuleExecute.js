@@ -4,8 +4,7 @@
 
 // Load external packages
 const chai = require('chai'),
-  assert = chai.assert,
-  fs = require('fs');
+  assert = chai.assert;
 
 const config = require('../test/utils/configReader'),
   abis = require('../test/utils/abis'),
@@ -18,6 +17,8 @@ let openST,
   tokenHolderContractAddress,
   sampleCustomRuleContractAddress,
   ephemeralKeyAccount;
+
+const ruleName = 'transferFrom';
 
 let authorizeSession = async function(openST, tokenHolderAddress, ephemeralKey, wallets) {
   const BigNumber = require('bignumber.js');
@@ -95,7 +96,7 @@ let fundERC20Tokens = async function(openST, erc20TokenContractAddress, tokenHol
 };
 
 let registerRule = async function(openST, tokenRulesContractAddress, ruleName, ruleContractAddress, ruleAbi) {
-  ruleAbi = ruleAbi || 'a';
+  ruleAbi = JSON.stringify(ruleAbi);
 
   let tokenRules = new openST.contracts.TokenRules(tokenRulesContractAddress);
 
@@ -112,22 +113,27 @@ let registerRule = async function(openST, tokenRulesContractAddress, ruleName, r
   console.log('** RuleRegistered event obtained.');
 };
 
-let executeSampleRule = async function(
-  openST,
-  ruleContractAddress,
-  tokenHolderAddress,
-  ephemeralKeyAccount,
-  ephemeralKey,
-  ephemeralKeyPrivateKey
-) {
+let executeSampleRule = async function(openST, tokenRulesContractAddress, tokenHolderAddress, ephemeralKeyAccount) {
   const BigNumber = require('bignumber.js');
+
+  let ephemeralKey = ephemeralKeyAccount.address;
+
   let tokenHolder = new openST.contracts.TokenHolder(tokenHolderAddress),
     amountToTransfer = new BigNumber(100);
 
-  let transferRuleAbi = abis.sampleCustomRule;
+  let tokenRules = new openST.contracts.TokenRules(tokenRulesContractAddress);
+
+  let ruleNameHash = openST.web3().utils.soliditySha3(ruleName);
+  let rulesByNameHashResult = await tokenRules.rulesByNameHash(ruleNameHash).call({});
+
+  let ruleIndex = rulesByNameHashResult.index;
+  let ruleStruct = await tokenRules.rules(ruleIndex).call({});
+
+  let transferRuleAbi = JSON.parse(ruleStruct.ruleAbi);
+  let ruleContractAddress = ruleStruct.ruleAddress;
+
   let transferRule = new (openST.web3()).eth.Contract(transferRuleAbi, ruleContractAddress);
 
-  // TODO:: transferRule obj to be prepared in a different way
   let methodEncodedAbi = await transferRule.methods
     .transferFrom(tokenHolderAddress, '0x66d0be510f3cac64f30eea359bda39717569ea4b', amountToTransfer.toString(10))
     .encodeABI();
@@ -141,13 +147,14 @@ let executeSampleRule = async function(
     tokenHolderInstance: tokenHolder
   });
 
+  console.log('ephemeralKeyAccount', ephemeralKeyAccount);
+
   let keyNonce = await executableTransactionObject.getNonce();
   console.log('keyNonce', keyNonce);
 
   let web3 = openST.web3();
   let callPrefix = await tokenHolder.EXECUTE_RULE_CALLPREFIX().call({});
 
-  console.log('testcase callPrefix', callPrefix);
   let eip1077SignedData = ephemeralKeyAccount.signEIP1077Transaction({
     from: tokenHolderAddress,
     to: ruleContractAddress,
@@ -158,10 +165,6 @@ let executeSampleRule = async function(
     nonce: keyNonce,
     callPrefix: callPrefix
   });
-  console.log('eip1077SignedData (ephemeralKeyAccount.signEIP1077Transaction)', eip1077SignedData);
-
-  //Sign the data and put it in executableTransactionData.
-  // let executableTransactionData =
 
   let executeRuleResponse = await tokenHolder
     .executeRule(
@@ -179,8 +182,15 @@ let executeSampleRule = async function(
     });
 
   console.log('executeRuleResponse\n', JSON.stringify(executeRuleResponse, null, 2));
-  // TODO - assert for event received
-  return;
+
+  assert.isOk(executeRuleResponse.events.RuleExecuted, 'RuleExecuted event not obtained.');
+
+  console.log('** RuleExecuted event obtained.');
+
+  assert.isOk(executeRuleResponse.events.RuleExecuted.returnValues._status, 'Rule Executed with status false.');
+  console.log('** Rule executed with status true.');
+
+  console.log(executeRuleResponse.events.RuleExecuted.returnValues._status);
 };
 
 let checkBalance = async function(openST, erc20TokenContractAddress, address) {
@@ -243,28 +253,34 @@ describe('test/sampleRuleExecute', function() {
     sampleCustomRuleContractAddress = sampleCustomRuleDeployReceipt.contractAddress;
 
     console.log('* Registering Sample Custom Rule');
-    await registerRule(openST, tokenRulesContractAddress, 'transferFrom', sampleCustomRuleContractAddress);
+    await registerRule(
+      openST,
+      tokenRulesContractAddress,
+      ruleName,
+      sampleCustomRuleContractAddress,
+      abis.sampleCustomRule
+    );
   });
 
   it('Execute Sample Custom Rule', async function() {
     let beforeBalance = await checkBalance(openST, erc20TokenContractAddress, tokenHolderContractAddress);
 
     console.log('* Execute Sample Custom Rule');
-    await executeSampleRule(
-      openST,
-      sampleCustomRuleContractAddress,
-      tokenHolderContractAddress,
-      ephemeralKeyAccount,
-      ephemeralKeyAccount.address,
-      ephemeralKeyAccount.privateKey
-    );
+    await executeSampleRule(openST, tokenRulesContractAddress, tokenHolderContractAddress, ephemeralKeyAccount);
 
+    console.log('* Confirming change in balance of token holder contract');
     let afterBalance = await checkBalance(openST, erc20TokenContractAddress, tokenHolderContractAddress);
 
     const BigNumber = require('bignumber.js');
     let beforeBalanceBn = new BigNumber(beforeBalance);
     let afterBalanceBn = new BigNumber(afterBalance);
 
-    assert.equal(beforeBalanceBn.minus(afterBalanceBn).toString(10), '100');
+    assert.equal(
+      beforeBalanceBn.minus(afterBalanceBn).toString(10),
+      '100',
+      'Token transfer verification using before and after balance failed.'
+    );
+
+    console.log('** Token transfer verification using before and after balance succeeded.');
   });
 });
