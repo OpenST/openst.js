@@ -9,32 +9,8 @@ const _ = require('underscore'),
 
 const DEBUG = false;
 
-Accounts.prototype.signEIP1077Transaction = function(transaction, privateKey, callback, version) {
-  /** EIP1077
- keccak256(
-   byte(0x19), // Will be taken care by hashEIP191Message
-   byte(0), // Will be taken care by hashEIP191Message
-   from,
-   to,
-   value,
-   dataHash,
-   nonce,
-   gasPrice,
-   gas,
-   gasToken,
-   callPrefix,
-   operationType,
-   extraHash
- );
- **/
-
+utils.toEIP1077TransactionHash = (transaction, version) => {
   transaction = helpers.formatters.inputCallFormatter(transaction);
-
-  if (transaction.nonce < 0 || transaction.gas < 0 || transaction.gasPrice < 0) {
-    error = new Error('Gas, gasPrice or nonce is lower than 0');
-    callback && callback(error);
-    throw error;
-  }
 
   transaction.value = utils.toBN(transaction.value || '0').toString();
   transaction.gasPrice = utils.toBN(transaction.gasPrice || '0').toString();
@@ -42,7 +18,6 @@ Accounts.prototype.signEIP1077Transaction = function(transaction, privateKey, ca
   transaction.gasToken = utils.toBN(transaction.gasToken || '0').toString();
   transaction.operationType = utils.toBN(transaction.operationType || '0').toString();
   transaction.nonce = utils.toBN(transaction.nonce || '0').toString();
-
   transaction.to = transaction.to || '0x';
   transaction.data = transaction.data || '0x';
   transaction.extraHash = transaction.extraHash || '0x00';
@@ -81,16 +56,33 @@ Accounts.prototype.signEIP1077Transaction = function(transaction, privateKey, ca
     { t: 'uint8', v: transaction.operationType }, //operationType
     { t: 'bytes32', v: transaction.extraHash }
   );
+  return txHash;
+};
 
-  let signature = Account.sign(txHash, privateKey);
-  let vrs = Account.decodeSignature(signature);
-  let result = {
-    messageHash: txHash,
-    v: vrs[0],
-    r: vrs[1],
-    s: vrs[2],
-    signature: signature
-  };
+Accounts.prototype.signEIP1077Transaction = (transaction, privateKey, callback, version) => {
+  if (transaction.nonce < 0 || transaction.gas < 0 || transaction.gasPrice < 0) {
+    let error = new Error('Gas, gasPrice or nonce is lower than 0');
+    callback && callback(error);
+    throw error;
+  }
+
+  let result;
+  try {
+    let txHash = utils.toEIP1077TransactionHash(transaction, version);
+    let signature = Account.sign(txHash, privateKey);
+    let vrs = Account.decodeSignature(signature);
+    result = {
+      messageHash: txHash,
+      v: vrs[0],
+      r: vrs[1],
+      s: vrs[2],
+      signature: signature
+    };
+  } catch (error) {
+    callback && callback(error);
+    throw error;
+  }
+
   callback && callback(null, result);
   return result;
 };

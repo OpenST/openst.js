@@ -6,18 +6,27 @@
 
 const InstanceComposer = require('./instance_composer');
 const version = require('./package.json').version;
+const SignEIP1077Extension = require('./utils/SignEIP1077Extension');
+const abiBinProvider = require('./utils/abiBinProvider');
 
-require('./providers/ChainWeb3');
+require('./lib/providers/web3/ChainWeb3');
 require('./lib/Signers');
 require('./lib/Deployer');
 require('./lib/Contracts');
 
-const OpenST = function(gethEndPoint) {
+const OpenST = function(provider, net) {
   const oThis = this;
-
   oThis.version = version;
 
-  oThis.configurations = Object.assign({}, { gethEndPoint: gethEndPoint });
+  oThis.configurations = Object.assign(
+    {},
+    {
+      web3Provider: provider,
+      web3Net: net
+    }
+  );
+
+  InstanceComposer.registerObject(abiBinProvider, 'abiBinProvider');
 
   const _instanceComposer = new InstanceComposer(oThis.configurations);
 
@@ -45,7 +54,8 @@ OpenST.prototype = {
 };
 
 OpenST.utils = {
-  GethSignerService: require('./utils/GethSignerService')
+  GethSignerService: require('./utils/GethSignerService'),
+  abiBinProvider: abiBinProvider
 };
 
 module.exports = OpenST;

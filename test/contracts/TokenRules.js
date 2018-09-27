@@ -16,7 +16,8 @@ let openST,
   tokenRulesContractAddress,
   tokenHolderContractAddress,
   sampleCustomRuleContractAddress,
-  ephemeralKeyAccount;
+  ephemeralKeyAccount,
+  deployer;
 
 const ruleName = 'transferFrom';
 
@@ -39,7 +40,7 @@ let registerRule = async function(openST, tokenRulesContractAddress, ruleName, r
 };
 
 // Load cache service
-describe('test/sampleRuleExecute', function() {
+describe('test/TokenRules', function() {
   before(async function() {
     // Creating object of OpenST
     const OpenST = require('../../index.js');
@@ -55,33 +56,63 @@ describe('test/sampleRuleExecute', function() {
     let web3WalletHelper = new Web3WalletHelper(openST.web3());
     await web3WalletHelper.init();
 
-    let deployer = new openST.Deployer(deployParams);
+    deployer = new openST.Deployer(deployParams);
     // deploy ERC20
     console.log('* Deploying ERC20 Token');
     let erc20DeployReceipt = await deployer.deployERC20Token();
     erc20TokenContractAddress = erc20DeployReceipt.contractAddress;
-
-    // deploy TokenRules
-    console.log('* Deploying TokenRules');
-    let tokenRulesDeployReceipt = await deployer.deployTokenRules(
-      config.organizationAddress,
-      erc20TokenContractAddress
-    );
-    tokenRulesContractAddress = tokenRulesDeployReceipt.contractAddress;
-
-    console.log('* Deploying Sample Custom Rule');
-    let sampleCustomRuleDeployReceipt = await deployer.deploySimpleTransferRule(tokenRulesContractAddress);
-    sampleCustomRuleContractAddress = sampleCustomRuleDeployReceipt.contractAddress;
   });
 
-  it('Register Rule', async function() {
-    console.log('* Registering Sample Custom Rule');
-    await registerRule(
-      openST,
-      tokenRulesContractAddress,
-      ruleName,
-      sampleCustomRuleContractAddress,
-      abis.sampleCustomRule
-    );
-  });
+  //All Auto Generated Code needs to be tested more than once as prototype
+  //of the class is being manipulated during construction of the instance.
+  let noOfInstances = 2;
+
+  while (noOfInstances--) {
+    let descPostFix = noOfInstances ? '' : '(retest with new instance)';
+    it(`it should deploy TokenRules ${descPostFix}`, () => {
+      return deployer
+        .deployTokenRules(config.organizationAddress, erc20TokenContractAddress)
+        .then((tokenRulesDeployReceipt) => {
+          tokenRulesContractAddress = tokenRulesDeployReceipt.contractAddress;
+        });
+    });
+
+    it(`should deploy sample custom rule ${descPostFix}`, () => {
+      return deployer.deploySimpleTransferRule(tokenRulesContractAddress).then((sampleCustomRuleDeployReceipt) => {
+        sampleCustomRuleContractAddress = sampleCustomRuleDeployReceipt.contractAddress;
+      });
+    });
+
+    it(`it should register rule ${descPostFix}`, () => {
+      return registerRule(
+        openST,
+        tokenRulesContractAddress,
+        ruleName,
+        sampleCustomRuleContractAddress,
+        abis.sampleCustomRule
+      );
+    });
+
+    it(`it should fail to register rule with same name and address ${descPostFix}`, () => {
+      let isSuccessfull = false;
+      return registerRule(
+        openST,
+        tokenRulesContractAddress,
+        ruleName,
+        sampleCustomRuleContractAddress,
+        abis.sampleCustomRule
+      )
+        .then((receipt) => {
+          //Registeration was sucessfull.
+          isSuccessfull = true;
+          return Promise.reject(receipt);
+        })
+        .catch((reason) => {
+          if (isSuccessfull) {
+            return Promise.reject(reason);
+          }
+          Promise.resolve();
+        });
+    });
+  }
 });

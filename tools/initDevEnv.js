@@ -14,7 +14,7 @@ const gethFolder = setUpConfig.chain.gethFolder,
   passphrase = 'testtest',
   hexStartsWith = '0x',
   passwordFilePath = gethFolder + '/pwd',
-  etherToWeiCinversion = new BigNumber(1000000000000000000);
+  etherToWeiCinversion = new BigNumber('1000000000000000000');
 
 const InitDevEnv = function(params) {
   const oThis = this;
@@ -173,7 +173,7 @@ InitDevEnv.prototype = {
 
     let senderAddr = configFileContent.chainOwnerAddress,
       web3Instance = new Web3(oThis._rpcEndpoint()),
-      amount = '100000000000000000000';
+      amount = '1000000000000000000000';
 
     let ethRecipients = [
       'workerAddress',
