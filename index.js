@@ -9,7 +9,7 @@ const version = require('./package.json').version;
 
 require('./providers/ChainWeb3');
 require('./lib/Signers');
-require('./lib/Setup');
+require('./lib/Deployer');
 require('./lib/Contracts');
 
 const OpenST = function(gethEndPoint) {
@@ -32,7 +32,7 @@ const OpenST = function(gethEndPoint) {
 
   oThis.contracts = oThis.ic().Contracts();
 
-  oThis.Setup = oThis.ic().Setup();
+  oThis.Deployer = oThis.ic().Deployer();
 
   oThis.signers = oThis.ic().Signers();
 

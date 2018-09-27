@@ -65,7 +65,7 @@ InitDevEnv.prototype = {
     oThis._addConfig({
       chainId: setUpConfig.chain.chainId,
       networkId: setUpConfig.chain.networkId,
-      gasLimit: setUpConfig.chain.gasLimit,
+      gas: setUpConfig.chain.gas,
       gasPrice: setUpConfig.chain.gasprice,
       gethRpcEndPoint: oThis._rpcEndpoint(),
       gethWsEndPoint: oThis._wsEndpoint()
@@ -95,7 +95,7 @@ InitDevEnv.prototype = {
       setUpConfig.chain.chainId,
       chainOwnerAddress,
       setUpConfig.chain.allocAmount,
-      setUpConfig.chain.gasLimit,
+      setUpConfig.chain.gas,
       setUpConfig.chain.genesisFileTemplatePath,
       setUpConfig.chain.genesisFilePath
     );
@@ -123,7 +123,7 @@ InitDevEnv.prototype = {
       `geth --datadir '${gethFolder}'` +
       ` --networkid ${setUpConfig.chain.networkId}` +
       ` --port ${setUpConfig.chain.geth.port}` +
-      ` --mine --minerthreads 1 --targetgaslimit ${setUpConfig.chain.gasLimit} --gasprice 0x3B9ACA00` +
+      ` --mine --minerthreads 1 --targetgaslimit ${setUpConfig.chain.gas} --gasprice 0x3B9ACA00` +
       ` --rpc --rpcapi eth,net,web3,personal,txpool --rpcaddr ${setUpConfig.chain.geth.host} --rpcport ${
         setUpConfig.chain.geth.rpcport
       }` +
@@ -205,7 +205,7 @@ InitDevEnv.prototype = {
         to: recipient,
         value: amount,
         gasPrice: setUpConfig.chain.gasprice,
-        gas: setUpConfig.chain.gasLimit
+        gas: setUpConfig.chain.gas
       });
     });
   },
@@ -226,7 +226,7 @@ InitDevEnv.prototype = {
     chainId,
     allocAmountToAddress,
     allocAmount,
-    gasLimit,
+    gas,
     chainGenesisTemplateLocation,
     chainGenesisLocation,
     sealerAddress
@@ -245,8 +245,8 @@ InitDevEnv.prototype = {
     fileContent.config.chainId = chainId;
 
     // set gas limit
-    let bnGasLimit = new BigNumber(gasLimit);
-    fileContent.gasLimit = hexStartsWith + bnGasLimit.toString(16);
+    let bnGas = new BigNumber(gas);
+    fileContent.gas = hexStartsWith + bnGas.toString(16);
 
     console.log(JSON.stringify(fileContent));
 

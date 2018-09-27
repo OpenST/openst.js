@@ -15,7 +15,7 @@ DeployContract.prototype = {
     const oThis = this;
 
     let txOptions = {
-      from: oThis.deployerAddress,
+      from: oThis.from,
       gas: oThis.gas,
       gasPrice: oThis.gasPrice
     };

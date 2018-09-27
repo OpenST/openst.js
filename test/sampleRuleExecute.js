@@ -39,7 +39,7 @@ let authorizeSession = async function(openST, tokenHolderAddress, ephemeralKey, 
     .send({
       from: currWallet,
       gasPrice: config.gasPrice,
-      gas: config.gasLimit
+      gas: config.gas
     });
 
   assert.isOk(
@@ -64,7 +64,7 @@ let authorizeSession = async function(openST, tokenHolderAddress, ephemeralKey, 
     let confirmTransactionResponse = await tokenHolder.confirmTransaction(transactionId).send({
       from: currWallet,
       gasPrice: config.gasPrice,
-      gas: config.gasLimit
+      gas: config.gas
     });
 
     assert.isOk(confirmTransactionResponse.events.TransactionConfirmed, 'TransactionConfirmed event not obtained.');
@@ -89,7 +89,7 @@ let fundERC20Tokens = async function(openST, erc20TokenContractAddress, tokenHol
   return mockToken.methods.transfer(tokenHolderContractAddress, amountToTransfer.toString(10)).send({
     from: config.deployerAddress,
     gasPrice: config.gasPrice,
-    gas: config.gasLimit
+    gas: config.gas
   });
 };
 
@@ -103,7 +103,7 @@ let registerRule = async function(openST, tokenRulesContractAddress, ruleName, r
   let registerRuleResponse = await tokenRules.registerRule(ruleName, ruleContractAddress, ruleAbi).send({
     from: config.organizationAddress,
     gasPrice: config.gasPrice,
-    gas: config.gasLimit
+    gas: config.gas
   });
 
   assert.isOk(registerRuleResponse.events.RuleRegistered, 'RuleRegistered event not obtained.');
@@ -136,7 +136,7 @@ let executeSampleRule = async function(openST, tokenRulesContractAddress, tokenH
     .transferFrom(tokenHolderAddress, '0x66d0be510f3cac64f30eea359bda39717569ea4b', amountToTransfer.toString(10))
     .encodeABI();
 
-  console.log('ephemeralKeyAccount', ephemeralKeyAccount);
+  console.log('ephemeralKey', ephemeralKey);
   console.log('keyNonce', keyNonce);
 
   let web3 = openST.web3();
@@ -165,7 +165,7 @@ let executeSampleRule = async function(openST, tokenRulesContractAddress, tokenH
     .send({
       from: config.facilitatorAddress,
       gasPrice: config.gasPrice,
-      gas: config.gasLimit
+      gas: config.gas
     });
 
   assert.isOk(executeRuleResponse.events.RuleExecuted, 'RuleExecuted event not obtained.');
@@ -189,25 +189,27 @@ describe('test/sampleRuleExecute', function() {
     openST = new OpenST(config.gethRpcEndPoint);
 
     deployParams = {
-      deployerAddress: config.deployerAddress,
-      deployerPassphrase: config.passphrase,
+      from: config.deployerAddress,
       gasPrice: config.gasPrice,
-      gasLimit: config.gasLimit
+      gas: config.gas
     };
 
     // adding the addresses to the web3 wallet
     let web3WalletHelper = new Web3WalletHelper(openST.web3());
     await web3WalletHelper.init();
 
-    let setup = new openST.Setup(deployParams);
+    let deployer = new openST.Deployer(deployParams);
     // deploy ERC20
     console.log('* Deploying ERC20 Token');
-    let erc20DeployReceipt = await setup.deployERC20Token();
+    let erc20DeployReceipt = await deployer.deployERC20Token();
     erc20TokenContractAddress = erc20DeployReceipt.contractAddress;
 
     // deploy TokenRules
     console.log('* Deploying TokenRules');
-    let tokenRulesDeployReceipt = await setup.deployTokenRules(config.organizationAddress, erc20TokenContractAddress);
+    let tokenRulesDeployReceipt = await deployer.deployTokenRules(
+      config.organizationAddress,
+      erc20TokenContractAddress
+    );
     tokenRulesContractAddress = tokenRulesDeployReceipt.contractAddress;
 
     // deploy TokenHolder
@@ -215,7 +217,7 @@ describe('test/sampleRuleExecute', function() {
     let requirement = wallets.length;
 
     console.log('* Deploying Token Holder Contract');
-    let tokenHolderDeployReceipt = await setup.deployTokenHolder(
+    let tokenHolderDeployReceipt = await deployer.deployTokenHolder(
       erc20TokenContractAddress,
       tokenRulesContractAddress,
       requirement,
@@ -232,7 +234,7 @@ describe('test/sampleRuleExecute', function() {
     await fundERC20Tokens(openST, erc20TokenContractAddress, tokenHolderContractAddress);
 
     console.log('* Deploying Sample Custom Rule');
-    let sampleCustomRuleDeployReceipt = await setup.deploySampleCustomRule(tokenRulesContractAddress);
+    let sampleCustomRuleDeployReceipt = await deployer.deploySimpleTransferRule(tokenRulesContractAddress);
     sampleCustomRuleContractAddress = sampleCustomRuleDeployReceipt.contractAddress;
 
     console.log('* Registering Sample Custom Rule');

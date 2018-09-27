@@ -103,7 +103,7 @@ let passphrase = 'testtest';
 
 // some other constants
 const gasPrice = '0x12A05F200';
-const gasLimit = 4700000;
+const gas = 8000000;
 
 // Helper function for reading json file
 const fs = require('fs');
@@ -139,7 +139,7 @@ let passphrase = 'some passphrase.....';
 
 // some other constants
 const gasPrice = '0x12A05F200';
-const gasLimit = 4700000;
+const gas = 8000000;
 
 // Helper function for reading json file
 const fs = require('fs');
@@ -166,7 +166,7 @@ let openST = new OpenST(gethEndpoint);
 ### Adding accounts
 One can add accounts to web3 wallet or to our custom signer service. You should do only one of these and not both.
 
-Remember to add all of deployerAddress, organizationAddress, wallet1, wallet2, ephemeralKey and facilitatorAddress to use the functionality given in this readme. In general, add only those accounts which are being used in the transactions in your use cases.
+Remember to add each of deployerAddress, organizationAddress, wallet1, wallet2, ephemeralKey and facilitatorAddress to use the functionality given in this readme. In general, add only those accounts which are being used in the transactions in your use cases.
 
 ##### Add accounts to web3 wallet
 For adding to web3 wallet, there are 2 ways. We can add using the keystore file OR by private key.
@@ -265,14 +265,13 @@ Optionally, you will want ERC20 contract to be deployed. You can use a pre-deplo
 // deploy ERC20 - if needed. Not mandatory
 let erc20TokenContractAddress = null;
 
-let InitERC20Token = openST.setup.InitERC20Token;
+let ERC20TokenDeployer = openST.setup.ERC20TokenDeployer;
 console.log('* Deploying ERC20 Token');
   
-new InitERC20Token({
-  deployerAddress: deployerAddress,
-  deployerPassphrase: passphrase,
+new ERC20TokenDeployer({
+  from: deployerAddress,
   gasPrice: gasPrice,
-  gasLimit: gasLimit
+  gas: gas
 }).perform().then(function(response){
   erc20TokenContractAddress = response.receipt.contractAddress;
   console.log('erc20TokenContractAddress noted down:', erc20TokenContractAddress);
@@ -287,14 +286,13 @@ TokenRules contract is deployed per organization. Organization needs register cu
 // deploy TokenRules contract
 let tokenRulesContractAddress = null;
 
-let InitTokenRules = openST.setup.InitTokenRules;
+let TokenRulesDeployer = openST.setup.TokenRulesDeployer;
 console.log('* Deploying TokenRules');
   
-new InitTokenRules({
-  deployerAddress: deployerAddress,
-  deployerPassphrase: passphrase,
+new TokenRulesDeployer({
+  from: deployerAddress,
   gasPrice: gasPrice,
-  gasLimit: gasLimit,
+  gas: gas,
   args: [organizationAddress, erc20TokenContractAddress]
 }).perform().then(function(response){
   tokenRulesContractAddress = response.receipt.contractAddress;
@@ -314,12 +312,11 @@ let tokenHolderContractAddress = null;
 
 // setting first token holder
 console.log('* Deploying Token Holder Contract1');
-let InitTokenHolder = openST.setup.InitTokenHolder;
-new InitTokenHolder({
-  deployerAddress: deployerAddress,
-  deployerPassphrase: passphrase,
+let TokenHolderDeployer = openST.setup.TokenHolderDeployer;
+new TokenHolderDeployer({
+  from: deployerAddress,
   gasPrice: gasPrice,
-  gasLimit: gasLimit,
+  gas: gas,
   args: [
     erc20TokenContractAddress,
     erc20TokenContractAddress, // this will be coGateway contract address. passing dummy value for now.
@@ -353,7 +350,7 @@ let authorizeSession = async function (tokenHolderAddress, ephemeralKey, wallets
     .send({
       from: wallets[0],
       gasPrice: gasPrice,
-      gas: gasLimit
+      gas: gas
     });
   
   console.log('authorizeSession1Response:', JSON.stringify(authorizeSession1Response, null));
@@ -364,7 +361,7 @@ let authorizeSession = async function (tokenHolderAddress, ephemeralKey, wallets
     .send({
       from: wallets[1],
       gasPrice: gasPrice,
-      gas: gasLimit
+      gas: gas
     });
   
   console.log('authorizeSession2Response', JSON.stringify(authorizeSession2Response, null));
@@ -398,7 +395,7 @@ let fundERC20Tokens = async function() {
     .send({
       from: deployerAddress,
       gasPrice: gasPrice,
-      gas: gasLimit
+      gas: gas
     });
 };
 fundERC20Tokens().then(console.log);
@@ -413,14 +410,13 @@ Here we are deploying custom rules contract. The rules contract is registered in
 // deploy rule contract
 let ruleContractAddress = null;
 
-let InitRule = openST.setup.InitTransferRule;
+let InitRule = openST.setup.TransferRuleDeployer;
 console.log('* Deploying Rule');
 
 new InitRule({
-  deployerAddress: deployerAddress,
-  deployerPassphrase: passphrase,
+  from: deployerAddress,
   gasPrice: gasPrice,
-  gasLimit: gasLimit,
+  gas: gas,
   args: [tokenRulesContractAddress]
 }).perform().then(function(response){
   ruleContractAddress = response.receipt.contractAddress;
@@ -443,7 +439,7 @@ let registerRule = async function (ruleName, ruleContractAddress) {
     .send({
       from: organizationAddress,
       gasPrice: gasPrice,
-      gas: gasLimit
+      gas: gas
     })
 };
 registerRule('transferFrom', ruleContractAddress).then(console.log);

@@ -20,7 +20,7 @@ Accounts.prototype.signEIP1077Transaction = function(transaction, privateKey, ca
    dataHash,
    nonce,
    gasPrice,
-   gasLimit,
+   gas,
    gasToken,
    callPrefix,
    operationType,
@@ -57,7 +57,7 @@ Accounts.prototype.signEIP1077Transaction = function(transaction, privateKey, ca
    dataHash,
    nonce,
    gasPrice,
-   gasLimit,
+   gas,
    gasToken,
    callPrefix,
    operationType,
@@ -75,7 +75,7 @@ Accounts.prototype.signEIP1077Transaction = function(transaction, privateKey, ca
     { t: 'bytes', v: utils.soliditySha3(transaction.data) }, //dataHash
     { t: 'uint256', v: transaction.nonce }, //nonce
     { t: 'uint8', v: transaction.gasPrice }, //gasPrice
-    { t: 'uint8', v: transaction.gas }, //gasLimit
+    { t: 'uint8', v: transaction.gas }, //gas
     { t: 'uint8', v: transaction.gasToken }, //gasToken
     { t: 'bytes4', v: transaction.callPrefix }, //callPrefix
     { t: 'uint8', v: transaction.operationType }, //operationType
@@ -90,7 +90,7 @@ Accounts.prototype.signEIP1077Transaction = function(transaction, privateKey, ca
     { t: 'bytes', v: utils.soliditySha3(transaction.data) }, //dataHash
     { t: 'uint256', v: transaction.nonce }, //nonce
     { t: 'uint8', v: transaction.gasPrice }, //gasPrice
-    { t: 'uint8', v: transaction.gas }, //gasLimit
+    { t: 'uint8', v: transaction.gas }, //gas
     { t: 'uint8', v: transaction.gasToken }, //gasToken
     { t: 'bytes4', v: transaction.callPrefix }, //callPrefix
     { t: 'uint8', v: transaction.operationType }, //operationType
