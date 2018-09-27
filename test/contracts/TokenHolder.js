@@ -6,9 +6,9 @@
 const chai = require('chai'),
   assert = chai.assert;
 
-const config = require('../test/utils/configReader'),
-  abis = require('../test/utils/abis'),
-  Web3WalletHelper = require('../test/utils/Web3WalletHelper');
+const config = require('../../test/utils/configReader'),
+  abis = require('../../test/utils/abis'),
+  Web3WalletHelper = require('../../test/utils/Web3WalletHelper');
 
 let openST,
   deployParams,
@@ -19,6 +19,7 @@ let openST,
   ephemeralKeyAccount;
 
 const ruleName = 'transferFrom';
+const wallets = [config.wallet1, config.wallet2];
 
 let authorizeSession = async function(openST, tokenHolderAddress, ephemeralKey, wallets) {
   const BigNumber = require('bignumber.js');
@@ -185,7 +186,7 @@ let checkBalance = async function(openST, erc20TokenContractAddress, address) {
 describe('test/sampleRuleExecute', function() {
   before(async function() {
     // Creating object of OpenST
-    const OpenST = require('../index.js');
+    const OpenST = require('../../index.js');
     openST = new OpenST(config.gethRpcEndPoint);
 
     deployParams = {
@@ -213,7 +214,6 @@ describe('test/sampleRuleExecute', function() {
     tokenRulesContractAddress = tokenRulesDeployReceipt.contractAddress;
 
     // deploy TokenHolder
-    let wallets = [config.wallet1, config.wallet2];
     let requirement = wallets.length;
 
     console.log('* Deploying Token Holder Contract');
@@ -224,11 +224,6 @@ describe('test/sampleRuleExecute', function() {
       wallets
     );
     tokenHolderContractAddress = tokenHolderDeployReceipt.contractAddress;
-
-    // create a ephemeralKey
-    ephemeralKeyAccount = openST.web3().eth.accounts.create();
-
-    await authorizeSession(openST, tokenHolderContractAddress, ephemeralKeyAccount.address, wallets);
 
     console.log('* Funding ERC20 tokens from deployer address');
     await fundERC20Tokens(openST, erc20TokenContractAddress, tokenHolderContractAddress);
@@ -245,6 +240,12 @@ describe('test/sampleRuleExecute', function() {
       sampleCustomRuleContractAddress,
       abis.sampleCustomRule
     );
+  });
+
+  it('Authorise ephemeral key', async function() {
+    // create a ephemeralKey
+    ephemeralKeyAccount = openST.web3().eth.accounts.create();
+    await authorizeSession(openST, tokenHolderContractAddress, ephemeralKeyAccount.address, wallets);
   });
 
   it('Execute Sample Custom Rule', async function() {

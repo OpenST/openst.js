@@ -66,21 +66,6 @@ Accounts.prototype.signEIP1077Transaction = function(transaction, privateKey, ca
    **/
 
   version = version || '0x00';
-  console.log(
-    { t: 'bytes', v: '0x19' }, // prefix
-    { t: 'bytes', v: version }, // version control
-    { t: 'address', v: transaction.from }, //from
-    { t: 'address', v: transaction.to }, //to
-    { t: 'uint8', v: transaction.value }, //value
-    { t: 'bytes', v: utils.soliditySha3(transaction.data) }, //dataHash
-    { t: 'uint256', v: transaction.nonce }, //nonce
-    { t: 'uint8', v: transaction.gasPrice }, //gasPrice
-    { t: 'uint8', v: transaction.gas }, //gas
-    { t: 'uint8', v: transaction.gasToken }, //gasToken
-    { t: 'bytes4', v: transaction.callPrefix }, //callPrefix
-    { t: 'uint8', v: transaction.operationType }, //operationType
-    { t: 'bytes32', v: transaction.extraHash }
-  );
   let txHash = utils.soliditySha3(
     { t: 'bytes', v: '0x19' }, // prefix
     { t: 'bytes', v: version }, // version control
