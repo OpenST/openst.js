@@ -55,8 +55,6 @@ let authorizeSession = async function(openST, tokenHolderAddress, ephemeralKey, 
 
   let transactionId = submitAuthorizeSession1Response.events.SessionAuthorizationSubmitted.returnValues._transactionId;
 
-  console.log('transactionId:', transactionId);
-
   while (len--) {
     let currWallet = wallets[len];
 
@@ -122,34 +120,23 @@ let executeSampleRule = async function(openST, tokenRulesContractAddress, tokenH
     amountToTransfer = new BigNumber(100);
 
   let tokenRules = new openST.contracts.TokenRules(tokenRulesContractAddress);
+  let transferRule = await tokenRules.getRule(ruleName);
 
-  let ruleNameHash = openST.web3().utils.soliditySha3(ruleName);
-  let rulesByNameHashResult = await tokenRules.rulesByNameHash(ruleNameHash).call({});
+  let ruleContractAddress = transferRule.options.address;
 
-  let ruleIndex = rulesByNameHashResult.index;
-  let ruleStruct = await tokenRules.rules(ruleIndex).call({});
-
-  let transferRuleAbi = JSON.parse(ruleStruct.ruleAbi);
-  let ruleContractAddress = ruleStruct.ruleAddress;
-
-  let transferRule = new (openST.web3()).eth.Contract(transferRuleAbi, ruleContractAddress);
+  let keyNonce = await tokenHolder
+    .ephemeralKeys(ephemeralKey)
+    .call({})
+    .then((ephemeralKeyData) => {
+      let nonceBigNumber = new BigNumber(ephemeralKeyData[1]);
+      return nonceBigNumber.toString(10);
+    });
 
   let methodEncodedAbi = await transferRule.methods
     .transferFrom(tokenHolderAddress, '0x66d0be510f3cac64f30eea359bda39717569ea4b', amountToTransfer.toString(10))
     .encodeABI();
 
-  let executableTransactionObject = new openST.utils.ExecutableTransaction({
-    web3: openST.web3(),
-    tokenHolderContractAddress: tokenHolderAddress,
-    ruleContractAddress: ruleContractAddress,
-    methodEncodedAbi: methodEncodedAbi,
-    ephemeralKeyAddress: ephemeralKey,
-    tokenHolderInstance: tokenHolder
-  });
-
   console.log('ephemeralKeyAccount', ephemeralKeyAccount);
-
-  let keyNonce = await executableTransactionObject.getNonce();
   console.log('keyNonce', keyNonce);
 
   let web3 = openST.web3();
@@ -189,8 +176,6 @@ let executeSampleRule = async function(openST, tokenRulesContractAddress, tokenH
 
   assert.isOk(executeRuleResponse.events.RuleExecuted.returnValues._status, 'Rule Executed with status false.');
   console.log('** Rule executed with status true.');
-
-  console.log(executeRuleResponse.events.RuleExecuted.returnValues._status);
 };
 
 let checkBalance = async function(openST, erc20TokenContractAddress, address) {

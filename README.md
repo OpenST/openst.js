@@ -469,33 +469,6 @@ let executeSampleRule = async function(tokenHolderAddress, ephemeralKey) {
       '0x66d0be510f3cac64f30eea359bda39717569ea4b',
       amountToTransfer.toString(10)
     ).encodeABI();
-  
-  let executableTransactionObject = new openST.utils.ExecutableTransaction({
-    web3: openST.web3(),
-    tokenHolderContractAddress: tokenHolderAddress,
-    ruleContractAddress: ruleContractAddress,
-    methodEncodedAbi: methodEncodedAbi,
-    signer: ephemeralKey,
-    signerPassphrase: passphrase,
-    tokenHolderInstance: tokenHolder
-  });
-  let executableTransactionData = await executableTransactionObject.get();
-  
-  let executeRuleResponse = await tokenHolder
-    .executeRule(
-      tokenHolderAddress,
-      ruleContractAddress,
-      executableTransactionData.ephemeralKeyNonce,
-      methodEncodedAbi,
-      executableTransactionData.callPrefix,
-      executableTransactionData.v,
-      executableTransactionData.r,
-      executableTransactionData.s
-    ).send({
-      from: facilitatorAddress,
-      gasPrice: gasPrice,
-      gas: gasLimit
-    });
 
     return executeRuleResponse;
 };
