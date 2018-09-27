@@ -79,7 +79,7 @@ Accounts.prototype.signEIP1077Transaction = function(transaction, privateKey, ca
     { t: 'uint8', v: transaction.gasToken }, //gasToken
     { t: 'bytes4', v: transaction.callPrefix }, //callPrefix
     { t: 'uint8', v: transaction.operationType }, //operationType
-    { t: 'bytes', v: transaction.extraHash }
+    { t: 'bytes32', v: transaction.extraHash }
   );
   let txHash = utils.soliditySha3(
     { t: 'bytes', v: '0x19' }, // prefix
@@ -94,7 +94,7 @@ Accounts.prototype.signEIP1077Transaction = function(transaction, privateKey, ca
     { t: 'uint8', v: transaction.gasToken }, //gasToken
     { t: 'bytes4', v: transaction.callPrefix }, //callPrefix
     { t: 'uint8', v: transaction.operationType }, //operationType
-    { t: 'bytes', v: transaction.extraHash }
+    { t: 'bytes32', v: transaction.extraHash }
   );
 
   let signature = Account.sign(txHash, privateKey);

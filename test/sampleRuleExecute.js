@@ -178,6 +178,7 @@ let executeSampleRule = async function(
       gas: config.gasLimit
     });
 
+  console.log('executeRuleResponse\n', JSON.stringify(executeRuleResponse, null, 2));
   // TODO - assert for event received
   return;
 };
@@ -202,7 +203,8 @@ describe('test/sampleRuleExecute', function() {
     };
 
     // adding the addresses to the web3 wallet
-    new Web3WalletHelper(openST.web3()).init();
+    let web3WalletHelper = new Web3WalletHelper(openST.web3());
+    await web3WalletHelper.init();
 
     let setup = new openST.Setup(deployParams);
     // deploy ERC20
