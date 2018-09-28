@@ -7,7 +7,7 @@ module.exports = {
     gethFolder: os.homedir() + '/openst-setup/origin-geth',
     allocAmount: '90000000000000000000000000000000000000000', // in base currency
     gas: 8000000,
-    gasprice: '0x12A05F200',
+    gasprice: '0x3B9ACA00',
     genesisFileTemplatePath: './tools/genesis.json',
     genesisFilePath: os.homedir() + '/openst-setup/genesis.json',
     geth: {

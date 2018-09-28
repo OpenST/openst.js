@@ -15,7 +15,7 @@ ConfigReader.prototype = {
   facilitatorAddress: devEnvConfig.facilitator,
   gethRpcEndPoint: devEnvConfig.gethRpcEndPoint,
   passphrase: 'testtest',
-  gasPrice: '0x12A05F200',
+  gasPrice: '0x3B9ACA00',
   gas: 8000000
 };
 
