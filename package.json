@@ -50,9 +50,12 @@
     "pre-commit"
   ],
   "lint-staged": {
-    "*.js": [
-      "prettier --write --config .prettierrc.json",
-      "git add"
-    ]
+    "linters" : {
+      "*.js": [
+        "prettier --write --config .prettierrc.json",
+        "git add"
+      ],
+      "ignore" : ["**/dist/*"]
+    }
   }
 }
