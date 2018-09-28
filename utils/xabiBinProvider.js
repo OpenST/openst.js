@@ -5,11 +5,17 @@ const fs = require('fs'),
   path = require('path');
 //__NOT_FOR_WEB__END__
 
-const AbiBinProvider = function() {};
+const AbiBinProvider = function(abiFolderPath, binFolderPath) {
+  const oThis = this;
+  oThis.abiFolderPath = abiFolderPath || oThis.abiFolderPath;
+  oThis.binFolderPath = binFolderPath || oThis.binFolderPath;
+};
 
 AbiBinProvider.prototype = {
   constructor: AbiBinProvider,
   custom: null,
+  abiFolderPath: '../contracts/abi/',
+  binFolderPath: '../contracts/bin/',
   addABI: function(contractName, abiFileContent) {
     const oThis = this;
     contractName = String(contractName).toLowerCase();
@@ -64,7 +70,7 @@ AbiBinProvider.prototype = {
     }
 
     //__NOT_FOR_WEB__BEGIN__
-    let abiFileContent = oThis._read('../contracts/abi/' + contractName + '.abi');
+    let abiFileContent = oThis._read(oThis.abiFolderPath + contractName + '.abi');
     let abi = JSON.parse(abiFileContent);
     return abi;
     //__NOT_FOR_WEB__END__
@@ -79,7 +85,7 @@ AbiBinProvider.prototype = {
     }
 
     //__NOT_FOR_WEB__BEGIN__
-    let binCode = oThis._read('../contracts/bin/' + contractName + '.bin');
+    let binCode = oThis._read(oThis.binFolderPath + contractName + '.bin');
     return binCode;
     //__NOT_FOR_WEB__END__
   },
@@ -92,7 +98,20 @@ AbiBinProvider.prototype = {
   //__NOT_FOR_WEB__END__
 };
 
-let abiBinProvider = new AbiBinProvider();
-//@Akshay & @Ashutosh here you can now use abiBinProvider.addABI & abiBinProvider.addBIN methods.
+//__WEB_SAFE_SPACE_BEGINS__
 
-module.exports = abiBinProvider;
+//@Akshay & @Ashutosh: For Web, please populate AbiBinProvider.prototype.custom object here.
+/*
+  //In theory, you should be able to use the addABI & addBIN methods even via prototype. Example:
+  AbiBinProvider.prototype.addABI(contractName, abiFileContent);
+  AbiBinProvider.prototype.addBIN(contractName, binFileContent);
+
+  //Why this should work ?
+  //If you call methods the way explained above, the scope of these functions becomes prototype.
+  //Therefore oThis refers to AbiBinProvider.prototype and oThis.custom will refer to AbiBinProvider.prototype.custom
+  
+*/
+
+//__WEB_SAFE_SPACE_ENDS__
+
+module.exports = AbiBinProvider;
