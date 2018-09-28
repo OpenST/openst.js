@@ -75,9 +75,13 @@ let authorizeSession = async function(openST, tokenHolderAddress, ephemeralKey, 
     console.log('** TransactionConfirmed event obtained.');
   }
 
-  let isEphemeralKeyActiveResponse = await tokenHolder.isEphemeralKeyActive(ephemeralKey).call({});
+  let ephemeralKeysResponse = await tokenHolder.ephemeralKeys(ephemeralKey).call({});
+  console.log('ephemeralKeysResponse', ephemeralKeysResponse);
 
-  assert.isTrue(isEphemeralKeyActiveResponse, 'isEphemeralKeyActive response not true');
+  assert.isTrue(ephemeralKeysResponse.status == 1, 'Ephemeral key status is not AUTHORIZED');
+  console.log('** Ephemeral key', ephemeralKey, 'status is AUTHORIZED.');
+
+  assert.isTrue(ephemeralKeysResponse.expirationHeight > currentBlockNumber, 'Ephemeral key has expired');
   console.log('** Ephemeral key', ephemeralKey, 'is active.');
 };
 
