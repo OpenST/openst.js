@@ -64,8 +64,8 @@ AbiBinProvider.prototype = {
   getABI: function(contractName) {
     const oThis = this;
 
-    if (oThis.custom && oThis.custom[contractName] && custom[contractName].abi) {
-      return custom[contractName].abi;
+    if (oThis.custom && oThis.custom[contractName] && oThis.custom[contractName].abi) {
+      return oThis.custom[contractName].abi;
     }
 
     //__NOT_FOR_WEB__BEGIN__
@@ -78,8 +78,8 @@ AbiBinProvider.prototype = {
   getBIN: function(contractName) {
     const oThis = this;
 
-    if (oThis.custom && oThis.custom[contractName] && custom[contractName].bin) {
-      return custom[contractName].bin;
+    if (oThis.custom && oThis.custom[contractName] && oThis.custom[contractName].bin) {
+      return oThis.custom[contractName].bin;
     }
 
     //__NOT_FOR_WEB__BEGIN__
