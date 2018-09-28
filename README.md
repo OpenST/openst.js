@@ -77,10 +77,9 @@ node ./tools/initDevEnv.js ~
 ```
     
 ##### Sample Constants
-
 To seemlessly execute the example code provided in this file, please use below code if you have setup development environment using init-dev-env.
-```js
 
+```js
 const os = require('os');
 let configFilePath = os.homedir() + '/openst-setup/config.json';
 let devEnvConfig = require(configFilePath);
@@ -313,8 +312,8 @@ deployer.deployTokenRules(organizationAddress, erc20Address).then(function( rece
 Per user TokenHolder contract is deployed. TokenHolder contract holds Utility tokens of user.
 
 ```js
-let requirement = 2;
 let wallets = [wallet1, wallet2];
+let requirement = wallets.length;
 let tokenHolderAddress = null;
 
 // Deploy TokenHolder Contract
@@ -333,8 +332,6 @@ Here we shall deploye the Transfer Rule contract.
 Later, this rule contract will be registered in TokenRules contract by the organization.
 
 ```js
-
-
 // Deploy Transfer Rule Contract
 let transferRuleAddress = null;
 
@@ -395,41 +392,69 @@ Using TH authorize session function, owners can register an ephemeral key. Autho
 let tokenHolder = new openST.contracts.TokenHolder(tokenHolderAddress);
 
 //Authorize ephemeral key.
-let authorizeSession = async function (tokenHolderAddress, ephemeralKey, wallets) {
-  let BN = require('bn.js');  
+let authorizeSession = async function(openST, tokenHolderAddress, ephemeralKey, wallets) {
+  const BigNumber = require('bignumber.js');
   let currentBlockNumber = await openST.web3().eth.getBlockNumber(),
-    spendingLimit = new BN('10000000000000000000000000000').toString(10),
-    expirationBlocks = new BN('10000000000000000000000000000');
-    expirationHeight = new BN(currentBlockNumber).add( expirationBlocks ).toString(10);
-    
-  // Authorize an ephemeral public key using wallet key-1.
-  let authorizeSession1Response = await tokenHolder
-    .authorizeSession(ephemeralKey, spendingLimit, expirationHeight)
+    spendingLimit = new BigNumber('10000000000000000000000000000').toString(10),
+    expirationHeight = new BigNumber(currentBlockNumber).add('10000000000000000000000000000').toString(10);
+
+  let tokenHolder = new openST.contracts.TokenHolder(tokenHolderAddress);
+
+  let len = wallets.length - 1;
+
+  let currWallet = wallets[len];
+
+  console.log('* submitAuthorizeSession from wallet:', currWallet);
+  // Authorize an ephemeral public key
+  let submitAuthorizeSessionReceipt = await tokenHolder
+    .submitAuthorizeSession(ephemeralKey, spendingLimit, expirationHeight)
     .send({
-      from: wallets[0],
+      from: currWallet,
       gasPrice: gasPrice,
       gas: gas
     });
-  
-  console.log('authorizeSession1Response:', JSON.stringify(authorizeSession1Response, null));
-  
-  // Authorize an ephemeral public key using wallet key-2.
-  let authorizeSession2Response = await tokenHolder
-    .authorizeSession(ephemeralKey, spendingLimit, expirationHeight)
-    .send({
-      from: wallets[1],
+
+  console.log("submitAuthorizeSessionReceipt", JSON.stringify(submitAuthorizeSessionReceipt, null, 2));
+  if ( !submitAuthorizeSessionReceipt.status ) {
+    console.log("SubmitAuthorizeSession failed.");
+    return Promise.reject('SubmitAuthorizeSession failed.');
+  }
+
+  console.log('SessionAuthorizationSubmitted Event', JSON.stringify(submitAuthorizeSessionReceipt.events.SessionAuthorizationSubmitted, null, 2));
+
+  let transactionId = submitAuthorizeSessionReceipt.events.SessionAuthorizationSubmitted.returnValues._transactionId;
+
+  while (len--) {
+    let currWallet = wallets[len];
+
+    console.log('* confirmTransaction from wallet:', currWallet);
+
+    // Authorize an ephemeral public key
+    let confirmTransactionReceipt = await tokenHolder.confirmTransaction(transactionId).send({
+      from: currWallet,
       gasPrice: gasPrice,
       gas: gas
     });
+
+    if (!confirmTransactionReceipt.events.TransactionConfirmed) {
+      console.log('Failed to confirm transaction', JSON.stringify(confirmTransactionReceipt, null, 2));
+      return Promise.reject('Failed to confirm transaction');
+    }
+  }
+
+  let ephemeralKeysResponse = await tokenHolder.ephemeralKeys(ephemeralKey).call({});
+  console.log('ephemeralKeysResponse', ephemeralKeysResponse);
   
-  console.log('authorizeSession2Response', JSON.stringify(authorizeSession2Response, null));
+  if (ephemeralKeysResponse.status == 1 && ephemeralKeysResponse.expirationHeight > currentBlockNumber) {
+    console.log('Ephemeral key with address', ephemeralKey, 'has been successfully authorized');
+  } else {
+    console.log('Failed to authorize Ephemeral key with address', ephemeralKey);
+  }
   
-  let isAuthorizedEphemeralKeyResponse = await tokenHolder
-    .isAuthorizedEphemeralKey(ephemeralKey).call({});
-  
-  console.log('isAuthorizedEphemeralKey:', isAuthorizedEphemeralKeyResponse);
+  return ephemeralKeysResponse;
 };
-authorizeSession(tokenHolderAddress, ephemeralKeyAddress, wallets);
+authorizeSession(openST, tokenHolderAddress, ephemeralKeyAddress, wallets);
+
 
 ```
 
@@ -448,7 +473,7 @@ let fundERC20Tokens = async function() {
   
   let mockToken = new (openST.web3()).eth.Contract(mockTokenAbi, erc20Address);
   
-  return mockToken.methods
+  mockToken.methods
     .transfer(tokenHolderAddress, amountToTransfer.toString(10))
     .send({
       from: deployerAddress,
@@ -456,34 +481,10 @@ let fundERC20Tokens = async function() {
       gas: gas
     });
 };
-fundERC20Tokens().then(console.log);
+fundERC20Tokens().then(function(r) {
+  console.log('Fund ERC20 DONE!', r);
+});
 
-```
-
-##### Execute sample rule
-
-Here executable transaction is signed by ephemeral key. Facilitator calls TokenHolder execute rule method to execute custom rule.
-TokenHolder approves Token rules for transfer. Transfers are done in TokenRules contract.
-
-```js
-let executeSampleRule = async function(tokenHolderAddress, ephemeralKey) {
-  const BigNumber = require('bignumber.js');
-  let tokenHolder = new openST.contracts.TokenHolder(tokenHolderAddress),
-    amountToTransfer = new BigNumber(100);
-  
-  let transferRuleAbi = parseFile('./contracts/abi/TransferRule.abi', 'utf8');
-  let transferRule = new (openST.web3()).eth.Contract(transferRuleAbi, transferRuleAddress);
-    
-  let methodEncodedAbi = await transferRule.methods
-    .transferFrom(
-      tokenHolderAddress,
-      '0x66d0be510f3cac64f30eea359bda39717569ea4b',
-      amountToTransfer.toString(10)
-    ).encodeABI();
-
-    return executeRuleResponse;
-};
-executeSampleRule(tokenHolderAddress, ephemeralKey).then(console.log);
 ```
 
 ##### Balance verification after execute rule
@@ -494,6 +495,116 @@ let checkBalance = async function (address) {
   let mockToken = new (openST.web3()).eth.Contract(mockTokenAbi, erc20Address);
   return mockToken.methods.balanceOf(address).call({});
 };
-checkBalance(tokenHolderAddress).then(console.log)
+
+let beforeBalance = null;
+checkBalance(tokenHolderAddress).then(function (r) {
+  beforeBalance = r;
+  console.log('beforeBalance noted down:', beforeBalance);
+});
+```
+
+##### Execute sample rule
+
+Here executable transaction is signed by ephemeral key. Facilitator calls TokenHolder execute rule method to execute custom rule.
+TokenHolder approves Token rules for transfer. Transfers are done in TokenRules contract.
+
+```js
+let executeSampleRule = async function(tokenRulesContractAddress, tokenHolderContractAddress, ephemeralKeyAccount) {
+  const BigNumber = require('bignumber.js');
+  let ephemeralKey = ephemeralKeyAccount.address;
+
+  let tokenHolder = new openST.contracts.TokenHolder(tokenHolderContractAddress),
+    amountToTransfer = new BigNumber(100);
+
+  let tokenRules = new openST.contracts.TokenRules(tokenRulesContractAddress);
+  let transferRule = await tokenRules.getRule(ruleName);
+
+  let ruleContractAddress = transferRule.options.address;
+
+  console.log('** Fetching ephemeral key nonce from token holder contract.');
+  let keyNonce = await tokenHolder
+    .ephemeralKeys(ephemeralKey)
+    .call({})
+    .then((ephemeralKeyData) => {
+      let nonceBigNumber = new BigNumber(ephemeralKeyData[1]);
+      return nonceBigNumber.toString(10);
+    });
+
+  console.log('** Constructing the data to sign by the ephemeral key.');
+  let methodEncodedAbi = await transferRule.methods
+    .transferFrom(
+      tokenHolderContractAddress,
+      '0x66d0be510f3cac64f30eea359bda39717569ea4b',
+      amountToTransfer.toString(10)
+    )
+    .encodeABI();
+
+  console.log('** Fetching call prefix from the token holder contract.');
+  let callPrefix = await tokenHolder.EXECUTE_RULE_CALLPREFIX().call({});
+
+  console.log('** Sign the data as per EIP 1077.');
+  let eip1077SignedData = ephemeralKeyAccount.signEIP1077Transaction({
+    from: tokenHolderContractAddress,
+    to: ruleContractAddress,
+    value: 0,
+    gasPrice: 0,
+    gas: 0,
+    data: methodEncodedAbi,
+    nonce: keyNonce,
+    callPrefix: callPrefix
+  });
+
+  console.log('** Calling executeRule on tokenHolder contract.');
+  let executeRuleResponse = await tokenHolder
+    .executeRule(
+      ruleContractAddress,
+      methodEncodedAbi,
+      keyNonce,
+      eip1077SignedData.v,
+      eip1077SignedData.r,
+      eip1077SignedData.s
+    )
+    .send({
+      from: facilitatorAddress,
+      gasPrice: gasPrice,
+      gas: gas
+    });
+
+  if(!executeRuleResponse.events.RuleExecuted) {
+    let err = 'RuleExecuted event not obtained.';
+    return Promise.reject(err);
+  }
+  
+  if(!executeRuleResponse.events.RuleExecuted.returnValues._status) {
+      let err = 'Rule Executed with status false.';
+      return Promise.reject(err);
+  }
+  console.log('** Rule executed with status true.');
+};
+executeSampleRule(tokenRulesAddress, tokenHolderAddress, ephemeralKeyAccount);
+
+
+```
+
+##### Balance verification after execute rule
+
+```js
+let verifyBalance = async function () {
+  const BigNumber = require('bignumber.js');
+  
+  let afterBalance = await checkBalance(tokenHolderAddress);
+  console.log('afterBalance noted down:', afterBalance);
+  
+  let beforeBalanceBn = new BigNumber(beforeBalance);
+  let afterBalanceBn = new BigNumber(afterBalance);
+    
+  if (beforeBalanceBn.minus(afterBalanceBn).toString(10) == '100') {
+    console.log('balance change verification DONE!');
+  } else {
+    console.log('balance change verification FAILED!');
+  }
+};
+
+verifyBalance();
 ```
 
