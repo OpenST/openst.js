@@ -18,7 +18,7 @@ AbiBinProvider.prototype = {
   binFolderPath: '../contracts/bin/',
   addABI: function(contractName, abiFileContent) {
     const oThis = this;
-    contractName = String(contractName).toLowerCase();
+
     oThis.custom = oThis.custom || {};
 
     let abi;
@@ -43,7 +43,7 @@ AbiBinProvider.prototype = {
 
   addBIN: function(contractName, binFileContent) {
     const oThis = this;
-    contractName = String(contractName).toLowerCase();
+
     oThis.custom = oThis.custom || {};
 
     if (typeof binFileContent !== 'string') {
@@ -64,7 +64,6 @@ AbiBinProvider.prototype = {
   getABI: function(contractName) {
     const oThis = this;
 
-    contractName = String(contractName).toLowerCase();
     if (oThis.custom && oThis.custom[contractName] && custom[contractName].abi) {
       return custom[contractName].abi;
     }
@@ -79,7 +78,6 @@ AbiBinProvider.prototype = {
   getBIN: function(contractName) {
     const oThis = this;
 
-    contractName = String(contractName).toLowerCase();
     if (oThis.custom && oThis.custom[contractName] && custom[contractName].bin) {
       return custom[contractName].bin;
     }
