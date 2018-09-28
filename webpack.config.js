@@ -49,6 +49,15 @@ const webpackOption = {
           replace: '',
           flags: 'isg'
         }
+      },
+      {
+        test: require.resolve('./index.js'),
+        use: [
+          {
+            loader: 'expose-loader',
+            options: 'OpenST'
+          }
+        ]
       }
     ]
   },
