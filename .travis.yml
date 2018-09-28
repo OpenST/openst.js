@@ -5,6 +5,7 @@ branches:
   only:
   - master
   - develop
+  - openst_0_9_4_develop
 notifications:
   email:
     recipients:

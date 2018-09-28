@@ -7,7 +7,7 @@
 const InstanceComposer = require('./instance_composer');
 const version = require('./package.json').version;
 const SignEIP1077Extension = require('./utils/SignEIP1077Extension');
-const AbiBinProvider = require('./utils/abiBinProvider');
+const AbiBinProvider = require('./utils/AbiBinProvider');
 
 require('./lib/providers/web3/ChainWeb3');
 require('./lib/Signers');
