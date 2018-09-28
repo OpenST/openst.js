@@ -88,28 +88,12 @@ AbiBinProvider.prototype = {
     //__NOT_FOR_WEB__END__
   },
 
-  //__NOT_FOR_WEB__BEGIN__
   _read: function(filePath) {
+    //__NOT_FOR_WEB__BEGIN__
     filePath = path.join(__dirname, '/' + filePath);
     return fs.readFileSync(filePath, 'utf8');
+    //__NOT_FOR_WEB__END__
   }
-  //__NOT_FOR_WEB__END__
 };
-
-//__WEB_SAFE_SPACE_BEGINS__
-
-//@Akshay & @Ashutosh: For Web, please populate AbiBinProvider.prototype.custom object here.
-/*
-  //In theory, you should be able to use the addABI & addBIN methods even via prototype. Example:
-  AbiBinProvider.prototype.addABI(contractName, abiFileContent);
-  AbiBinProvider.prototype.addBIN(contractName, binFileContent);
-
-  //Why this should work ?
-  //If you call methods the way explained above, the scope of these functions becomes prototype.
-  //Therefore oThis refers to AbiBinProvider.prototype and oThis.custom will refer to AbiBinProvider.prototype.custom
-  
-*/
-
-//__WEB_SAFE_SPACE_ENDS__
 
 module.exports = AbiBinProvider;
