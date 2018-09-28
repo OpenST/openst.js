@@ -357,7 +357,7 @@ These contract interacts object are similar to [web3.eth.Contracts.methods](http
 
 let tokenRules = new openST.contracts.TokenRules(tokenRulesAddress);
 let ruleName = 'transferFrom1';
-let ruleAbi = JSON.stringify( openST.utils.abiBinProvider.getABI('TransferRule') );
+let ruleAbi = JSON.stringify( openST.abiBinProvider().getABI('TransferRule') );
 tokenRules.registerRule(ruleName, transferRuleAddress, ruleAbi).send({
     from: organizationAddress,
     gasPrice: gasPrice,
