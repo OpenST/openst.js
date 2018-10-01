@@ -13,3 +13,5 @@ node_modules
 package-lock.json
 build/
 openst-setup/
+
+bin/temp/*

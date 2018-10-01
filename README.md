@@ -81,7 +81,33 @@ npm install
 ###### Setup Development Environment
 ```
 node ./tools/initDevEnv.js ~
+
+
 ```
+   
+##### Creating an object of OpenST
+OpenST.js is a thin layer over web3js. The constructor arguments are same as that of web3js.
+
+
+```js
+// Creating object of web3 js using the GETH endpoint
+const web3Provider = 'http://127.0.0.1:8545';
+
+// Creating object of OpenST
+const OpenST = require('./index.js');
+let openST = new OpenST( web3Provider );
+
+
+```
+
+OpenST.js also provides access to web3js object it creates and uses.
+```js
+// fetch the web3 object to add to the wallet.
+let web3 = openST.web3();
+
+
+```
+
 
 ##### Sample Constants
 To seemlessly execute the example code provided in this file, please use below code if you have setup development environment using init-dev-env.
@@ -107,16 +133,6 @@ let passphrase = 'testtest';
 // some other constants
 const gasPrice = '0x12A05F200';
 const gas = 8000000;
-
-// Helper function for reading json file
-const fs = require('fs');
- function parseFile(filePath, options) {
- filePath = path.join(filePath);
- const fileContent = fs.readFileSync(filePath, options || 'utf8');
- return JSON.parse(fileContent);
- }
-
-let mockTokenAbi = parseFile('./contracts/abi/MockToken.abi', 'utf8');
 
 
 ```
@@ -146,28 +162,23 @@ let passphrase = 'some passphrase.....';
 const gasPrice = '0x12A05F200';
 const gas = 8000000;
 
-// Helper function for reading json file
-const fs = require('fs');
- function parseFile(filePath, options) {
- filePath = path.join(filePath);
- const fileContent = fs.readFileSync(filePath, options || 'utf8');
- return JSON.parse(fileContent);
- }
-
-let mockTokenAbi = parseFile('./contracts/abi/MockToken.abi', 'utf8');
-
 
 ```
 
-##### Creating an object of OpenST
+##### ABI and BIN Provider.
+OpenST.js comes with an in-built abi-bin provider for managing abi(s) and bin(s).
+The abiBinProvider by-default, provides developers with following abi(s) and bin(s):
+
+* [MockToken](https://github.com/OpenSTFoundation/mosaic-contracts/blob/v0.9.3-rc1/contracts/SimpleToken/MockToken.sol) (An ERC20 Contract with name 'MockToken'.)
+* [TokenRules](https://github.com/OpenSTFoundation/openst-contracts/blob/develop/contracts/TokenRules.sol) 
+* [TokenHolder](https://github.com/OpenSTFoundation/openst-contracts/blob/develop/contracts/TokenHolder.sol) (A Multi-Sig wallet that shall hold tokens.)
+* [TransferRule](https://github.com/OpenSTFoundation/openst-contracts/blob/develop/contracts/TransferRule.sol) (A simple token transfer rule.)
 
 ```js
-// Creating object of web3 js using the GETH endpoint
-const gethEndpoint = 'http://127.0.0.1:8545';
 
-// Creating object of OpenST
-const OpenST = require('./index.js');
-let openST = new OpenST(gethEndpoint);
+//Get the mock-token ABI.
+let abiBinProvider = openST.abiBinProvider();
+let mockTokenAbi = abiBinProvider.getABI('MockToken');
 
 
 ```
@@ -181,10 +192,6 @@ Remember to add each of deployerAddress, organizationAddress, wallet1, wallet2, 
 For adding to web3 wallet, there are 2 ways. We can add using the keystore file OR by private key.
 In detail documentation can be found here - https://web3js.readthedocs.io/en/1.0/web3-eth-accounts.html
 ```js
-
-// fetch the web3 object to add to the wallet.
-// add all your accounts to this openST web3 object.
-let web3 = openST.web3();
 
 // Here is a sample helper method for the developers to add account to wallet using keystore content.
 // Read more about web3.eth.accounts.decrypt here: https://web3js.readthedocs.io/en/1.0/web3-eth-accounts.html#id22

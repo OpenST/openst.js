@@ -13,7 +13,10 @@
     "url": "https://github.com/OpenSTFoundation/openst.js/issues"
   },
   "scripts": {
-    "pre-commit": "lint-staged"
+    "pre-commit": "lint-staged",
+    "webpack-build": "webpack",
+    "web-pre-build": "node webPreBuild.js",
+    "web-build": "npm-run-all web-pre-build webpack-build"
   },
   "dependencies": {
     "bignumber.js": "4.1.0",
@@ -21,24 +24,40 @@
     "web3": "1.0.0-beta.34"
   },
   "devDependencies": {
+    "@babel/core": "7.1.0",
+    "@babel/polyfill": "7.0.0",
+    "@babel/preset-env": "7.1.0",
+    "@babel/runtime": "7.0.0",
+    "babel-loader": "8.0.2",
+    "chai": "4.1.2",
+    "commander": "2.8.1",
+    "edit-json-file": "1.0.8",
+    "expose-loader": "0.7.5",
     "lint-staged": "7.2.0",
+    "mocha": "5.0.0",
+    "node-cmd": "3.0.0",
+    "npm-run-all": "4.1.3",
     "os": "0.1.1",
     "pre-commit": "1.2.2",
     "prettier": "1.13.7",
     "shelljs": "0.8.1",
-    "node-cmd": "3.0.0",
-    "edit-json-file": "1.0.8",
-    "chai": "4.1.2",
-    "mocha": "5.0.0",
-    "commander": "2.8.1"
+    "string-replace-loader": "2.1.1",
+    "webpack": "4.19.1",
+    "webpack-cli": "3.1.0",
+    "webpack-uglify-js-plugin": "1.1.9"
   },
   "pre-commit": [
     "pre-commit"
   ],
   "lint-staged": {
-    "*.js": [
-      "prettier --write --config .prettierrc.json",
-      "git add"
-    ]
+    "linters": {
+      "*.js": [
+        "prettier --write --config .prettierrc.json",
+        "git add"
+      ],
+      "ignore": [
+        "**/dist/*"
+      ]
+    }
   }
 }

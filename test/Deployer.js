@@ -61,7 +61,7 @@ describe('test/deployer', () => {
   });
 
   it('should create a new instance of openST.Deployer', () => {
-    deployParams = {
+    let deployParams = {
       from: config.deployerAddress,
       gasPrice: config.gasPrice,
       gas: config.gas
