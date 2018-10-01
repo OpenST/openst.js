@@ -9,84 +9,76 @@ Below is an overview of the different steps in this file:<br/>
 4.
 
 
-
-Below is overview of different components:
+#### Below is overview of different components:
 
 1. TokenRules contract: The TokenRules Contract keeps a list of all the registered Custom Rules Contracts with their properties and helps in interacting with them.Each economy must have one TokenRules Contract deployed.
 
-2. TokenHolder contracts :Each user in a token economy internally will be represented by a contract address.
-  Token Holder contract will hold the user’s tokens. It’s a multisig contract which can have multiple ownership keys (presumably owned by a single natural person).
+2. TokenHolder contracts :Each user in a token economy will be represented by a contract address. Token Holder contract will hold the user’s tokens. It’s a multi-sig contract i.e it can have multiple ownership keys (presumably owned by a single natural person).
 
-- Each partner company will write at least one Custom Rules Contract. They can write multiple based on requirement / economy design.
-  Each economy has actions and the logic around these actions will be defined as rules in this contract.
-##### Prerequisites
+3. Rule contracts: These contracts contains business logic that the economy creator uses to achieve their community or business goals . Each economy must have at least one custom Rule.
 
-  ##### Install all the required packages
+##### Initial Setup
+
+1.  Install the following packages
 ```
 > sudo apt-get update
   sudo apt-get install nodejs
   sudo apt-get install npm
   sudo apt-get install software-properties-common
 ```
-
- #### Reference materials
-- Web3 documentation for reference: https://web3js.readthedocs.io/en/1.0/web3-eth.html  
-
 - Install openst.js in your project
 
   npm install https://github.com/OpenSTFoundation/openst.js#develop --save
 
-- Geth Installation on mac machine  
+- Install Geth
 
-    Below code tested with geth version: 1.7.3-stable. However any higher version of geth should also work.
+    This code was tested with geth version: 1.7.3-stable. Other higher versions should also work.
 
     curl https://gethstore.blob.core.windows.net/builds/geth-linux-amd64-1.7.3-4bb3c89d.tar.gz | tar xvz
     mv geth-linux-amd64-1.7.3-4bb3c89d /usr/local/bin
     ln -s /usr/local/bin/geth-linux-amd64-1.7.3-4bb3c89d/geth /usr/local/bin/geth
     export PATH="$PATH:/usr/local/bin/geth-linux-amd64-1.7.3-4bb3c89d"
 
-- Make sure your development machine is synced with a any of below test environments.
+- Sync your development machine with one of the following test environment
 
   https://ropsten.etherscan.io/
   https://kovan.etherscan.io/
   https://rinkeby.etherscan.io/  
+- Create the following addresses and fund them with gas.
 
-
-- Below addresses should already be created in the test environment and funded with gas.
-
-    deployerAddress - address which deploy ERC20Token, TokenRules, TokenHolder, Custom Rules contracts
-    organizationAddress - Address which will register custome rules contract to TokenRules
-    wallet1 - Owner1 of TokenHolder contract.
-    wallet2 - Owner2 of TokenHolder contract.
-    ephemeralKey - Key which will be authorized by owners in TokenHolder contract. This key will sign execute custom rule transactions.
-    facilitatorAddress - Address which will facilitate custom rule transactions.
-
-##### Initializing chain on developer machines for development testing
-
-The below command creates a json file (`~/openst-setup/config.json`) having all the needed addresses and other constants.
-It also starts GETH process for the chain. This is meant for developer to get going directly and try out the functionality
-of openst.js as described in the following sections.
+  1. deployerAddress - address which deploy ERC20Token, TokenRules, TokenHolder, Custom Rules contracts. <br/>
+  2. organizationAddress - Address which will register custom rules contract to TokenRules.      
+  - wallet1 - Owner1 of TokenHolder contract.      
+  - wallet2 - Owner2 of TokenHolder contract.  
+  - ephemeralKey - the key which will be authorized by owners in TokenHolder contract. This key will sign execute custom rule transactions.
+  - facilitatorAddress - the address which will facilitate custom rule transactions.
 
 
 ###### Clone openst.js
 ```
 git clone git@github.com:OpenSTFoundation/openst.js.git
 ```
-###### Install npm packages
+  ###### Install npm packages
 ```   
 cd openst.js
 git checkout develop
 npm install
 ```
-###### Setup Development Environment
+
+##### Initializing chain on developer machines
+
+The below command creates a json file (`~/openst-setup/config.json`) with all the needed addresses and other constants.
+It also starts Geth process for the chain.<br/> This is a "quick-start" option. You could also choose to do this step manually.
+
+
 ```
 node ./tools/initDevEnv.js ~
 
 
 ```
-   
-##### Creating an object of OpenST
-OpenST.js is a thin layer over web3js. The constructor arguments are same as that of web3js.
+
+##### Creating an OpenST object
+OpenST.js is a thin layer over web3js. Its constructor arguments are same as that of web3js.
 
 
 ```js
@@ -108,9 +100,8 @@ let web3 = openST.web3();
 
 ```
 
-
 ##### Sample Constants
-To seemlessly execute the example code provided in this file, please use below code if you have setup development environment using init-dev-env.
+Please use below code if you have set up development environment using init-dev-env.
 
 ```js
 const os = require('os');
@@ -137,7 +128,8 @@ const gas = 8000000;
 
 ```
 
-Optionally, you can set these constants as you wish to.
+Optionally, you can set these constants to other addresses and data that you may prefer.
+Please remember to use only addresses that you are able to access
 
 ```js
 
@@ -167,11 +159,11 @@ const gas = 8000000;
 
 ##### ABI and BIN Provider.
 OpenST.js comes with an in-built abi-bin provider for managing abi(s) and bin(s).
-The abiBinProvider by-default, provides developers with following abi(s) and bin(s):
+The abiBinProvider provides developers with following abi(s) and bin(s):
 
 * [MockToken](https://github.com/OpenSTFoundation/mosaic-contracts/blob/v0.9.3-rc1/contracts/SimpleToken/MockToken.sol) (An ERC20 Contract with name 'MockToken'.)
-* [TokenRules](https://github.com/OpenSTFoundation/openst-contracts/blob/develop/contracts/TokenRules.sol) 
-* [TokenHolder](https://github.com/OpenSTFoundation/openst-contracts/blob/develop/contracts/TokenHolder.sol) (A Multi-Sig wallet that shall hold tokens.)
+* [TokenRules](https://github.com/OpenSTFoundation/openst-contracts/blob/develop/contracts/TokenRules.sol)
+* [TokenHolder](https://github.com/OpenSTFoundation/openst-contracts/blob/develop/contracts/TokenHolder.sol) (A Multi-Sig wallet that can hold tokens.)
 * [TransferRule](https://github.com/OpenSTFoundation/openst-contracts/blob/develop/contracts/TransferRule.sol) (A simple token transfer rule.)
 
 ```js
@@ -186,16 +178,16 @@ let mockTokenAbi = abiBinProvider.getABI('MockToken');
 ### Adding accounts
 One can add accounts to web3 wallet or to our custom signer service. You should do only one of these and not both.
 
-Remember to add each of deployerAddress, organizationAddress, wallet1, wallet2, ephemeralKey and facilitatorAddress to use the functionality given in this readme. In general, add only those accounts which are being used in the transactions in your use cases.
+Remember to add all of deployerAddress, organizationAddress, wallet1, wallet2, ephemeralKey and facilitatorAddress to use the functionality given in this readme.
 
-##### Add accounts to web3 wallet
-For adding to web3 wallet, there are 2 ways. We can add using the keystore file OR by private key.
-In detail documentation can be found here - https://web3js.readthedocs.io/en/1.0/web3-eth-accounts.html
+##### Option 1: Add accounts to web3 wallets
+For adding to web3 wallet, there are 2 ways. We can add using the keystore file OR by private key.If you choose this option, you could also choose to connect to an [infura endpoint]() rather than running a full geth node.
+<br/>Detailed documentation on adding accounts can be found here : https://web3js.readthedocs.io/en/1.0/web3-eth-accounts.html
 ```js
 
 // Here is a sample helper method for the developers to add account to wallet using keystore content.
 // Read more about web3.eth.accounts.decrypt here: https://web3js.readthedocs.io/en/1.0/web3-eth-accounts.html#id22
-let addToWalletByKeystoreContent = function (encryptedPrivateKey, password) {
+let addToWalletByKeystoreContent = function (encrhttps://infura.io/docsyptedPrivateKey, password) {
   let account = web3.eth.accounts.decrypt(encryptedPrivateKey, password);
   web3.eth.accounts.wallet.add(account);
 };
@@ -203,7 +195,7 @@ let addToWalletByKeystoreContent = function (encryptedPrivateKey, password) {
 
 ```
 
-#### OpenST Signers Service
+#### Option 2: OpenST Signers Service
 OpenST.js makes it easy for developers to build custom and secure key-management solutions.
 
 Thats right! You can build your own custom signer service. Once the signer service is set, you can continue to use Contract.methods.myMethod.send (https://web3js.readthedocs.io/en/1.0/web3-eth-contract.html#methods-mymethod-send) & web3.eth.sendTransaction (https://web3js.readthedocs.io/en/1.0/web3-eth.html#sendtransaction) without worrying about unlocking/signing the transactions. You can set the signer service using `openST.signers.setSignerService` method.
