@@ -3,8 +3,10 @@
 const shell = require('shelljs'),
   BigNumber = require('bignumber.js'),
   fs = require('fs'),
+  path = require('path'),
   Web3 = require('web3'),
-  shellAsyncCmd = require('node-cmd');
+  shellAsyncCmd = require('node-cmd'),
+  program = require('commander');
 
 const setUpConfig = require('./config.js');
 
@@ -12,7 +14,7 @@ const gethFolder = setUpConfig.chain.gethFolder,
   passphrase = 'testtest',
   hexStartsWith = '0x',
   passwordFilePath = gethFolder + '/pwd',
-  etherToWeiCinversion = new BigNumber(1000000000000000000);
+  etherToWeiCinversion = new BigNumber('1000000000000000000');
 
 const InitDevEnv = function(params) {
   const oThis = this;
@@ -52,8 +54,6 @@ InitDevEnv.prototype = {
 
     // fund ETH
     await oThis._fundEth();
-
-    console.log('Dev env init DONE!');
   },
 
   _initConfigFile: function() {
@@ -65,7 +65,7 @@ InitDevEnv.prototype = {
     oThis._addConfig({
       chainId: setUpConfig.chain.chainId,
       networkId: setUpConfig.chain.networkId,
-      gasLimit: setUpConfig.chain.gasLimit,
+      gas: setUpConfig.chain.gas,
       gasPrice: setUpConfig.chain.gasprice,
       gethRpcEndPoint: oThis._rpcEndpoint(),
       gethWsEndPoint: oThis._wsEndpoint()
@@ -95,7 +95,7 @@ InitDevEnv.prototype = {
       setUpConfig.chain.chainId,
       chainOwnerAddress,
       setUpConfig.chain.allocAmount,
-      setUpConfig.chain.gasLimit,
+      setUpConfig.chain.gas,
       setUpConfig.chain.genesisFileTemplatePath,
       setUpConfig.chain.genesisFilePath
     );
@@ -123,7 +123,7 @@ InitDevEnv.prototype = {
       `geth --datadir '${gethFolder}'` +
       ` --networkid ${setUpConfig.chain.networkId}` +
       ` --port ${setUpConfig.chain.geth.port}` +
-      ` --mine --minerthreads 1 --targetgaslimit ${setUpConfig.chain.gasLimit} --gasprice 0x3B9ACA00` +
+      ` --mine --minerthreads 1 --targetgaslimit ${setUpConfig.chain.gas} --gasprice 0x3B9ACA00` +
       ` --rpc --rpcapi eth,net,web3,personal,txpool --rpcaddr ${setUpConfig.chain.geth.host} --rpcport ${
         setUpConfig.chain.geth.rpcport
       }` +
@@ -173,7 +173,7 @@ InitDevEnv.prototype = {
 
     let senderAddr = configFileContent.chainOwnerAddress,
       web3Instance = new Web3(oThis._rpcEndpoint()),
-      amount = '100000000000000000000';
+      amount = '1000000000000000000000';
 
     let ethRecipients = [
       'workerAddress',
@@ -205,7 +205,7 @@ InitDevEnv.prototype = {
         to: recipient,
         value: amount,
         gasPrice: setUpConfig.chain.gasprice,
-        gas: setUpConfig.chain.gasLimit
+        gas: setUpConfig.chain.gas
       });
     });
   },
@@ -226,7 +226,7 @@ InitDevEnv.prototype = {
     chainId,
     allocAmountToAddress,
     allocAmount,
-    gasLimit,
+    gas,
     chainGenesisTemplateLocation,
     chainGenesisLocation,
     sealerAddress
@@ -245,8 +245,8 @@ InitDevEnv.prototype = {
     fileContent.config.chainId = chainId;
 
     // set gas limit
-    let bnGasLimit = new BigNumber(gasLimit);
-    fileContent.gasLimit = hexStartsWith + bnGasLimit.toString(16);
+    let bnGas = new BigNumber(gas);
+    fileContent.gas = hexStartsWith + bnGas.toString(16);
 
     console.log(JSON.stringify(fileContent));
 
@@ -287,16 +287,39 @@ InitDevEnv.prototype = {
 };
 
 // commander
-const os = require('os');
-new InitDevEnv({
-  setupRoot: os.homedir() + '/openst-setup' // later to come as argument for this script
-})
-  .perform()
-  .then(function() {
-    console.log('Exiting initDevEnv with exit code 0');
+(function() {
+  let defaultSetupPath = path.join(process.cwd(), './');
+  program
+    .version('0.1.0')
+    .usage(`<path_to_setup_directory> (default: ${defaultSetupPath})`)
+    .parse(process.argv);
+
+  let setupRoot = program.args[0] || defaultSetupPath;
+  setupRoot = path.resolve(setupRoot);
+
+  try {
+    let setupRootStats = fs.statSync(setupRoot);
+    if (!setupRootStats.isDirectory()) {
+      throw 'Invalid setup directory path.';
+    }
+  } catch (e) {
+    console.log(e.message);
     process.exit(0);
+  }
+
+  setupRoot = path.resolve(setupRoot, './openst-setup');
+  console.log('Creating openst-setup folder. path = ', setupRoot);
+
+  new InitDevEnv({
+    setupRoot: setupRoot
   })
-  .catch(function() {
-    console.log('Exiting initDevEnv with error');
-    process.exit(1);
-  });
+    .perform()
+    .then(function() {
+      console.log('openst-setup development environment setup is complete');
+      process.exit(0);
+    })
+    .catch(function(reason) {
+      console.log('openst-setup development environment setup could not be completed.');
+      process.exit(1);
+    });
+})();

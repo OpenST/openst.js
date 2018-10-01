@@ -11,6 +11,16 @@ const composerMap = {};
 const instanceComposerMethodName = 'ic';
 const shadowMap = {};
 
+InstanceComposer.registerObject = function(obj, getterMethodName) {
+  if (composerMap.hasOwnProperty(getterMethodName) || shadowMap.hasOwnProperty(getterMethodName)) {
+    console.trace('Duplicate register Getter Method name', getterMethodName);
+    throw `Duplicate register Getter Method Name ${getterMethodName}`;
+  }
+  InstanceComposer.prototype[getterMethodName] = function() {
+    return obj;
+  };
+};
+
 InstanceComposer.register = function(
   ClassConstructor,
   getterMethodName,

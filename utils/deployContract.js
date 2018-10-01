@@ -15,7 +15,7 @@ DeployContract.prototype = {
     const oThis = this;
 
     let txOptions = {
-      from: oThis.deployerAddress,
+      from: oThis.from,
       gas: oThis.gas,
       gasPrice: oThis.gasPrice
     };
@@ -65,8 +65,8 @@ DeployContract.prototype = {
       return Promise.reject('Contract deployment failed. oThis.web3.eth.getCode returned empty code.');
     }
 
-    console.log('Address  : ' + contractAddress);
-    console.log('Gas used : ' + receipt.gasUsed);
+    console.log('Address  :', contractAddress);
+    console.log('Gas used :', receipt.gasUsed, '\n');
 
     return Promise.resolve({
       receipt: receipt,
