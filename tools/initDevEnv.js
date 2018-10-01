@@ -320,6 +320,7 @@ InitDevEnv.prototype = {
     })
     .catch(function(reason) {
       console.log('openst-setup development environment setup could not be completed.');
+      console.log('reason', reason);
       process.exit(1);
     });
 })();
