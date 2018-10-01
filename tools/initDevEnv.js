@@ -10,18 +10,31 @@ const shell = require('shelljs'),
 
 const setUpConfig = require('./config.js');
 
-const gethFolder = setUpConfig.chain.gethFolder,
+//Convert to absolute paths
+setUpConfig.chain.genesisFileTemplatePath = path.join(__dirname, setUpConfig.chain.genesisFileTemplatePath);
+
+let gethFolder,
   passphrase = 'testtest',
   hexStartsWith = '0x',
-  passwordFilePath = gethFolder + '/pwd',
+  passwordFilePath,
   etherToWeiCinversion = new BigNumber('1000000000000000000');
 
 const InitDevEnv = function(params) {
   const oThis = this;
 
   oThis.setupRoot = params.setupRoot;
-  oThis.configJsonFilePath = oThis.setupRoot + '/' + 'config.json';
+  oThis.configJsonFilePath = path.join(oThis.setupRoot, '/config.json');
   oThis.gethShellPath = null;
+  gethFolder = path.join(setupRoot, setUpConfig.chain.gethFolder);
+  passwordFilePath = path.join(gethFolder, '/pwd');
+  setUpConfig.chain.genesisFileTemplatePath = path.join(__dirname, setUpConfig.chain.genesisFileTemplatePath);
+  setUpConfig.chain.genesisFilePath = path.join(gethFolder, setUpConfig.chain.genesisFilePath);
+
+  console.log('configJsonFilePath', oThis.configJsonFilePath);
+  console.log('gethFolder', gethFolder);
+  console.log('passwordFilePath', passwordFilePath);
+  console.log('setUpConfig.chain.genesisFileTemplatePath', setUpConfig.chain.genesisFileTemplatePath);
+  console.log('setUpConfig.chain.genesisFilePath', setUpConfig.chain.genesisFilePath);
 };
 
 InitDevEnv.prototype = {
@@ -248,9 +261,9 @@ InitDevEnv.prototype = {
     let bnGas = new BigNumber(gas);
     fileContent.gas = hexStartsWith + bnGas.toString(16);
 
-    console.log(JSON.stringify(fileContent));
+    console.log(JSON.stringify(fileContent, null, 2));
 
-    oThis._executeInShell("echo '" + JSON.stringify(fileContent) + "' > " + chainGenesisLocation);
+    oThis._executeInShell("echo '" + JSON.stringify(fileContent, null, 2) + "' > " + chainGenesisLocation);
 
     return true;
   },
@@ -264,7 +277,7 @@ InitDevEnv.prototype = {
       fileContent[i] = params[i];
     }
 
-    oThis._executeInShell("echo '" + JSON.stringify(fileContent) + "' > " + oThis.configJsonFilePath);
+    oThis._executeInShell("echo '" + JSON.stringify(fileContent, null, 2) + "' > " + oThis.configJsonFilePath);
   },
 
   _executeInShell: function(cmd) {
