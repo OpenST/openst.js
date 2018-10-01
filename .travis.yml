@@ -5,7 +5,6 @@ branches:
   only:
   - master
   - develop
-  - openst_0_9_4_develop
 notifications:
   email:
     recipients:
@@ -31,6 +30,4 @@ before_script:
 script:
   - mocha --timeout 120000 test/* --exit
 after_script:
-  - echo 'inside after_script before sleep'
-  - sleep 30
-  - echo 'inside after_script after sleep'
+  - kill $(ps aux | grep 'openst-setup/origin-geth' | awk '{print $2}')
