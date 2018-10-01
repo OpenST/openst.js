@@ -2,14 +2,8 @@
 
 OpenST is a framework for building token economies. Here are steps to get your started with openst.js. In order to view and example, please visit our example repo[ADD LINK HERE]
 
-Below is an overview of the different steps in this file:<br/>
-1. Pre-requisites <br/>
-2. Setting up the developer environment <br/>
-3. Setting up accounts
-4.
 
-
-#### Below is overview of different components:
+#### Overview of different components:
 
 1. TokenRules contract: The TokenRules Contract keeps a list of all the registered Custom Rules Contracts with their properties and helps in interacting with them.Each economy must have one TokenRules Contract deployed.
 
@@ -17,7 +11,19 @@ Below is an overview of the different steps in this file:<br/>
 
 3. Rule contracts: These contracts contains business logic that the economy creator uses to achieve their community or business goals . Each economy must have at least one custom Rule.
 
-##### Initial Setup
+#### Below is an overview of the different steps in this file:<br/>
+1. Basic Setup <br/>
+2. Setting up the developer environment <br/>
+3. Creating an OpenST object <br/>
+4. Adding Accounts <br/>
+5. Deploying and ERC20 Contract <br/>
+6. Economy setup <br/>
+7. User setup <br/>
+8. Balance verification: Before execute rule <br/>
+9. Execute sample rule <br/>
+10. Balance verification: After execute rule
+
+###### Basic Setup
 
 1.  Install the following packages
 ```
@@ -53,7 +59,7 @@ Below is an overview of the different steps in this file:<br/>
   - ephemeralKey - the key which will be authorized by owners in TokenHolder contract. This key will sign execute custom rule transactions.
   - facilitatorAddress - the address which will facilitate custom rule transactions.
 
-
+#### Setting up the developer environment
 ###### Clone openst.js
 ```
 git clone git@github.com:OpenSTFoundation/openst.js.git
@@ -65,7 +71,7 @@ git checkout develop
 npm install
 ```
 
-##### Initializing chain on developer machines
+###### Initialize the chain on developer machine
 
 The below command creates a json file (`~/openst-setup/config.json`) with all the needed addresses and other constants.
 It also starts Geth process for the chain.<br/> This is a "quick-start" option. You could also choose to do this step manually.
@@ -77,7 +83,7 @@ node ./tools/initDevEnv.js ~
 
 ```
 
-##### Creating an OpenST object
+#### Creating an OpenST object
 OpenST.js is a thin layer over web3js. Its constructor arguments are same as that of web3js.
 
 
@@ -100,7 +106,7 @@ let web3 = openST.web3();
 
 ```
 
-##### Sample Constants
+###### Sample Constants
 Please use below code if you have set up development environment using init-dev-env.
 
 ```js
@@ -157,7 +163,7 @@ const gas = 8000000;
 
 ```
 
-##### ABI and BIN Provider.
+###### ABI and BIN Provider
 OpenST.js comes with an in-built abi-bin provider for managing abi(s) and bin(s).
 The abiBinProvider provides developers with following abi(s) and bin(s):
 
@@ -175,12 +181,12 @@ let mockTokenAbi = abiBinProvider.getABI('MockToken');
 
 ```
 
-### Adding accounts
+#### Adding accounts
 One can add accounts to web3 wallet or to our custom signer service. Please choose only ONE of the options described below.
 
 Remember to add all of deployerAddress, organizationAddress, wallet1, wallet2, ephemeralKey and facilitatorAddress to use the functionality given in this readme.
 
-##### Option 1: Add accounts to web3 wallets
+###### Option 1: Add accounts to web3 wallets
 For adding to web3 wallet, there are 2 ways. We can add using the keystore file OR by private key.If you choose this option, you could also choose to connect to an [infura endpoint](https://infura.io/docs) rather than running a full geth node.
 <br/>Detailed documentation on adding accounts can be found here : https://web3js.readthedocs.io/en/1.0/web3-eth-accounts.html
 ```js
@@ -195,7 +201,7 @@ let addToWalletByKeystoreContent = function (encrhttps://infura.io/docsyptedPriv
 
 ```
 
-#### Option 2: OpenST Signers Service
+###### Option 2: OpenST Signers Service
 
 You can set the signer service using `openST.signers.setSignerService` method.<br/>. To use the signer service, you must have a full geth node running locally.
  Once the signer service is set up, you can continue to use [Contract.methods.myMethod.send](https://web3js.readthedocs.io/en/1.0/web3-eth-contract.html#methods-mymethod-send) & [web3.eth.sendTransaction](https://web3js.readthedocs.io/en/1.0/web3-eth.html#sendtransaction) without worrying about unlocking/signing the transactions.
@@ -268,7 +274,7 @@ openST.signers.setSignerService(gethSigner);
 
 ```
 
-#### OpenST Deployer
+###### OpenST Deployer
 OpenST.js comes with deployer Class that can deploy TokenRules, TokenHolder, TransferRule (Sample Rule), ERC20 Token (Mock ERC20 Token).
 ```js
 let deployerParams = {
@@ -282,7 +288,7 @@ let deployer = new openST.Deployer( deployerParams );
 ```
 
 
-##### Deploying ERC20 Contract
+#### Deploying ERC20 Contract
 
 To create a token economy, you will want ERC20 contract. You can either use a pre-deployed ERC20 contract or deploy a one as shown below.
 
