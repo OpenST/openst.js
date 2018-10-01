@@ -22,7 +22,8 @@
     "bignumber.js": "4.1.0",
     "path": "0.12.7",
     "web3": "1.0.0-beta.34",
-    "shelljs": "0.8.1"
+    "shelljs": "0.8.1",
+    "node-cmd": "3.0.0"
   },
   "devDependencies": {
     "@babel/core": "7.1.0",
@@ -36,7 +37,6 @@
     "expose-loader": "0.7.5",
     "lint-staged": "7.2.0",
     "mocha": "5.0.0",
-    "node-cmd": "3.0.0",
     "npm-run-all": "4.1.3",
     "os": "0.1.1",
     "pre-commit": "1.2.2",
