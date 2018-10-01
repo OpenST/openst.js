@@ -14,4 +14,4 @@ package-lock.json
 build/
 openst-setup/
 
-web_temp/*
+bin/temp/*
