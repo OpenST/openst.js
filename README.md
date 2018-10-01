@@ -176,12 +176,12 @@ let mockTokenAbi = abiBinProvider.getABI('MockToken');
 ```
 
 ### Adding accounts
-One can add accounts to web3 wallet or to our custom signer service. You should do only one of these and not both.
+One can add accounts to web3 wallet or to our custom signer service. Please choose only ONE of the options described below.
 
 Remember to add all of deployerAddress, organizationAddress, wallet1, wallet2, ephemeralKey and facilitatorAddress to use the functionality given in this readme.
 
 ##### Option 1: Add accounts to web3 wallets
-For adding to web3 wallet, there are 2 ways. We can add using the keystore file OR by private key.If you choose this option, you could also choose to connect to an [infura endpoint]() rather than running a full geth node.
+For adding to web3 wallet, there are 2 ways. We can add using the keystore file OR by private key.If you choose this option, you could also choose to connect to an [infura endpoint](https://infura.io/docs) rather than running a full geth node.
 <br/>Detailed documentation on adding accounts can be found here : https://web3js.readthedocs.io/en/1.0/web3-eth-accounts.html
 ```js
 
@@ -196,13 +196,12 @@ let addToWalletByKeystoreContent = function (encrhttps://infura.io/docsyptedPriv
 ```
 
 #### Option 2: OpenST Signers Service
-OpenST.js makes it easy for developers to build custom and secure key-management solutions.
 
-Thats right! You can build your own custom signer service. Once the signer service is set, you can continue to use Contract.methods.myMethod.send (https://web3js.readthedocs.io/en/1.0/web3-eth-contract.html#methods-mymethod-send) & web3.eth.sendTransaction (https://web3js.readthedocs.io/en/1.0/web3-eth.html#sendtransaction) without worrying about unlocking/signing the transactions. You can set the signer service using `openST.signers.setSignerService` method.
-
+You can set the signer service using `openST.signers.setSignerService` method.<br/>. To use the signer service, you must have a full geth node running locally.
+ Once the signer service is set up, you can continue to use [Contract.methods.myMethod.send](https://web3js.readthedocs.io/en/1.0/web3-eth-contract.html#methods-mymethod-send) & [web3.eth.sendTransaction](https://web3js.readthedocs.io/en/1.0/web3-eth.html#sendtransaction) without worrying about unlocking/signing the transactions.
 OpenST.js will call your service to determine the nonce of the sender, ask your service to sign the transaction and then submit the transaction.
 
-All you need to do is provide the instance of openST with an object that exposes three functions:
+All you need to do is provide the instance of OpenST with an object that exposes three functions:
 ```js
 
 let signerServiceObject = {
@@ -253,7 +252,7 @@ let signerServiceObject = {
 
 ```
 
-openst.js comes with a sample geth signer service that you can use for development purpose.
+OpenST.js comes with a sample Geth signer service that you can use for development.
 
 ```js
 let gethSigner = new openST.utils.GethSignerService(openST.web3());
@@ -270,7 +269,7 @@ openST.signers.setSignerService(gethSigner);
 ```
 
 #### OpenST Deployer
-openst.js comes with Deployer Class that can deploy TokenRules, TokenHolder, TransferRule (Sample Rule), ERC20 Token (Mock ERC20 Token).
+OpenST.js comes with deployer Class that can deploy TokenRules, TokenHolder, TransferRule (Sample Rule), ERC20 Token (Mock ERC20 Token).
 ```js
 let deployerParams = {
   "from": deployerAddress,
@@ -283,9 +282,9 @@ let deployer = new openST.Deployer( deployerParams );
 ```
 
 
-##### Deploying ERC20 Contract (Optional)
+##### Deploying ERC20 Contract
 
-Optionally, you will want ERC20 contract to be deployed. You can use a pre-deployed ERC20 contract address as well, instead.
+To create a token economy, you will want ERC20 contract. You can either use a pre-deployed ERC20 contract or deploy a one as shown below.
 
 ```js
 // Deploy ERC20 - if needed. Not mandatory
@@ -298,9 +297,12 @@ deployer.deployERC20Token().then(function( receipt ){
 
 ```
 
-##### Deploying TokenRules Contract
+#### Economy Setup
 
-TokenRules contract is deployed per organization. Organization needs register custom rules contract in TokenRules contract.
+
+###### Deploying the TokenRules Contract
+
+One TokenRules contract is deployed per organization. Only the Organization can register custom rules contract in TokenRules contract.
 
 ```js
 // Deploy TokenRules contract
@@ -313,28 +315,10 @@ deployer.deployTokenRules(organizationAddress, erc20Address).then(function( rece
 
 ```
 
-##### Deploying TokenHolder Contract
-
-Per user TokenHolder contract is deployed. TokenHolder contract holds Utility tokens of user.
-
-```js
-let wallets = [wallet1, wallet2];
-let requirement = wallets.length;
-let tokenHolderAddress = null;
-
-// Deploy TokenHolder Contract
-deployer.deployTokenHolder(erc20Address, tokenRulesAddress, requirement, wallets).then(function(receipt){
-  tokenHolderAddress = receipt.contractAddress;
-  console.log('tokenHolderAddress noted down:', tokenHolderAddress);
-});
-
-
-```
-
-##### Deploy Rule Contract (A Simple Transfer Rule)
-openst.js comes with a Simple Transfer Rule Contract that tranfers ERC20 Tokens using the OpenST protocol.
-We encorage you to deploy and use your own Custom Token Economy Rule.
-Here we shall deploye the Transfer Rule contract.
+###### Deploy Rule Contract (A Simple Transfer Rule)
+OpenST.js comes with a Simple Transfer Rule Contract that transfers ERC20 Tokens using the OpenST protocol.
+We encourage you to deploy and use your own Custom Token Economy Rule.
+Here we shall deploy the Transfer Rule contract.
 Later, this rule contract will be registered in TokenRules contract by the organization.
 
 ```js
@@ -349,11 +333,7 @@ deployer.deploySimpleTransferRule(tokenRulesAddress).then(function( receipt ){
 
 ```
 
-#### OpenST Contracts
-`openSt.contracts` exposes TokenHolder and TokenRules contract interact classes.
-These contract interacts object are similar to [web3.eth.Contracts.methods](https://web3js.readthedocs.io/en/1.0/web3-eth-contract.html#id12).
-
-##### Register Token Economy Rule using `openST.contracts.TokenRules`
+###### Register Token Economy Rule using `openST.contracts.TokenRules`
 
 ```js
 
@@ -377,7 +357,32 @@ tokenRules.registerRule(ruleName, transferRuleAddress, ruleAbi).send({
 
 ```
 
-##### Create Ephemeral Key for TokenHolder Contract (Optional)
+###### OpenST Contracts
+`openSt.contracts` exposes TokenHolder and TokenRules contract interact classes.
+These contract interacts object are similar to [web3.eth.Contracts.methods](https://web3js.readthedocs.io/en/1.0/web3-eth-contract.html#id12).
+
+#### User Setup
+###### Deploying TokenHolder Contract
+
+One TokenHolder contract is deployed per user.
+TokenHolder contract holds Utility tokens for the user.
+
+```js
+let wallets = [wallet1, wallet2];
+let requirement = wallets.length;
+let tokenHolderAddress = null;
+
+// Deploy TokenHolder Contract
+deployer.deployTokenHolder(erc20Address, tokenRulesAddress, requirement, wallets).then(function(receipt){
+  tokenHolderAddress = receipt.contractAddress;
+  console.log('tokenHolderAddress noted down:', tokenHolderAddress);
+});
+
+
+```
+
+
+###### Create Ephemeral Key for TokenHolder Contract (Optional)
 ```js
 
 
@@ -388,9 +393,9 @@ tokenRules.registerRule(ruleName, transferRuleAddress, ruleAbi).send({
 
 ```
 
-##### Authorize session keys in TokenHolder
+###### Authorize session keys in TokenHolder
 
-Using TH authorize session function, owners can register an ephemeral key. Authorize session is a multisig operation.
+Using TH authorize session function, owners can register an ephemeral key. Authorize session is a multi-sig operation.
 
 ```js
 
@@ -464,9 +469,9 @@ authorizeSession(openST, tokenHolderAddress, ephemeralKeyAddress, wallets);
 
 ```
 
-##### Fund ERC20 tokens
+###### Fund ERC20 tokens
 
-Now we will fund ERC20 tokens to token holder contract address for example execute rule to run.
+The token holder contract address must be funded with Branded Tokens for the transfer rule to be executed
 
 ```js
 // Fund ERC20 tokens to the tokenHolderAddress
@@ -493,7 +498,7 @@ fundERC20Tokens().then(function(r) {
 
 ```
 
-##### Balance verification after execute rule
+#### Balance verification: Before execute rule
 
 ```js
 let checkBalance = async function (address) {
@@ -509,10 +514,10 @@ checkBalance(tokenHolderAddress).then(function (r) {
 });
 ```
 
-##### Execute sample rule
+#### Execute sample rule
 
-Here executable transaction is signed by ephemeral key. Facilitator calls TokenHolder execute rule method to execute custom rule.
-TokenHolder approves Token rules for transfer. Transfers are done in TokenRules contract.
+Here, the executable transaction is signed by an ephemeral key. The facilitator calls TokenHolder execute rule method to execute the custom rule.
+TokenHolder approves Token rules for transfer. Transfers are performed by the TokenRules contract.
 
 ```js
 let executeSampleRule = async function(tokenRulesContractAddress, tokenHolderContractAddress, ephemeralKeyAccount) {
@@ -592,7 +597,7 @@ executeSampleRule(tokenRulesAddress, tokenHolderAddress, ephemeralKeyAccount);
 
 ```
 
-##### Balance verification after execute rule
+#### Balance verification: After execute rule
 
 ```js
 let verifyBalance = async function () {
