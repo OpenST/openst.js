@@ -22,12 +22,12 @@ let gethFolder,
 const InitDevEnv = function(params) {
   const oThis = this;
 
-  oThis.setupRoot = params.setupRoot;
+  let setupRoot = (oThis.setupRoot = params.setupRoot);
   oThis.configJsonFilePath = path.join(oThis.setupRoot, '/config.json');
   oThis.gethShellPath = null;
   gethFolder = path.join(setupRoot, setUpConfig.chain.gethFolder);
   passwordFilePath = path.join(gethFolder, '/pwd');
-  setUpConfig.chain.genesisFileTemplatePath = path.join(__dirname, setUpConfig.chain.genesisFileTemplatePath);
+  setUpConfig.chain.genesisFileTemplatePath = path.join('', setUpConfig.chain.genesisFileTemplatePath);
   setUpConfig.chain.genesisFilePath = path.join(gethFolder, setUpConfig.chain.genesisFilePath);
 
   console.log('configJsonFilePath', oThis.configJsonFilePath);
