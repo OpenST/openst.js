@@ -53,7 +53,7 @@ let authorizeSession = async function(openST, tokenHolderAddress, ephemeralKey, 
 
   console.log('** TransactionConfirmed event obtained.');
 
-  let transactionId = submitAuthorizeSession1Response.events.SessionAuthorizationSubmitted.returnValues._transactionId;
+  let transactionId = submitAuthorizeSession1Response.events.SessionAuthorizationSubmitted.returnValues._transactionID;
 
   while (len--) {
     let currWallet = wallets[len];
@@ -132,7 +132,7 @@ let executeSampleRule = async function(openST, tokenRulesContractAddress, tokenH
     .ephemeralKeys(ephemeralKey)
     .call({})
     .then((ephemeralKeyData) => {
-      let nonceBigNumber = new BigNumber(ephemeralKeyData[1]);
+      let nonceBigNumber = new BigNumber(ephemeralKeyData[1]).add(1);
       return nonceBigNumber.toString(10);
     });
 
@@ -224,8 +224,8 @@ describe('test/testExecuteRule', function() {
     let tokenHolderDeployReceipt = await deployer.deployTokenHolder(
       erc20TokenContractAddress,
       tokenRulesContractAddress,
-      requirement,
-      wallets
+      wallets,
+      requirement
     );
     tokenHolderContractAddress = tokenHolderDeployReceipt.contractAddress;
 

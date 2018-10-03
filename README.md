@@ -365,7 +365,7 @@ let requirement = wallets.length;
 let tokenHolderAddress = null;
 
 // Deploy TokenHolder contract
-deployer.deployTokenHolder(erc20Address, tokenRulesAddress, requirement, wallets).then(function(receipt){
+deployer.deployTokenHolder(erc20Address, tokenRulesAddress, wallets, requirement).then(function(receipt){
   tokenHolderAddress = receipt.contractAddress;
   console.log('tokenHolderAddress noted down:', tokenHolderAddress);
 });
@@ -419,7 +419,7 @@ let authorizeSession = async function(openST, tokenHolderAddress, ephemeralKey, 
 
   console.log('SessionAuthorizationSubmitted Event', JSON.stringify(submitAuthorizeSessionReceipt.events.SessionAuthorizationSubmitted, null, 2));
 
-  let transactionId = submitAuthorizeSessionReceipt.events.SessionAuthorizationSubmitted.returnValues._transactionId;
+  let transactionId = submitAuthorizeSessionReceipt.events.SessionAuthorizationSubmitted.returnValues._transactionID;
 
   while (len--) {
     let currWallet = wallets[len];

@@ -56,7 +56,7 @@ let authorizeSession = async function(openST, tokenHolderAddress, ephemeralKey, 
 
   console.log('** TransactionConfirmed event obtained.');
 
-  let transactionId = submitAuthorizeSession1Response.events.SessionAuthorizationSubmitted.returnValues._transactionId;
+  let transactionId = submitAuthorizeSession1Response.events.SessionAuthorizationSubmitted.returnValues._transactionID;
 
   while (len--) {
     let currWallet = wallets[len];
@@ -187,7 +187,7 @@ describe('test/contracts/TokenHolder', function() {
 
     it(`should deploy a new TokenHolder Contract  ${descPostFix}`, function() {
       return deployer
-        .deployTokenHolder(erc20TokenContractAddress, tokenRulesContractAddress, requirement, wallets)
+        .deployTokenHolder(erc20TokenContractAddress, tokenRulesContractAddress, wallets, requirement)
         .then((receipt) => {
           tokenHolderContractAddress = receipt.contractAddress;
           console.log('* Funding ERC20 tokens from deployer address');
@@ -223,7 +223,7 @@ describe('test/contracts/TokenHolder', function() {
         .ephemeralKeys(ephemeralKey)
         .call({})
         .then((ephemeralKeyData) => {
-          let nonceBigNumber = new BigNumber(ephemeralKeyData[1]);
+          let nonceBigNumber = new BigNumber(ephemeralKeyData[1]).add(1);
           return nonceBigNumber.toString(10);
         });
 
