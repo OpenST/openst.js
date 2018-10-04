@@ -99,6 +99,4 @@ Accounts.prototype._addAccountFunctions = function(account) {
   return account;
 };
 
-console.log('EIP1077 signing helper has been added.');
-
 module.exports = Accounts;
