@@ -58,6 +58,13 @@ const webpackOption = {
             options: 'OpenST'
           }
         ]
+      },
+      {
+        test: /package\.json$/,
+        loader: 'package-json-cleanup-loader',
+        options: {
+          only: ['version', 'name', 'otherParam']
+        }
       }
     ]
   },
