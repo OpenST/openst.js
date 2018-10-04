@@ -12,7 +12,7 @@ const config = require('../test/utils/configReader'),
 
 let openST,
   deployParams,
-  erc20TokenContractAddress,
+  eip20TokenContractAddress,
   tokenRulesContractAddress,
   tokenHolderContractAddress,
   sampleCustomRuleContractAddress,
@@ -53,7 +53,7 @@ let authorizeSession = async function(openST, tokenHolderAddress, ephemeralKey, 
 
   console.log('** TransactionConfirmed event obtained.');
 
-  let transactionId = submitAuthorizeSession1Response.events.SessionAuthorizationSubmitted.returnValues._transactionId;
+  let transactionId = submitAuthorizeSession1Response.events.SessionAuthorizationSubmitted.returnValues._transactionID;
 
   while (len--) {
     let currWallet = wallets[len];
@@ -82,13 +82,13 @@ let authorizeSession = async function(openST, tokenHolderAddress, ephemeralKey, 
   console.log('** Ephemeral key', ephemeralKey, 'is active.');
 };
 
-let fundERC20Tokens = async function(openST, erc20TokenContractAddress, tokenHolderContractAddress) {
+let fundEIP20Tokens = async function(openST, eip20TokenContractAddress, tokenHolderContractAddress) {
   const BigNumber = require('bignumber.js');
   let amountToTransfer = new BigNumber('1000000000000000000000');
 
-  console.log('Funding ERC20 tokens to token holder:', tokenHolderContractAddress);
+  console.log('Funding EIP20 tokens to token holder:', tokenHolderContractAddress);
 
-  let mockToken = new (openST.web3()).eth.Contract(abis.mockToken, erc20TokenContractAddress);
+  let mockToken = new (openST.web3()).eth.Contract(abis.mockToken, eip20TokenContractAddress);
 
   return mockToken.methods.transfer(tokenHolderContractAddress, amountToTransfer.toString(10)).send({
     from: config.deployerAddress,
@@ -132,7 +132,7 @@ let executeSampleRule = async function(openST, tokenRulesContractAddress, tokenH
     .ephemeralKeys(ephemeralKey)
     .call({})
     .then((ephemeralKeyData) => {
-      let nonceBigNumber = new BigNumber(ephemeralKeyData[1]);
+      let nonceBigNumber = new BigNumber(ephemeralKeyData[1]).add(1);
       return nonceBigNumber.toString(10);
     });
 
@@ -180,8 +180,8 @@ let executeSampleRule = async function(openST, tokenRulesContractAddress, tokenH
   console.log('** Rule executed with status true.');
 };
 
-let checkBalance = async function(openST, erc20TokenContractAddress, address) {
-  let mockToken = new (openST.web3()).eth.Contract(abis.mockToken, erc20TokenContractAddress);
+let checkBalance = async function(openST, eip20TokenContractAddress, address) {
+  let mockToken = new (openST.web3()).eth.Contract(abis.mockToken, eip20TokenContractAddress);
   return mockToken.methods.balanceOf(address).call({});
 };
 
@@ -203,16 +203,16 @@ describe('test/testExecuteRule', function() {
     await web3WalletHelper.init();
 
     let deployer = new openST.Deployer(deployParams);
-    // deploy ERC20
-    console.log('* Deploying ERC20 Token');
-    let erc20DeployReceipt = await deployer.deployERC20Token();
-    erc20TokenContractAddress = erc20DeployReceipt.contractAddress;
+    // deploy EIP20
+    console.log('* Deploying EIP20 Token');
+    let eip20DeployReceipt = await deployer.deployEIP20Token();
+    eip20TokenContractAddress = eip20DeployReceipt.contractAddress;
 
     // deploy TokenRules
     console.log('* Deploying TokenRules');
     let tokenRulesDeployReceipt = await deployer.deployTokenRules(
       config.organizationAddress,
-      erc20TokenContractAddress
+      eip20TokenContractAddress
     );
     tokenRulesContractAddress = tokenRulesDeployReceipt.contractAddress;
 
@@ -222,10 +222,10 @@ describe('test/testExecuteRule', function() {
 
     console.log('* Deploying Token Holder Contract');
     let tokenHolderDeployReceipt = await deployer.deployTokenHolder(
-      erc20TokenContractAddress,
+      eip20TokenContractAddress,
       tokenRulesContractAddress,
-      requirement,
-      wallets
+      wallets,
+      requirement
     );
     tokenHolderContractAddress = tokenHolderDeployReceipt.contractAddress;
 
@@ -234,8 +234,8 @@ describe('test/testExecuteRule', function() {
 
     await authorizeSession(openST, tokenHolderContractAddress, ephemeralKeyAccount.address, wallets);
 
-    console.log('* Funding ERC20 tokens from deployer address');
-    await fundERC20Tokens(openST, erc20TokenContractAddress, tokenHolderContractAddress);
+    console.log('* Funding EIP20 tokens from deployer address');
+    await fundEIP20Tokens(openST, eip20TokenContractAddress, tokenHolderContractAddress);
 
     console.log('* Deploying Sample Custom Rule');
     let sampleCustomRuleDeployReceipt = await deployer.deploySimpleTransferRule(tokenRulesContractAddress);
@@ -252,13 +252,13 @@ describe('test/testExecuteRule', function() {
   });
 
   it('Execute Sample Custom Rule', async function() {
-    let beforeBalance = await checkBalance(openST, erc20TokenContractAddress, tokenHolderContractAddress);
+    let beforeBalance = await checkBalance(openST, eip20TokenContractAddress, tokenHolderContractAddress);
 
     console.log('* Execute Sample Custom Rule');
     await executeSampleRule(openST, tokenRulesContractAddress, tokenHolderContractAddress, ephemeralKeyAccount);
 
     console.log('* Confirming change in balance of token holder contract');
-    let afterBalance = await checkBalance(openST, erc20TokenContractAddress, tokenHolderContractAddress);
+    let afterBalance = await checkBalance(openST, eip20TokenContractAddress, tokenHolderContractAddress);
 
     const BigNumber = require('bignumber.js');
     let beforeBalanceBn = new BigNumber(beforeBalance);
