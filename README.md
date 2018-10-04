@@ -35,12 +35,13 @@ sudo apt-get install npm
 sudo apt-get install software-properties-common
 ```
 
-2.  Install OpenST.js in your project
+2.  Install OpenST.js in your project using npm
 
 ```bash
-npm install https://github.com/OpenSTFoundation/openst.js#develop --save
-```
+$ npm install @openstfoundation/openst.js --save
 
+
+```
 3.  Install Geth
 
     This code was tested with geth version: 1.7.3-stable. Other higher versions should also work.
@@ -66,17 +67,6 @@ export PATH="$PATH:/usr/local/bin/geth-linux-amd64-1.7.3-4bb3c89d"
     - wallet2 - owner2 of the TokenHolder contract
     - ephemeralKey - the key that will be authorized by owners in the TokenHolder contract; this key will sign execute rule transactions
     - facilitatorAddress - the address that will facilitate execute rule transactions
-
-
-
-#### Installation
-Install openst.js using npm
-
-```bash
-$ npm install @openstfoundation/openst.js --save
-
-
-```
 
 #### Setting up the developer environment
 
