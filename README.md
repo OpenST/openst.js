@@ -284,7 +284,7 @@ let deployer = new openST.Deployer( deployerParams );
 
 #### Deploying an EIP20 contract
 
-To create a token economy, you will want an EIP20 contract. You can either use a pre-deployed EIP20 contract or deploy a new one as shown below.
+To create a token economy, you will want an EIP20 contract. You can either use a pre-deployed EIP20 contract or deploy a new one as shown below (presently only deploys a new MockToken contract).
 
 ```js
 // Deploy EIP20 
