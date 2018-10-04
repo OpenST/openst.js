@@ -1,7 +1,16 @@
 {
   "name": "@openstfoundation/openst.js",
   "version": "0.9.4",
-  "description": "",
+  "description": "OpenST is a framework for building token economies.",
+  "keywords": [
+    "web3",
+    "openST",
+    "OST",
+    "simpletoken",
+    "utility-token",
+    "ethereum",
+    "eip20"
+  ],
   "homepage": "https://openst.org",
   "author": "OpenST Ltd.",
   "license": "LGPL-3.0",
