@@ -109,7 +109,7 @@ const os = require('os');
 let configFilePath = os.homedir() + '/openst-setup/config.json';
 let devEnvConfig = require(configFilePath);
 
-// deployer address
+// Deployer address
 let deployerAddress = devEnvConfig.deployerAddress;
 
 // organization address
@@ -242,6 +242,8 @@ let signerServiceObject = {
     });
   }
 };
+
+
 ```
 
 OpenST.js comes with a sample Geth signer service that you can use for development.
@@ -256,6 +258,8 @@ gethSigner.addAccount(wallet2, passphrase);
 gethSigner.addAccount(facilitatorAddress, passphrase);
 
 openST.signers.setSignerService(gethSigner);
+
+
 ```
 
 ###### OpenST Deployer
