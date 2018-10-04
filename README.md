@@ -159,9 +159,9 @@ OpenST.js comes with an in-built abi-bin provider for managing abi(s) and bin(s)
 The abiBinProvider provides developers with following abi(s) and bin(s):
 
 * [MockToken](https://github.com/OpenSTFoundation/mosaic-contracts/blob/v0.9.3-rc1/contracts/SimpleToken/MockToken.sol) (an EIP20 contract with name 'MockToken')
-* [TokenRules](https://github.com/OpenSTFoundation/openst-contracts/blob/develop/contracts/TokenRules.sol) (a registry of rule contracts and the conduit for transfers)
-* [TokenHolder](https://github.com/OpenSTFoundation/openst-contracts/blob/develop/contracts/TokenHolder.sol) (a multi-sig wallet that can hold tokens)
-* [TransferRule](https://github.com/OpenSTFoundation/openst-contracts/blob/develop/contracts/TransferRule.sol) (a simple transfer rule contract)
+* [TokenRules](https://github.com/OpenSTFoundation/openst-contracts/blob/v0.9.4/contracts/TokenRules.sol) (a registry of rule contracts and the conduit for transfers)
+* [TokenHolder](https://github.com/OpenSTFoundation/openst-contracts/blob/v0.9.4/contracts/TokenHolder.sol) (a multi-sig wallet that can hold tokens)
+* [TransferRule](https://github.com/OpenSTFoundation/openst-contracts/blob/v0.9.4/contracts/TransferRule.sol) (a simple transfer rule contract)
 
 ```js
 // Get the MockToken ABI
