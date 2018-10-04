@@ -3,13 +3,13 @@
   "version": "0.9.4",
   "description": "OpenST is a framework for building token economies.",
   "keywords": [
-    "web3",
-    "openST",
+    "OpenST",
     "OST",
-    "simpletoken",
-    "ethereum",
-    "eip20",
-    "utility-token"
+    "Simple Token",
+    "Token Economy",
+    "web3",
+    "Ethereum",
+    "EIP20"
   ],
   "homepage": "https://openst.org",
   "author": "OpenST Ltd.",
