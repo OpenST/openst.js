@@ -468,7 +468,7 @@ let fundERC20Tokens = async function() {
 
   let mockToken = new (openST.web3()).eth.Contract(mockTokenAbi, erc20Address);
 
-  mockToken.methods
+  return mockToken.methods
     .transfer(tokenHolderAddress, amountToTransfer.toString(10))
     .send({
       from: deployerAddress,
@@ -521,7 +521,7 @@ let executeSampleRule = async function(tokenRulesContractAddress, tokenHolderCon
     .ephemeralKeys(ephemeralKey)
     .call({})
     .then((ephemeralKeyData) => {
-      let nonceBigNumber = new BigNumber(ephemeralKeyData[1]);
+      let nonceBigNumber = (new BigNumber(ephemeralKeyData[1])).add(1);
       return nonceBigNumber.toString(10);
     });
 
