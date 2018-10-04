@@ -14,5 +14,5 @@ package-lock.json
 build/
 openst-setup/
 
-bin/temp/*
-web_temp/*
+tmp/*
+!tmp/.gitkeep

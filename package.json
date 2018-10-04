@@ -1,7 +1,16 @@
 {
   "name": "@openstfoundation/openst.js",
   "version": "0.9.4",
-  "description": "",
+  "description": "OpenST is a framework for building token economies.",
+  "keywords": [
+    "OpenST",
+    "OST",
+    "Simple Token",
+    "Token Economy",
+    "web3",
+    "Ethereum",
+    "EIP20"
+  ],
   "homepage": "https://openst.org",
   "author": "OpenST Ltd.",
   "license": "LGPL-3.0",
@@ -17,14 +26,14 @@
     "webpack-build": "webpack --mode=production",
     "web-pre-build": "node webPreBuild.js",
     "web-build": "npm-run-all web-pre-build webpack-build",
-    "web-post-build" : "git add dist/."
+    "web-post-build": "git add dist/."
   },
   "dependencies": {
     "bignumber.js": "4.1.0",
+    "node-cmd": "3.0.0",
     "path": "0.12.7",
-    "web3": "1.0.0-beta.34",
     "shelljs": "0.8.1",
-    "node-cmd": "3.0.0"
+    "web3": "1.0.0-beta.34"
   },
   "devDependencies": {
     "@babel/core": "7.1.0",
@@ -45,10 +54,11 @@
     "string-replace-loader": "2.1.1",
     "webpack": "4.19.1",
     "webpack-cli": "3.1.0",
-    "webpack-uglify-js-plugin": "1.1.9"
+    "webpack-uglify-js-plugin": "1.1.9",
+    "package-json-cleanup-loader": "1.0.3"
   },
-  "pre-commit":{
-    "run" : [
+  "pre-commit": {
+    "run": [
       "web-build",
       "web-post-build",
       "pre-commit"
