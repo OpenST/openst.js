@@ -9,7 +9,7 @@ OpenST is a framework for building token economies. Here are steps to get starte
 
 2. TokenHolder contracts: Each user in a token economy will be represented by a TokenHolder contract. The TokenHolder contract will hold the user’s tokens. It’s a multi-sig contract (i.e it can have multiple ownership keys, presumably owned by a single natural person).
 
-3. Rule contracts: These contracts contains business logic that the economy creator uses to achieve their community or business goals. Each economy must have at least one rule contract.
+3. Rule contracts: These contracts contains business logic that the economy creator uses to achieve their community or business goals. 
 
 #### Below is an overview of the different steps in this file:
 
