@@ -67,21 +67,18 @@ export PATH="$PATH:/usr/local/bin/geth-linux-amd64-1.7.3-4bb3c89d"
     - ephemeralKey - the key that will be authorized by owners in the TokenHolder contract; this key will sign execute rule transactions
     - facilitatorAddress - the address that will facilitate execute rule transactions
 
-#### Setting up the developer environment
 
-###### Clone OpenST.js repository
+
+#### Installation
+Install openst.js using npm
 
 ```bash
-git clone git@github.com:OpenSTFoundation/openst.js.git
+$ npm install @openstfoundation/openst.js --save
+
+
 ```
 
-###### Install npm packages
-
-```bash  
-cd openst.js
-git checkout develop
-npm install
-```
+#### Setting up the developer environment
 
 ###### Initialize the chain on developer machine
 
@@ -90,7 +87,9 @@ The below command creates a json file (`~/openst-setup/config.json`) with all th
 This is a quick-start option. You could also choose to do this step manually.
 
 ```bash
-node ./tools/initDevEnv.js ~
+node ./node_modules/\@openstfoundation/openst.js/tools/initDevEnv.js ~
+
+
 ```
 
 #### Creating an OpenST object
