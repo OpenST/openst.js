@@ -17,7 +17,7 @@ OpenST is a framework for building token economies. Here are steps to get starte
 2. [Setting up the developer environment](#setting-up-the-developer-environment)
 3. [Creating an OpenST object](#creating-an-openst-object)
 4. [Adding accounts](#adding-accounts)
-5. [Deploying an EIP20 contract](#deploying-an-erc20-contract)
+5. [Deploying an EIP20 contract](#deploying-an-eip20-contract)
 6. [Economy setup](#economy-setup)
 7. [User setup](#user-setup)
 8. [Balance verification: Before execute rule](#balance-verification-before-execute-rule)
@@ -60,7 +60,7 @@ export PATH="$PATH:/usr/local/bin/geth-linux-amd64-1.7.3-4bb3c89d"
 
 5.  Create the following addresses and fund them with gas
 
-    - deployerAddress - address that deploys the ERC20Token, TokenRules, TokenHolder, and rule contracts
+    - deployerAddress - address that deploys the EIP20Token, TokenRules, TokenHolder, and rule contracts
     - organizationAddress - address that registers rule contracts in the TokenRules contract
     - wallet1 - owner1 of the TokenHolder contract
     - wallet2 - owner2 of the TokenHolder contract
@@ -193,7 +193,7 @@ Detailed documentation on adding accounts can be found here: https://web3js.read
 ```js
 // Here is a sample helper method for developers to add an account to the wallet using keystore content
 // Read more about web3.eth.accounts.decrypt here: https://web3js.readthedocs.io/en/1.0/web3-eth-accounts.html#id22
-let addToWalletByKeystoreContent = function (encrhttps://infura.io/docsyptedPrivateKey, password) {
+let addToWalletByKeystoreContent = function (encryptedPrivateKey, password) {
   let account = web3.eth.accounts.decrypt(encryptedPrivateKey, password);
   web3.eth.accounts.wallet.add(account);
 };
@@ -288,11 +288,11 @@ To create a token economy, you will want an EIP20 contract. You can either use a
 
 ```js
 // Deploy EIP20 
-if needed (not mandatory)
-let erc20Address = null;
-deployer.deployERC20Token().then(function( receipt ){
-  erc20Address = receipt.contractAddress;
-  console.log('erc20Address noted down:', erc20Address);
+// if needed (not mandatory)
+let eip20Address = null;
+deployer.deployEIP20Token().then(function( receipt ){
+  eip20Address = receipt.contractAddress;
+  console.log('eip20Address noted down:', eip20Address);
 });
 ```
 
@@ -305,7 +305,7 @@ One TokenRules contract is deployed per Organization. Only the Organization can 
 ```js
 // Deploy TokenRules contract
 let tokenRulesAddress = null;
-deployer.deployTokenRules(organizationAddress, erc20Address).then(function( receipt ){
+deployer.deployTokenRules(organizationAddress, eip20Address).then(function( receipt ){
   tokenRulesAddress = receipt.contractAddress;
   console.log('tokenRulesAddress noted down:', tokenRulesAddress);
 });
@@ -366,7 +366,7 @@ let requirement = wallets.length;
 let tokenHolderAddress = null;
 
 // Deploy TokenHolder contract
-deployer.deployTokenHolder(erc20Address, tokenRulesAddress, wallets, requirement).then(function(receipt){
+deployer.deployTokenHolder(eip20Address, tokenRulesAddress, wallets, requirement).then(function(receipt){
   tokenHolderAddress = receipt.contractAddress;
   console.log('tokenHolderAddress noted down:', tokenHolderAddress);
 });
@@ -461,13 +461,13 @@ The TokenHolder contract address must be funded with tokens for the transfer rul
 ```js
 // Fund the tokenHolderAddress with EIP20 tokens
 // If you are using MockToken, the following method can help you
-let fundERC20Tokens = async function() {
+let fundEIP20Tokens = async function() {
   const BigNumber = require('bignumber.js');
   let amountToTransfer = new BigNumber('1000000000000000000000');
 
-  console.log('Funding ERC20 tokens to token holder:', tokenHolderAddress);
+  console.log('Funding EIP20 tokens to token holder:', tokenHolderAddress);
 
-  let mockToken = new (openST.web3()).eth.Contract(mockTokenAbi, erc20Address);
+  let mockToken = new (openST.web3()).eth.Contract(mockTokenAbi, eip20Address);
 
   return mockToken.methods
     .transfer(tokenHolderAddress, amountToTransfer.toString(10))
@@ -477,8 +477,8 @@ let fundERC20Tokens = async function() {
       gas: gas
     });
 };
-fundERC20Tokens().then(function(r) {
-  console.log('Fund ERC20 DONE!', r);
+fundEIP20Tokens().then(function(r) {
+  console.log('Fund EIP20 DONE!', r);
 });
 ```
 
@@ -487,7 +487,7 @@ fundERC20Tokens().then(function(r) {
 ```js
 let checkBalance = async function (address) {
 
-  let mockToken = new (openST.web3()).eth.Contract(mockTokenAbi, erc20Address);
+  let mockToken = new (openST.web3()).eth.Contract(mockTokenAbi, eip20Address);
   return mockToken.methods.balanceOf(address).call({});
 };
 

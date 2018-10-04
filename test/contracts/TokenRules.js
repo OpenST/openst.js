@@ -12,7 +12,7 @@ const config = require('../../test/utils/configReader'),
 
 let openST,
   deployParams,
-  erc20TokenContractAddress,
+  eip20TokenContractAddress,
   tokenRulesContractAddress,
   tokenHolderContractAddress,
   sampleCustomRuleContractAddress,
@@ -57,10 +57,10 @@ describe('test/TokenRules', function() {
     await web3WalletHelper.init();
 
     deployer = new openST.Deployer(deployParams);
-    // deploy ERC20
-    console.log('* Deploying ERC20 Token');
-    let erc20DeployReceipt = await deployer.deployERC20Token();
-    erc20TokenContractAddress = erc20DeployReceipt.contractAddress;
+    // deploy EIP20
+    console.log('* Deploying EIP20 Token');
+    let eip20DeployReceipt = await deployer.deployEIP20Token();
+    eip20TokenContractAddress = eip20DeployReceipt.contractAddress;
   });
 
   //All Auto Generated Code needs to be tested more than once as prototype
@@ -71,7 +71,7 @@ describe('test/TokenRules', function() {
     let descPostFix = noOfInstances ? '' : '(retest with new instance)';
     it(`it should deploy TokenRules ${descPostFix}`, () => {
       return deployer
-        .deployTokenRules(config.organizationAddress, erc20TokenContractAddress)
+        .deployTokenRules(config.organizationAddress, eip20TokenContractAddress)
         .then((tokenRulesDeployReceipt) => {
           tokenRulesContractAddress = tokenRulesDeployReceipt.contractAddress;
         });

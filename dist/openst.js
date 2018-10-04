@@ -88,7 +88,7 @@
 /* 0 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var global = __webpack_require__(5);
+var global = __webpack_require__(4);
 var core = __webpack_require__(13);
 var hide = __webpack_require__(22);
 var redefine = __webpack_require__(19);
@@ -164,6 +164,108 @@ if (typeof Object.create === 'function') {
 
 /***/ }),
 /* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* eslint-disable node/no-deprecated-api */
+var buffer = __webpack_require__(6)
+var Buffer = buffer.Buffer
+
+// alternative to using Object.keys for old browsers
+function copyProps (src, dst) {
+  for (var key in src) {
+    dst[key] = src[key]
+  }
+}
+if (Buffer.from && Buffer.alloc && Buffer.allocUnsafe && Buffer.allocUnsafeSlow) {
+  module.exports = buffer
+} else {
+  // Copy properties from require('buffer')
+  copyProps(buffer, exports)
+  exports.Buffer = SafeBuffer
+}
+
+function SafeBuffer (arg, encodingOrOffset, length) {
+  return Buffer(arg, encodingOrOffset, length)
+}
+
+// Copy static methods from Buffer
+copyProps(Buffer, SafeBuffer)
+
+SafeBuffer.from = function (arg, encodingOrOffset, length) {
+  if (typeof arg === 'number') {
+    throw new TypeError('Argument must not be a number')
+  }
+  return Buffer(arg, encodingOrOffset, length)
+}
+
+SafeBuffer.alloc = function (size, fill, encoding) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  var buf = Buffer(size)
+  if (fill !== undefined) {
+    if (typeof encoding === 'string') {
+      buf.fill(fill, encoding)
+    } else {
+      buf.fill(fill)
+    }
+  } else {
+    buf.fill(0)
+  }
+  return buf
+}
+
+SafeBuffer.allocUnsafe = function (size) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  return Buffer(size)
+}
+
+SafeBuffer.allocUnsafeSlow = function (size) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  return buffer.SlowBuffer(size)
+}
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports) {
+
+module.exports = function (exec) {
+  try {
+    return !!exec();
+  } catch (e) {
+    return true;
+  }
+};
+
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports) {
+
+// https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
+var global = module.exports = typeof window != 'undefined' && window.Math == Math
+  ? window : typeof self != 'undefined' && self.Math == Math ? self
+  // eslint-disable-next-line no-new-func
+  : Function('return this')();
+if (typeof __g == 'number') __g = global; // eslint-disable-line no-undef
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports) {
+
+module.exports = function (it) {
+  return typeof it === 'object' ? it !== null : typeof it === 'function';
+};
+
+
+/***/ }),
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1960,112 +2062,10 @@ function isnan (val) {
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(15)))
 
 /***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/* eslint-disable node/no-deprecated-api */
-var buffer = __webpack_require__(2)
-var Buffer = buffer.Buffer
-
-// alternative to using Object.keys for old browsers
-function copyProps (src, dst) {
-  for (var key in src) {
-    dst[key] = src[key]
-  }
-}
-if (Buffer.from && Buffer.alloc && Buffer.allocUnsafe && Buffer.allocUnsafeSlow) {
-  module.exports = buffer
-} else {
-  // Copy properties from require('buffer')
-  copyProps(buffer, exports)
-  exports.Buffer = SafeBuffer
-}
-
-function SafeBuffer (arg, encodingOrOffset, length) {
-  return Buffer(arg, encodingOrOffset, length)
-}
-
-// Copy static methods from Buffer
-copyProps(Buffer, SafeBuffer)
-
-SafeBuffer.from = function (arg, encodingOrOffset, length) {
-  if (typeof arg === 'number') {
-    throw new TypeError('Argument must not be a number')
-  }
-  return Buffer(arg, encodingOrOffset, length)
-}
-
-SafeBuffer.alloc = function (size, fill, encoding) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number')
-  }
-  var buf = Buffer(size)
-  if (fill !== undefined) {
-    if (typeof encoding === 'string') {
-      buf.fill(fill, encoding)
-    } else {
-      buf.fill(fill)
-    }
-  } else {
-    buf.fill(0)
-  }
-  return buf
-}
-
-SafeBuffer.allocUnsafe = function (size) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number')
-  }
-  return Buffer(size)
-}
-
-SafeBuffer.allocUnsafeSlow = function (size) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number')
-  }
-  return buffer.SlowBuffer(size)
-}
-
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports) {
-
-module.exports = function (exec) {
-  try {
-    return !!exec();
-  } catch (e) {
-    return true;
-  }
-};
-
-
-/***/ }),
-/* 5 */
-/***/ (function(module, exports) {
-
-// https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
-var global = module.exports = typeof window != 'undefined' && window.Math == Math
-  ? window : typeof self != 'undefined' && self.Math == Math ? self
-  // eslint-disable-next-line no-new-func
-  : Function('return this')();
-if (typeof __g == 'number') __g = global; // eslint-disable-line no-undef
-
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports) {
-
-module.exports = function (it) {
-  return typeof it === 'object' ? it !== null : typeof it === 'function';
-};
-
-
-/***/ }),
 /* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var isObject = __webpack_require__(6);
+var isObject = __webpack_require__(5);
 module.exports = function (it) {
   if (!isObject(it)) throw TypeError(it + ' is not an object!');
   return it;
@@ -2078,7 +2078,7 @@ module.exports = function (it) {
 
 var store = __webpack_require__(96)('wks');
 var uid = __webpack_require__(46);
-var Symbol = __webpack_require__(5).Symbol;
+var Symbol = __webpack_require__(4).Symbol;
 var USE_SYMBOL = typeof Symbol == 'function';
 
 var $exports = module.exports = function (name) {
@@ -7103,7 +7103,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;//     Underscor
 /***/ (function(module, exports, __webpack_require__) {
 
 // Thank's IE8 for his funny defineProperty
-module.exports = !__webpack_require__(4)(function () {
+module.exports = !__webpack_require__(3)(function () {
   return Object.defineProperty({}, 'a', { get: function () { return 7; } }).a != 7;
 });
 
@@ -7543,7 +7543,7 @@ module.exports = {
 /* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var global = __webpack_require__(5);
+var global = __webpack_require__(4);
 var hide = __webpack_require__(22);
 var has = __webpack_require__(21);
 var SRC = __webpack_require__(46)('src');
@@ -7581,7 +7581,7 @@ __webpack_require__(13).inspectSource = function (it) {
 /***/ (function(module, exports, __webpack_require__) {
 
 var $export = __webpack_require__(0);
-var fails = __webpack_require__(4);
+var fails = __webpack_require__(3);
 var defined = __webpack_require__(36);
 var quot = /"/g;
 // B.2.3.2.1 CreateHTML(string, tag, attribute, value)
@@ -7671,7 +7671,7 @@ assert.equal = function assertEqual(l, r, msg) {
 
 "use strict";
 
-var fails = __webpack_require__(4);
+var fails = __webpack_require__(3);
 
 module.exports = function (method, arg) {
   return !!method && fails(function () {
@@ -7826,7 +7826,7 @@ exports.f = __webpack_require__(12) ? gOPD : function getOwnPropertyDescriptor(O
 // most Object methods by ES6 should accept primitives
 var $export = __webpack_require__(0);
 var core = __webpack_require__(13);
-var fails = __webpack_require__(4);
+var fails = __webpack_require__(3);
 module.exports = function (KEY, exec) {
   var fn = (core.Object || {})[KEY] || Object[KEY];
   var exp = {};
@@ -8517,8 +8517,8 @@ module.exports = function (it) {
 
 if (__webpack_require__(12)) {
   var LIBRARY = __webpack_require__(47);
-  var global = __webpack_require__(5);
-  var fails = __webpack_require__(4);
+  var global = __webpack_require__(4);
+  var fails = __webpack_require__(3);
   var $export = __webpack_require__(0);
   var $typed = __webpack_require__(84);
   var $buffer = __webpack_require__(119);
@@ -8534,7 +8534,7 @@ if (__webpack_require__(12)) {
   var toPrimitive = __webpack_require__(39);
   var has = __webpack_require__(21);
   var classof = __webpack_require__(76);
-  var isObject = __webpack_require__(6);
+  var isObject = __webpack_require__(5);
   var toObject = __webpack_require__(24);
   var isArrayIter = __webpack_require__(112);
   var create = __webpack_require__(50);
@@ -9001,7 +9001,7 @@ if (__webpack_require__(12)) {
 /***/ (function(module, exports, __webpack_require__) {
 
 // 7.1.1 ToPrimitive(input [, PreferredType])
-var isObject = __webpack_require__(6);
+var isObject = __webpack_require__(5);
 // instead of the ES6 spec version, we didn't implement @@toPrimitive case
 // and the second argument - flag - preferred type is a string
 module.exports = function (it, S) {
@@ -9019,14 +9019,14 @@ module.exports = function (it, S) {
 /***/ (function(module, exports, __webpack_require__) {
 
 var META = __webpack_require__(46)('meta');
-var isObject = __webpack_require__(6);
+var isObject = __webpack_require__(5);
 var has = __webpack_require__(21);
 var setDesc = __webpack_require__(10).f;
 var id = 0;
 var isExtensible = Object.isExtensible || function () {
   return true;
 };
-var FREEZE = !__webpack_require__(4)(function () {
+var FREEZE = !__webpack_require__(3)(function () {
   return isExtensible(Object.preventExtensions({}));
 });
 var setMeta = function (it) {
@@ -9267,7 +9267,7 @@ process.umask = function() { return 0; };
 /* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Buffer = __webpack_require__(3).Buffer
+var Buffer = __webpack_require__(2).Buffer
 var Transform = __webpack_require__(121).Transform
 var StringDecoder = __webpack_require__(125).StringDecoder
 var inherits = __webpack_require__(1)
@@ -10679,7 +10679,7 @@ module.exports = function (key) {
 
 "use strict";
 
-var global = __webpack_require__(5);
+var global = __webpack_require__(4);
 var dP = __webpack_require__(10);
 var DESCRIPTORS = __webpack_require__(12);
 var SPECIES = __webpack_require__(8)('species');
@@ -10719,7 +10719,7 @@ module.exports = function (target, src, safe) {
 /* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var isObject = __webpack_require__(6);
+var isObject = __webpack_require__(5);
 module.exports = function (it, TYPE) {
   if (!isObject(it) || it._t !== TYPE) throw TypeError('Incompatible receiver, ' + TYPE + ' required!');
   return it;
@@ -10737,7 +10737,7 @@ function oldBrowser () {
   throw new Error('Secure random number generation is not supported by this browser.\nUse Chrome, Firefox or Internet Explorer 11')
 }
 
-var Buffer = __webpack_require__(3).Buffer
+var Buffer = __webpack_require__(2).Buffer
 var crypto = global.crypto || global.msCrypto
 
 if (crypto && crypto.getRandomValues) {
@@ -10776,7 +10776,7 @@ function randomBytes (size, cb) {
 /* 64 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Buffer = __webpack_require__(3).Buffer
+var Buffer = __webpack_require__(2).Buffer
 
 // prototype class for hash functions
 function Hash (blockSize, finalSize) {
@@ -11220,7 +11220,7 @@ function objectToString(o) {
   return Object.prototype.toString.call(o);
 }
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(2).Buffer))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(6).Buffer))
 
 /***/ }),
 /* 70 */
@@ -11237,7 +11237,7 @@ function objectToString(o) {
   return buffer
 }
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(2).Buffer))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(6).Buffer))
 
 /***/ }),
 /* 71 */
@@ -11436,7 +11436,7 @@ module.exports = function (it) {
 
 var $export = __webpack_require__(0);
 var defined = __webpack_require__(36);
-var fails = __webpack_require__(4);
+var fails = __webpack_require__(3);
 var spaces = __webpack_require__(103);
 var space = '[' + spaces + ']';
 var non = '\u200b\u0085';
@@ -11502,7 +11502,7 @@ module.exports = function (exec, skipClosing) {
 
 var hide = __webpack_require__(22);
 var redefine = __webpack_require__(19);
-var fails = __webpack_require__(4);
+var fails = __webpack_require__(3);
 var defined = __webpack_require__(36);
 var wks = __webpack_require__(8);
 
@@ -11579,7 +11579,7 @@ module.exports = function (O, D) {
 /* 82 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var global = __webpack_require__(5);
+var global = __webpack_require__(4);
 var navigator = global.navigator;
 
 module.exports = navigator && navigator.userAgent || '';
@@ -11591,15 +11591,15 @@ module.exports = navigator && navigator.userAgent || '';
 
 "use strict";
 
-var global = __webpack_require__(5);
+var global = __webpack_require__(4);
 var $export = __webpack_require__(0);
 var redefine = __webpack_require__(19);
 var redefineAll = __webpack_require__(61);
 var meta = __webpack_require__(40);
 var forOf = __webpack_require__(80);
 var anInstance = __webpack_require__(60);
-var isObject = __webpack_require__(6);
-var fails = __webpack_require__(4);
+var isObject = __webpack_require__(5);
+var fails = __webpack_require__(3);
 var $iterDetect = __webpack_require__(78);
 var setToStringTag = __webpack_require__(56);
 var inheritIfRequired = __webpack_require__(104);
@@ -11681,7 +11681,7 @@ module.exports = function (NAME, wrapper, methods, common, IS_MAP, IS_WEAK) {
 /* 84 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var global = __webpack_require__(5);
+var global = __webpack_require__(4);
 var hide = __webpack_require__(22);
 var uid = __webpack_require__(46);
 var TYPED = uid('typed_array');
@@ -11876,7 +11876,7 @@ function nextTick(fn, arg1, arg2, arg3) {
 // which is in turn based on the one from crypto-js
 // https://code.google.com/p/crypto-js/
 
-var Buffer = __webpack_require__(3).Buffer
+var Buffer = __webpack_require__(2).Buffer
 
 function asUInt32Array (buf) {
   if (!Buffer.isBuffer(buf)) buf = Buffer.from(buf)
@@ -12105,7 +12105,7 @@ module.exports.AES = AES
 /* 88 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Buffer = __webpack_require__(3).Buffer
+var Buffer = __webpack_require__(2).Buffer
 var MD5 = __webpack_require__(120)
 
 /* eslint-disable camelcase */
@@ -12278,7 +12278,7 @@ function decrypt (data, password) {
   return Buffer.concat(out)
 }
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(2).Buffer))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(6).Buffer))
 
 /***/ }),
 /* 91 */
@@ -12891,8 +12891,8 @@ module.exports = DeployContract;
 /* 95 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var isObject = __webpack_require__(6);
-var document = __webpack_require__(5).document;
+var isObject = __webpack_require__(5);
+var document = __webpack_require__(4).document;
 // typeof document.createElement is 'object' in old IE
 var is = isObject(document) && isObject(document.createElement);
 module.exports = function (it) {
@@ -12905,7 +12905,7 @@ module.exports = function (it) {
 /***/ (function(module, exports, __webpack_require__) {
 
 var core = __webpack_require__(13);
-var global = __webpack_require__(5);
+var global = __webpack_require__(4);
 var SHARED = '__core-js_shared__';
 var store = global[SHARED] || (global[SHARED] = {});
 
@@ -12961,7 +12961,7 @@ module.exports = Array.isArray || function isArray(arg) {
 /* 101 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var document = __webpack_require__(5).document;
+var document = __webpack_require__(4).document;
 module.exports = document && document.documentElement;
 
 
@@ -12971,7 +12971,7 @@ module.exports = document && document.documentElement;
 
 // Works with __proto__ only. Old v8 can't work with null proto objects.
 /* eslint-disable no-proto */
-var isObject = __webpack_require__(6);
+var isObject = __webpack_require__(5);
 var anObject = __webpack_require__(7);
 var check = function (O, proto) {
   anObject(O);
@@ -13008,7 +13008,7 @@ module.exports = '\x09\x0A\x0B\x0C\x0D\x20\xA0\u1680\u180E\u2000\u2001\u2002\u20
 /* 104 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var isObject = __webpack_require__(6);
+var isObject = __webpack_require__(5);
 var setPrototypeOf = __webpack_require__(102).set;
 module.exports = function (that, target, C) {
   var S = target.constructor;
@@ -13160,7 +13160,7 @@ module.exports = function (that, searchString, NAME) {
 /***/ (function(module, exports, __webpack_require__) {
 
 // 7.2.8 IsRegExp(argument)
-var isObject = __webpack_require__(6);
+var isObject = __webpack_require__(5);
 var cof = __webpack_require__(35);
 var MATCH = __webpack_require__(8)('match');
 module.exports = function (it) {
@@ -13321,7 +13321,7 @@ var ctx = __webpack_require__(33);
 var invoke = __webpack_require__(143);
 var html = __webpack_require__(101);
 var cel = __webpack_require__(95);
-var global = __webpack_require__(5);
+var global = __webpack_require__(4);
 var process = global.process;
 var setTask = global.setImmediate;
 var clearTask = global.clearImmediate;
@@ -13409,13 +13409,13 @@ module.exports = {
 
 "use strict";
 
-var global = __webpack_require__(5);
+var global = __webpack_require__(4);
 var DESCRIPTORS = __webpack_require__(12);
 var LIBRARY = __webpack_require__(47);
 var $typed = __webpack_require__(84);
 var hide = __webpack_require__(22);
 var redefineAll = __webpack_require__(61);
-var fails = __webpack_require__(4);
+var fails = __webpack_require__(3);
 var anInstance = __webpack_require__(60);
 var toInteger = __webpack_require__(37);
 var toLength = __webpack_require__(14);
@@ -13691,9 +13691,10 @@ exports[DATA_VIEW] = $DataView;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 var inherits = __webpack_require__(1)
 var HashBase = __webpack_require__(166)
+var Buffer = __webpack_require__(2).Buffer
 
 var ARRAY16 = new Array(16)
 
@@ -13807,7 +13808,7 @@ MD5.prototype._digest = function () {
   this._update()
 
   // produce result
-  var buffer = new Buffer(16)
+  var buffer = Buffer.allocUnsafe(16)
   buffer.writeInt32LE(this._a, 0)
   buffer.writeInt32LE(this._b, 4)
   buffer.writeInt32LE(this._c, 8)
@@ -13837,7 +13838,6 @@ function fnI (a, b, c, d, m, k, s) {
 
 module.exports = MD5
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(2).Buffer))
 
 /***/ }),
 /* 121 */
@@ -14380,7 +14380,7 @@ var Stream = __webpack_require__(168);
 
 /*<replacement>*/
 
-var Buffer = __webpack_require__(3).Buffer;
+var Buffer = __webpack_require__(2).Buffer;
 var OurUint8Array = global.Uint8Array || function () {};
 function _uint8ArrayToBuffer(chunk) {
   return Buffer.from(chunk);
@@ -15017,7 +15017,7 @@ Writable.prototype._destroy = function (err, cb) {
 
 /*<replacement>*/
 
-var Buffer = __webpack_require__(3).Buffer;
+var Buffer = __webpack_require__(2).Buffer;
 /*</replacement>*/
 
 var isEncoding = Buffer.isEncoding || function (encoding) {
@@ -15295,7 +15295,7 @@ function simpleEnd(buf) {
 
 "use strict";
 
-var Buffer = __webpack_require__(2).Buffer
+var Buffer = __webpack_require__(6).Buffer
 var inherits = __webpack_require__(1)
 var HashBase = __webpack_require__(166)
 
@@ -15590,7 +15590,7 @@ function getr(priv) {
   return r;
 }
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(2).Buffer))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(6).Buffer))
 
 /***/ }),
 /* 133 */
@@ -15892,7 +15892,7 @@ module.exports = {
 /* 136 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = !__webpack_require__(12) && !__webpack_require__(4)(function () {
+module.exports = !__webpack_require__(12) && !__webpack_require__(3)(function () {
   return Object.defineProperty(__webpack_require__(95)('div'), 'a', { get: function () { return 7; } }).a != 7;
 });
 
@@ -15901,7 +15901,7 @@ module.exports = !__webpack_require__(12) && !__webpack_require__(4)(function ()
 /* 137 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var global = __webpack_require__(5);
+var global = __webpack_require__(4);
 var core = __webpack_require__(13);
 var LIBRARY = __webpack_require__(47);
 var wksExt = __webpack_require__(97);
@@ -15994,7 +15994,7 @@ var IObject = __webpack_require__(65);
 var $assign = Object.assign;
 
 // should work with symbols and should have deterministic property order (V8 bug)
-module.exports = !$assign || __webpack_require__(4)(function () {
+module.exports = !$assign || __webpack_require__(3)(function () {
   var A = {};
   var B = {};
   // eslint-disable-next-line no-undef
@@ -16027,7 +16027,7 @@ module.exports = !$assign || __webpack_require__(4)(function () {
 "use strict";
 
 var aFunction = __webpack_require__(34);
-var isObject = __webpack_require__(6);
+var isObject = __webpack_require__(5);
 var invoke = __webpack_require__(143);
 var arraySlice = [].slice;
 var factories = {};
@@ -16078,7 +16078,7 @@ module.exports = function (fn, args, that) {
 /* 144 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var $parseInt = __webpack_require__(5).parseInt;
+var $parseInt = __webpack_require__(4).parseInt;
 var $trim = __webpack_require__(77).trim;
 var ws = __webpack_require__(103);
 var hex = /^[-+]?0[xX]/;
@@ -16093,7 +16093,7 @@ module.exports = $parseInt(ws + '08') !== 8 || $parseInt(ws + '0x16') !== 22 ? f
 /* 145 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var $parseFloat = __webpack_require__(5).parseFloat;
+var $parseFloat = __webpack_require__(4).parseFloat;
 var $trim = __webpack_require__(77).trim;
 
 module.exports = 1 / $parseFloat(__webpack_require__(103) + '-0') !== -Infinity ? function parseFloat(str) {
@@ -16119,7 +16119,7 @@ module.exports = function (it, msg) {
 /***/ (function(module, exports, __webpack_require__) {
 
 // 20.1.2.3 Number.isInteger(number)
-var isObject = __webpack_require__(6);
+var isObject = __webpack_require__(5);
 var floor = Math.floor;
 module.exports = function isInteger(it) {
   return !isObject(it) && isFinite(it) && floor(it) === it;
@@ -16291,11 +16291,11 @@ if (__webpack_require__(12) && /./g.flags != 'g') __webpack_require__(10).f(RegE
 "use strict";
 
 var LIBRARY = __webpack_require__(47);
-var global = __webpack_require__(5);
+var global = __webpack_require__(4);
 var ctx = __webpack_require__(33);
 var classof = __webpack_require__(76);
 var $export = __webpack_require__(0);
-var isObject = __webpack_require__(6);
+var isObject = __webpack_require__(5);
 var aFunction = __webpack_require__(34);
 var anInstance = __webpack_require__(60);
 var forOf = __webpack_require__(80);
@@ -16607,7 +16607,7 @@ module.exports.f = function (C) {
 /***/ (function(module, exports, __webpack_require__) {
 
 var anObject = __webpack_require__(7);
-var isObject = __webpack_require__(6);
+var isObject = __webpack_require__(5);
 var newPromiseCapability = __webpack_require__(157);
 
 module.exports = function (C, x) {
@@ -16780,7 +16780,7 @@ module.exports = {
 var redefineAll = __webpack_require__(61);
 var getWeak = __webpack_require__(40).getWeak;
 var anObject = __webpack_require__(7);
-var isObject = __webpack_require__(6);
+var isObject = __webpack_require__(5);
 var anInstance = __webpack_require__(60);
 var forOf = __webpack_require__(80);
 var createArrayMethod = __webpack_require__(30);
@@ -16887,7 +16887,7 @@ module.exports = function (it) {
 var gOPN = __webpack_require__(51);
 var gOPS = __webpack_require__(75);
 var anObject = __webpack_require__(7);
-var Reflect = __webpack_require__(5).Reflect;
+var Reflect = __webpack_require__(4).Reflect;
 module.exports = Reflect && Reflect.ownKeys || function ownKeys(it) {
   var keys = gOPN.f(anObject(it));
   var getSymbols = gOPS.f;
@@ -16956,7 +16956,7 @@ module.exports = Array.isArray || function (arr) {
 
 "use strict";
 
-var Buffer = __webpack_require__(3).Buffer
+var Buffer = __webpack_require__(2).Buffer
 var Transform = __webpack_require__(121).Transform
 var inherits = __webpack_require__(1)
 
@@ -17111,7 +17111,7 @@ var Stream = __webpack_require__(168);
 
 /*<replacement>*/
 
-var Buffer = __webpack_require__(3).Buffer;
+var Buffer = __webpack_require__(2).Buffer;
 var OurUint8Array = global.Uint8Array || function () {};
 function _uint8ArrayToBuffer(chunk) {
   return Buffer.from(chunk);
@@ -18399,7 +18399,7 @@ function done(stream, er, data) {
 
 var inherits = __webpack_require__(1)
 var Hash = __webpack_require__(64)
-var Buffer = __webpack_require__(3).Buffer
+var Buffer = __webpack_require__(2).Buffer
 
 var K = [
   0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5,
@@ -18532,7 +18532,7 @@ module.exports = Sha256
 
 var inherits = __webpack_require__(1)
 var Hash = __webpack_require__(64)
-var Buffer = __webpack_require__(3).Buffer
+var Buffer = __webpack_require__(2).Buffer
 
 var K = [
   0x428a2f98, 0xd728ae22, 0x71374491, 0x23ef65cd,
@@ -18801,7 +18801,7 @@ module.exports = Sha512
 var inherits = __webpack_require__(1)
 var Legacy = __webpack_require__(407)
 var Base = __webpack_require__(42)
-var Buffer = __webpack_require__(3).Buffer
+var Buffer = __webpack_require__(2).Buffer
 var md5 = __webpack_require__(174)
 var RIPEMD160 = __webpack_require__(126)
 
@@ -18911,7 +18911,7 @@ module.exports = function (password, salt, iterations, keylen) {
   }
 }
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(2).Buffer))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(6).Buffer))
 
 /***/ }),
 /* 177 */
@@ -18940,7 +18940,7 @@ var sha = __webpack_require__(127)
 
 var checkParameters = __webpack_require__(176)
 var defaultEncoding = __webpack_require__(177)
-var Buffer = __webpack_require__(3).Buffer
+var Buffer = __webpack_require__(2).Buffer
 var ZEROS = Buffer.alloc(128)
 var sizes = {
   md5: 16,
@@ -19045,7 +19045,7 @@ module.exports = pbkdf2
 /***/ (function(module, exports, __webpack_require__) {
 
 var xor = __webpack_require__(70)
-var Buffer = __webpack_require__(3).Buffer
+var Buffer = __webpack_require__(2).Buffer
 var incr32 = __webpack_require__(180)
 
 function getBlock (self) {
@@ -19108,7 +19108,7 @@ module.exports = {"aes-128-ecb":{"cipher":"AES","key":128,"iv":0,"mode":"ECB","t
 /***/ (function(module, exports, __webpack_require__) {
 
 var aes = __webpack_require__(87)
-var Buffer = __webpack_require__(3).Buffer
+var Buffer = __webpack_require__(2).Buffer
 var Transform = __webpack_require__(42)
 var inherits = __webpack_require__(1)
 var GHASH = __webpack_require__(424)
@@ -19231,7 +19231,7 @@ module.exports = StreamCipher
 /***/ (function(module, exports, __webpack_require__) {
 
 var aes = __webpack_require__(87)
-var Buffer = __webpack_require__(3).Buffer
+var Buffer = __webpack_require__(2).Buffer
 var Transform = __webpack_require__(42)
 var inherits = __webpack_require__(1)
 
@@ -20138,7 +20138,7 @@ function g1_512_lo(xh, xl) {
 
 var inherits = __webpack_require__(1);
 var Reporter = __webpack_require__(73).Reporter;
-var Buffer = __webpack_require__(2).Buffer;
+var Buffer = __webpack_require__(6).Buffer;
 
 function DecoderBuffer(base, options) {
   Reporter.call(this, options);
@@ -20614,7 +20614,7 @@ function derDecodeLen(buf, primitive, fail) {
 /***/ (function(module, exports, __webpack_require__) {
 
 var inherits = __webpack_require__(1);
-var Buffer = __webpack_require__(2).Buffer;
+var Buffer = __webpack_require__(6).Buffer;
 
 var asn1 = __webpack_require__(72);
 var base = asn1.base;
@@ -20920,52 +20920,58 @@ module.exports = {"1.3.132.0.10":"secp256k1","1.3.132.0.33":"p224","1.2.840.1004
 /* 196 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(Buffer) {var createHash = __webpack_require__(68);
-module.exports = function (seed, len) {
-  var t = new Buffer('');
-  var  i = 0, c;
-  while (t.length < len) {
-    c = i2ops(i++);
-    t = Buffer.concat([t, createHash('sha1').update(seed).update(c).digest()]);
-  }
-  return t.slice(0, len);
-};
+var createHash = __webpack_require__(68)
+var Buffer = __webpack_require__(2).Buffer
 
-function i2ops(c) {
-  var out = new Buffer(4);
-  out.writeUInt32BE(c,0);
-  return out;
+module.exports = function (seed, len) {
+  var t = Buffer.alloc(0)
+  var i = 0
+  var c
+  while (t.length < len) {
+    c = i2ops(i++)
+    t = Buffer.concat([t, createHash('sha1').update(seed).update(c).digest()])
+  }
+  return t.slice(0, len)
 }
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(2).Buffer))
+
+function i2ops (c) {
+  var out = Buffer.allocUnsafe(4)
+  out.writeUInt32BE(c, 0)
+  return out
+}
+
 
 /***/ }),
 /* 197 */
 /***/ (function(module, exports) {
 
-module.exports = function xor(a, b) {
-  var len = a.length;
-  var i = -1;
+module.exports = function xor (a, b) {
+  var len = a.length
+  var i = -1
   while (++i < len) {
-    a[i] ^= b[i];
+    a[i] ^= b[i]
   }
   return a
-};
+}
+
 
 /***/ }),
 /* 198 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(Buffer) {var bn = __webpack_require__(9);
-function withPublic(paddedMsg, key) {
-  return new Buffer(paddedMsg
-    .toRed(bn.mont(key.modulus))
-    .redPow(new bn(key.publicExponent))
+var BN = __webpack_require__(9)
+var Buffer = __webpack_require__(2).Buffer
+
+function withPublic (paddedMsg, key) {
+  return Buffer.from(paddedMsg
+    .toRed(BN.mont(key.modulus))
+    .redPow(new BN(key.publicExponent))
     .fromRed()
-    .toArray());
+    .toArray())
 }
 
-module.exports = withPublic;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(2).Buffer))
+module.exports = withPublic
+
 
 /***/ }),
 /* 199 */
@@ -21507,7 +21513,7 @@ if (typeof localStorage === 'undefined') {
 
 module.exports = Accounts;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(15), __webpack_require__(2).Buffer))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(15), __webpack_require__(6).Buffer))
 
 /***/ }),
 /* 200 */
@@ -22082,7 +22088,7 @@ module.exports = {
 
   var Buffer;
   try {
-    Buffer = __webpack_require__(2).Buffer;
+    Buffer = __webpack_require__(6).Buffer;
   } catch (e) {
   }
 
@@ -28720,13 +28726,13 @@ module.exports = __webpack_require__(13);
 "use strict";
 
 // ECMAScript 6 symbols shim
-var global = __webpack_require__(5);
+var global = __webpack_require__(4);
 var has = __webpack_require__(21);
 var DESCRIPTORS = __webpack_require__(12);
 var $export = __webpack_require__(0);
 var redefine = __webpack_require__(19);
 var META = __webpack_require__(40).KEY;
-var $fails = __webpack_require__(4);
+var $fails = __webpack_require__(3);
 var shared = __webpack_require__(96);
 var setToStringTag = __webpack_require__(56);
 var uid = __webpack_require__(46);
@@ -28736,7 +28742,7 @@ var wksDefine = __webpack_require__(137);
 var enumKeys = __webpack_require__(221);
 var isArray = __webpack_require__(100);
 var anObject = __webpack_require__(7);
-var isObject = __webpack_require__(6);
+var isObject = __webpack_require__(5);
 var toIObject = __webpack_require__(23);
 var toPrimitive = __webpack_require__(39);
 var createDesc = __webpack_require__(45);
@@ -29062,7 +29068,7 @@ __webpack_require__(29)('getOwnPropertyNames', function () {
 /***/ (function(module, exports, __webpack_require__) {
 
 // 19.1.2.5 Object.freeze(O)
-var isObject = __webpack_require__(6);
+var isObject = __webpack_require__(5);
 var meta = __webpack_require__(40).onFreeze;
 
 __webpack_require__(29)('freeze', function ($freeze) {
@@ -29077,7 +29083,7 @@ __webpack_require__(29)('freeze', function ($freeze) {
 /***/ (function(module, exports, __webpack_require__) {
 
 // 19.1.2.17 Object.seal(O)
-var isObject = __webpack_require__(6);
+var isObject = __webpack_require__(5);
 var meta = __webpack_require__(40).onFreeze;
 
 __webpack_require__(29)('seal', function ($seal) {
@@ -29092,7 +29098,7 @@ __webpack_require__(29)('seal', function ($seal) {
 /***/ (function(module, exports, __webpack_require__) {
 
 // 19.1.2.15 Object.preventExtensions(O)
-var isObject = __webpack_require__(6);
+var isObject = __webpack_require__(5);
 var meta = __webpack_require__(40).onFreeze;
 
 __webpack_require__(29)('preventExtensions', function ($preventExtensions) {
@@ -29107,7 +29113,7 @@ __webpack_require__(29)('preventExtensions', function ($preventExtensions) {
 /***/ (function(module, exports, __webpack_require__) {
 
 // 19.1.2.12 Object.isFrozen(O)
-var isObject = __webpack_require__(6);
+var isObject = __webpack_require__(5);
 
 __webpack_require__(29)('isFrozen', function ($isFrozen) {
   return function isFrozen(it) {
@@ -29121,7 +29127,7 @@ __webpack_require__(29)('isFrozen', function ($isFrozen) {
 /***/ (function(module, exports, __webpack_require__) {
 
 // 19.1.2.13 Object.isSealed(O)
-var isObject = __webpack_require__(6);
+var isObject = __webpack_require__(5);
 
 __webpack_require__(29)('isSealed', function ($isSealed) {
   return function isSealed(it) {
@@ -29135,7 +29141,7 @@ __webpack_require__(29)('isSealed', function ($isSealed) {
 /***/ (function(module, exports, __webpack_require__) {
 
 // 19.1.2.11 Object.isExtensible(O)
-var isObject = __webpack_require__(6);
+var isObject = __webpack_require__(5);
 
 __webpack_require__(29)('isExtensible', function ($isExtensible) {
   return function isExtensible(it) {
@@ -29238,7 +29244,7 @@ NAME in FProto || __webpack_require__(12) && dP(FProto, NAME, {
 
 "use strict";
 
-var isObject = __webpack_require__(6);
+var isObject = __webpack_require__(5);
 var getPrototypeOf = __webpack_require__(52);
 var HAS_INSTANCE = __webpack_require__(8)('hasInstance');
 var FunctionProto = Function.prototype;
@@ -29278,12 +29284,12 @@ $export($export.G + $export.F * (parseFloat != $parseFloat), { parseFloat: $pars
 
 "use strict";
 
-var global = __webpack_require__(5);
+var global = __webpack_require__(4);
 var has = __webpack_require__(21);
 var cof = __webpack_require__(35);
 var inheritIfRequired = __webpack_require__(104);
 var toPrimitive = __webpack_require__(39);
-var fails = __webpack_require__(4);
+var fails = __webpack_require__(3);
 var gOPN = __webpack_require__(51).f;
 var gOPD = __webpack_require__(28).f;
 var dP = __webpack_require__(10).f;
@@ -29413,7 +29419,7 @@ $export($export.P + $export.F * (!!$toFixed && (
   0.9.toFixed(0) !== '1' ||
   1.255.toFixed(2) !== '1.25' ||
   1000000000000000128.0.toFixed(0) !== '1000000000000000128'
-) || !__webpack_require__(4)(function () {
+) || !__webpack_require__(3)(function () {
   // V8 ~ Android 4.3-
   $toFixed.call({});
 })), 'Number', {
@@ -29476,7 +29482,7 @@ $export($export.P + $export.F * (!!$toFixed && (
 "use strict";
 
 var $export = __webpack_require__(0);
-var $fails = __webpack_require__(4);
+var $fails = __webpack_require__(3);
 var aNumberValue = __webpack_require__(146);
 var $toPrecision = 1.0.toPrecision;
 
@@ -29510,7 +29516,7 @@ $export($export.S, 'Number', { EPSILON: Math.pow(2, -52) });
 
 // 20.1.2.2 Number.isFinite(number)
 var $export = __webpack_require__(0);
-var _isFinite = __webpack_require__(5).isFinite;
+var _isFinite = __webpack_require__(4).isFinite;
 
 $export($export.S, 'Number', {
   isFinite: function isFinite(it) {
@@ -29790,7 +29796,7 @@ var $export = __webpack_require__(0);
 var $imul = Math.imul;
 
 // some WebKit versions fails with big numbers, some has wrong arity
-$export($export.S + $export.F * __webpack_require__(4)(function () {
+$export($export.S + $export.F * __webpack_require__(3)(function () {
   return $imul(0xffffffff, 5) != -5 || $imul.length != 2;
 }), 'Math', {
   imul: function imul(x, y) {
@@ -29862,7 +29868,7 @@ var expm1 = __webpack_require__(107);
 var exp = Math.exp;
 
 // V8 near Chromium 38 has a problem with very small numbers
-$export($export.S + $export.F * __webpack_require__(4)(function () {
+$export($export.S + $export.F * __webpack_require__(3)(function () {
   return !Math.sinh(-2e-17) != -2e-17;
 }), 'Math', {
   sinh: function sinh(x) {
@@ -30297,7 +30303,7 @@ var $export = __webpack_require__(0);
 var toObject = __webpack_require__(24);
 var toPrimitive = __webpack_require__(39);
 
-$export($export.P + $export.F * __webpack_require__(4)(function () {
+$export($export.P + $export.F * __webpack_require__(3)(function () {
   return new Date(NaN).toJSON() !== null
     || Date.prototype.toJSON.call({ toISOString: function () { return 1; } }) !== 1;
 }), 'Date', {
@@ -30331,7 +30337,7 @@ $export($export.P + $export.F * (Date.prototype.toISOString !== toISOString), 'D
 "use strict";
 
 // 20.3.4.36 / 15.9.5.43 Date.prototype.toISOString()
-var fails = __webpack_require__(4);
+var fails = __webpack_require__(3);
 var getTime = Date.prototype.getTime;
 var $toISOString = Date.prototype.toISOString;
 
@@ -30465,7 +30471,7 @@ var $export = __webpack_require__(0);
 var createProperty = __webpack_require__(113);
 
 // WebKit Array.of isn't generic
-$export($export.S + $export.F * __webpack_require__(4)(function () {
+$export($export.S + $export.F * __webpack_require__(3)(function () {
   function F() { /* empty */ }
   return !(Array.of.call(F) instanceof F);
 }), 'Array', {
@@ -30514,7 +30520,7 @@ var toLength = __webpack_require__(14);
 var arraySlice = [].slice;
 
 // fallback for not array-like ES3 strings and DOM objects
-$export($export.P + $export.F * __webpack_require__(4)(function () {
+$export($export.P + $export.F * __webpack_require__(3)(function () {
   if (html) arraySlice.call(html);
 }), 'Array', {
   slice: function slice(begin, end) {
@@ -30544,7 +30550,7 @@ $export($export.P + $export.F * __webpack_require__(4)(function () {
 var $export = __webpack_require__(0);
 var aFunction = __webpack_require__(34);
 var toObject = __webpack_require__(24);
-var fails = __webpack_require__(4);
+var fails = __webpack_require__(3);
 var $sort = [].sort;
 var test = [1, 2, 3];
 
@@ -30599,7 +30605,7 @@ module.exports = function (original, length) {
 /* 312 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var isObject = __webpack_require__(6);
+var isObject = __webpack_require__(5);
 var isArray = __webpack_require__(100);
 var SPECIES = __webpack_require__(8)('species');
 
@@ -30847,7 +30853,7 @@ __webpack_require__(59)('Array');
 /* 326 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var global = __webpack_require__(5);
+var global = __webpack_require__(4);
 var inheritIfRequired = __webpack_require__(104);
 var dP = __webpack_require__(10).f;
 var gOPN = __webpack_require__(51).f;
@@ -30861,7 +30867,7 @@ var re2 = /a/g;
 // "new" creates a new object, old webkit buggy here
 var CORRECT_NEW = new $RegExp(re1) !== re1;
 
-if (__webpack_require__(12) && (!CORRECT_NEW || __webpack_require__(4)(function () {
+if (__webpack_require__(12) && (!CORRECT_NEW || __webpack_require__(3)(function () {
   re2[__webpack_require__(8)('match')] = false;
   // RegExp constructor can alter flags and IsRegExp works correct with @@match
   return $RegExp(re1) != re1 || $RegExp(re2) == re2 || $RegExp(re1, 'i') != '/a/i';
@@ -30910,7 +30916,7 @@ var define = function (fn) {
 };
 
 // 21.2.5.14 RegExp.prototype.toString()
-if (__webpack_require__(4)(function () { return $toString.call({ source: 'a', flags: 'b' }) != '/a/b'; })) {
+if (__webpack_require__(3)(function () { return $toString.call({ source: 'a', flags: 'b' }) != '/a/b'; })) {
   define(function toString() {
     var R = anObject(this);
     return '/'.concat(R.source, '/',
@@ -31055,7 +31061,7 @@ __webpack_require__(79)('split', 2, function (defined, SPLIT, $split) {
 /* 332 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var global = __webpack_require__(5);
+var global = __webpack_require__(4);
 var macrotask = __webpack_require__(118).set;
 var Observer = global.MutationObserver || global.WebKitMutationObserver;
 var process = global.process;
@@ -31197,8 +31203,8 @@ var redefine = __webpack_require__(19);
 var meta = __webpack_require__(40);
 var assign = __webpack_require__(141);
 var weak = __webpack_require__(160);
-var isObject = __webpack_require__(6);
-var fails = __webpack_require__(4);
+var isObject = __webpack_require__(5);
+var fails = __webpack_require__(3);
 var validate = __webpack_require__(62);
 var WEAK_MAP = 'WeakMap';
 var getWeak = meta.getWeak;
@@ -31285,8 +31291,8 @@ var buffer = __webpack_require__(119);
 var anObject = __webpack_require__(7);
 var toAbsoluteIndex = __webpack_require__(49);
 var toLength = __webpack_require__(14);
-var isObject = __webpack_require__(6);
-var ArrayBuffer = __webpack_require__(5).ArrayBuffer;
+var isObject = __webpack_require__(5);
+var ArrayBuffer = __webpack_require__(4).ArrayBuffer;
 var speciesConstructor = __webpack_require__(81);
 var $ArrayBuffer = buffer.ArrayBuffer;
 var $DataView = buffer.DataView;
@@ -31304,7 +31310,7 @@ $export($export.S + $export.F * !$typed.CONSTR, ARRAY_BUFFER, {
   }
 });
 
-$export($export.P + $export.U + $export.F * __webpack_require__(4)(function () {
+$export($export.P + $export.U + $export.F * __webpack_require__(3)(function () {
   return !new $ArrayBuffer(2).slice(1, undefined).byteLength;
 }), ARRAY_BUFFER, {
   // 24.1.4.3 ArrayBuffer.prototype.slice(start, end)
@@ -31443,10 +31449,10 @@ __webpack_require__(38)('Float64', 8, function (init) {
 var $export = __webpack_require__(0);
 var aFunction = __webpack_require__(34);
 var anObject = __webpack_require__(7);
-var rApply = (__webpack_require__(5).Reflect || {}).apply;
+var rApply = (__webpack_require__(4).Reflect || {}).apply;
 var fApply = Function.apply;
 // MS Edge argumentsList argument is optional
-$export($export.S + $export.F * !__webpack_require__(4)(function () {
+$export($export.S + $export.F * !__webpack_require__(3)(function () {
   rApply(function () { /* empty */ });
 }), 'Reflect', {
   apply: function apply(target, thisArgument, argumentsList) {
@@ -31466,10 +31472,10 @@ var $export = __webpack_require__(0);
 var create = __webpack_require__(50);
 var aFunction = __webpack_require__(34);
 var anObject = __webpack_require__(7);
-var isObject = __webpack_require__(6);
-var fails = __webpack_require__(4);
+var isObject = __webpack_require__(5);
+var fails = __webpack_require__(3);
 var bind = __webpack_require__(142);
-var rConstruct = (__webpack_require__(5).Reflect || {}).construct;
+var rConstruct = (__webpack_require__(4).Reflect || {}).construct;
 
 // MS Edge supports only 2 arguments and argumentsList argument is optional
 // FF Nightly sets third argument as `new.target`, but does not create `this` from it
@@ -31521,7 +31527,7 @@ var anObject = __webpack_require__(7);
 var toPrimitive = __webpack_require__(39);
 
 // MS Edge has broken Reflect.defineProperty - throwing instead of returning false
-$export($export.S + $export.F * __webpack_require__(4)(function () {
+$export($export.S + $export.F * __webpack_require__(3)(function () {
   // eslint-disable-next-line no-undef
   Reflect.defineProperty(dP.f({}, 1, { value: 1 }), 1, { value: 2 });
 }), 'Reflect', {
@@ -31598,7 +31604,7 @@ var gOPD = __webpack_require__(28);
 var getPrototypeOf = __webpack_require__(52);
 var has = __webpack_require__(21);
 var $export = __webpack_require__(0);
-var isObject = __webpack_require__(6);
+var isObject = __webpack_require__(5);
 var anObject = __webpack_require__(7);
 
 function get(target, propertyKey /* , receiver */) {
@@ -31723,7 +31729,7 @@ var has = __webpack_require__(21);
 var $export = __webpack_require__(0);
 var createDesc = __webpack_require__(45);
 var anObject = __webpack_require__(7);
-var isObject = __webpack_require__(6);
+var isObject = __webpack_require__(5);
 
 function set(target, propertyKey, V /* , receiver */) {
   var receiver = arguments.length < 4 ? target : arguments[3];
@@ -31969,7 +31975,7 @@ module.exports = __webpack_require__(13).Promise['finally'];
 
 var $export = __webpack_require__(0);
 var core = __webpack_require__(13);
-var global = __webpack_require__(5);
+var global = __webpack_require__(4);
 var speciesConstructor = __webpack_require__(81);
 var promiseResolve = __webpack_require__(158);
 
@@ -32002,7 +32008,7 @@ module.exports = __webpack_require__(13);
 /***/ (function(module, exports, __webpack_require__) {
 
 // ie9- setTimeout & setInterval additional parameters fix
-var global = __webpack_require__(5);
+var global = __webpack_require__(4);
 var $export = __webpack_require__(0);
 var userAgent = __webpack_require__(82);
 var slice = [].slice;
@@ -32042,7 +32048,7 @@ $export($export.G + $export.B, {
 var $iterators = __webpack_require__(116);
 var getKeys = __webpack_require__(48);
 var redefine = __webpack_require__(19);
-var global = __webpack_require__(5);
+var global = __webpack_require__(4);
 var hide = __webpack_require__(22);
 var Iterators = __webpack_require__(57);
 var wks = __webpack_require__(8);
@@ -33063,7 +33069,6 @@ Accounts.prototype._addAccountFunctions = function (account) {
   return account;
 };
 
-console.log('EIP1077 signing helper has been added.');
 module.exports = Accounts;
 
 /***/ }),
@@ -33174,7 +33179,7 @@ module.exports = {
   encodeSignature: encodeSignature,
   decodeSignature: decodeSignature
 };
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(2).Buffer))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(6).Buffer))
 
 /***/ }),
 /* 389 */
@@ -33484,7 +33489,7 @@ module.exports = {
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Buffer = __webpack_require__(3).Buffer;
+var Buffer = __webpack_require__(2).Buffer;
 var util = __webpack_require__(394);
 
 function copyBuffer(src, target, offset) {
@@ -33998,7 +34003,7 @@ module.exports = __webpack_require__(123).PassThrough
 
 var inherits = __webpack_require__(1)
 var Hash = __webpack_require__(64)
-var Buffer = __webpack_require__(3).Buffer
+var Buffer = __webpack_require__(2).Buffer
 
 var K = [
   0x5a827999, 0x6ed9eba1, 0x8f1bbcdc | 0, 0xca62c1d6 | 0
@@ -34099,7 +34104,7 @@ module.exports = Sha
 
 var inherits = __webpack_require__(1)
 var Hash = __webpack_require__(64)
-var Buffer = __webpack_require__(3).Buffer
+var Buffer = __webpack_require__(2).Buffer
 
 var K = [
   0x5a827999, 0x6ed9eba1, 0x8f1bbcdc | 0, 0xca62c1d6 | 0
@@ -34204,7 +34209,7 @@ module.exports = Sha1
 var inherits = __webpack_require__(1)
 var Sha256 = __webpack_require__(171)
 var Hash = __webpack_require__(64)
-var Buffer = __webpack_require__(3).Buffer
+var Buffer = __webpack_require__(2).Buffer
 
 var W = new Array(64)
 
@@ -34255,7 +34260,7 @@ module.exports = Sha224
 var inherits = __webpack_require__(1)
 var SHA512 = __webpack_require__(172)
 var Hash = __webpack_require__(64)
-var Buffer = __webpack_require__(3).Buffer
+var Buffer = __webpack_require__(2).Buffer
 
 var W = new Array(160)
 
@@ -34318,7 +34323,7 @@ module.exports = Sha384
 "use strict";
 
 var inherits = __webpack_require__(1)
-var Buffer = __webpack_require__(3).Buffer
+var Buffer = __webpack_require__(2).Buffer
 
 var Base = __webpack_require__(42)
 
@@ -34378,7 +34383,7 @@ module.exports = __webpack_require__(175)
 /* WEBPACK VAR INJECTION */(function(global, process) {var checkParameters = __webpack_require__(176)
 var defaultEncoding = __webpack_require__(177)
 var sync = __webpack_require__(178)
-var Buffer = __webpack_require__(3).Buffer
+var Buffer = __webpack_require__(2).Buffer
 
 var ZERO_BUF
 var subtle = global.crypto && global.crypto.subtle
@@ -34558,7 +34563,7 @@ exports.listCiphers = exports.getCiphers = getCiphers
 var CipherBase = __webpack_require__(42)
 var des = __webpack_require__(129)
 var inherits = __webpack_require__(1)
-var Buffer = __webpack_require__(3).Buffer
+var Buffer = __webpack_require__(2).Buffer
 
 var modes = {
   'des-ede3-cbc': des.CBC.instantiate(des.EDE),
@@ -35308,7 +35313,7 @@ EDE.prototype._unpad = DES.prototype._unpad;
 
 var MODES = __webpack_require__(131)
 var AuthCipher = __webpack_require__(182)
-var Buffer = __webpack_require__(3).Buffer
+var Buffer = __webpack_require__(2).Buffer
 var StreamCipher = __webpack_require__(183)
 var Transform = __webpack_require__(42)
 var aes = __webpack_require__(87)
@@ -35462,7 +35467,7 @@ exports.decrypt = function (self, block) {
 /* 420 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Buffer = __webpack_require__(3).Buffer
+var Buffer = __webpack_require__(2).Buffer
 var xor = __webpack_require__(70)
 
 function encryptStart (self, data, decrypt) {
@@ -35501,7 +35506,7 @@ exports.encrypt = function (self, data, decrypt) {
 /* 421 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Buffer = __webpack_require__(3).Buffer
+var Buffer = __webpack_require__(2).Buffer
 
 function encryptByte (self, byteParam, decrypt) {
   var pad = self._cipher.encryptBlock(self._prev)
@@ -35532,7 +35537,7 @@ exports.encrypt = function (self, chunk, decrypt) {
 /* 422 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Buffer = __webpack_require__(3).Buffer
+var Buffer = __webpack_require__(2).Buffer
 
 function encryptByte (self, byteParam, decrypt) {
   var pad
@@ -35597,13 +35602,13 @@ exports.encrypt = function (self, chunk) {
   return xor(chunk, pad)
 }
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(2).Buffer))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(6).Buffer))
 
 /***/ }),
 /* 424 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Buffer = __webpack_require__(3).Buffer
+var Buffer = __webpack_require__(2).Buffer
 var ZEROES = Buffer.alloc(16, 0)
 
 function toArray (buf) {
@@ -35699,7 +35704,7 @@ module.exports = GHASH
 /***/ (function(module, exports, __webpack_require__) {
 
 var AuthCipher = __webpack_require__(182)
-var Buffer = __webpack_require__(3).Buffer
+var Buffer = __webpack_require__(2).Buffer
 var MODES = __webpack_require__(131)
 var StreamCipher = __webpack_require__(183)
 var Transform = __webpack_require__(42)
@@ -35901,7 +35906,7 @@ function createDiffieHellman (prime, enc, generator, genc) {
 exports.DiffieHellmanGroup = exports.createDiffieHellmanGroup = exports.getDiffieHellman = getDiffieHellman
 exports.createDiffieHellman = exports.DiffieHellman = createDiffieHellman
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(2).Buffer))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(6).Buffer))
 
 /***/ }),
 /* 428 */
@@ -36090,7 +36095,7 @@ function formatReturnValue(bn, enc) {
   }
 }
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(2).Buffer))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(6).Buffer))
 
 /***/ }),
 /* 432 */
@@ -36188,7 +36193,7 @@ module.exports = {
   createVerify: createVerify
 }
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(2).Buffer))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(6).Buffer))
 
 /***/ }),
 /* 433 */
@@ -36340,13 +36345,13 @@ module.exports = sign
 module.exports.getKey = getKey
 module.exports.makeKey = makeKey
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(2).Buffer))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(6).Buffer))
 
 /***/ }),
 /* 434 */
 /***/ (function(module) {
 
-module.exports = {"_from":"elliptic@^6.4.0","_id":"elliptic@6.4.1","_inBundle":false,"_integrity":"sha512-BsXLz5sqX8OHcsh7CqBMztyXARmGQ3LWPtGjJi6DiJHq5C/qvi9P3OqgswKSDftbu8+IoI/QDTAm2fFnQ9SZSQ==","_location":"/elliptic","_phantomChildren":{},"_requested":{"type":"range","registry":true,"raw":"elliptic@^6.4.0","name":"elliptic","escapedName":"elliptic","rawSpec":"^6.4.0","saveSpec":null,"fetchSpec":"^6.4.0"},"_requiredBy":["/browserify-sign","/create-ecdh","/eth-lib","/web3-eth-accounts/eth-lib"],"_resolved":"https://registry.npmjs.org/elliptic/-/elliptic-6.4.1.tgz","_shasum":"c2d0b7776911b86722c632c3c06c60f2f819939a","_spec":"elliptic@^6.4.0","_where":"/Users/ashutoshlodhi/Documents/workspace/rachinOpenstjs/openst.js/node_modules/eth-lib","author":{"name":"Fedor Indutny","email":"fedor@indutny.com"},"bugs":{"url":"https://github.com/indutny/elliptic/issues"},"bundleDependencies":false,"dependencies":{"bn.js":"^4.4.0","brorand":"^1.0.1","hash.js":"^1.0.0","hmac-drbg":"^1.0.0","inherits":"^2.0.1","minimalistic-assert":"^1.0.0","minimalistic-crypto-utils":"^1.0.0"},"deprecated":false,"description":"EC cryptography","devDependencies":{"brfs":"^1.4.3","coveralls":"^2.11.3","grunt":"^0.4.5","grunt-browserify":"^5.0.0","grunt-cli":"^1.2.0","grunt-contrib-connect":"^1.0.0","grunt-contrib-copy":"^1.0.0","grunt-contrib-uglify":"^1.0.1","grunt-mocha-istanbul":"^3.0.1","grunt-saucelabs":"^8.6.2","istanbul":"^0.4.2","jscs":"^2.9.0","jshint":"^2.6.0","mocha":"^2.1.0"},"files":["lib"],"homepage":"https://github.com/indutny/elliptic","keywords":["EC","Elliptic","curve","Cryptography"],"license":"MIT","main":"lib/elliptic.js","name":"elliptic","repository":{"type":"git","url":"git+ssh://git@github.com/indutny/elliptic.git"},"scripts":{"jscs":"jscs benchmarks/*.js lib/*.js lib/**/*.js lib/**/**/*.js test/index.js","jshint":"jscs benchmarks/*.js lib/*.js lib/**/*.js lib/**/**/*.js test/index.js","lint":"npm run jscs && npm run jshint","test":"npm run lint && npm run unit","unit":"istanbul test _mocha --reporter=spec test/index.js","version":"grunt dist && git add dist/"},"version":"6.4.1"};
+module.exports = {"_from":"elliptic@^6.4.0","_id":"elliptic@6.4.1","_inBundle":false,"_integrity":"sha512-BsXLz5sqX8OHcsh7CqBMztyXARmGQ3LWPtGjJi6DiJHq5C/qvi9P3OqgswKSDftbu8+IoI/QDTAm2fFnQ9SZSQ==","_location":"/elliptic","_phantomChildren":{},"_requested":{"type":"range","registry":true,"raw":"elliptic@^6.4.0","name":"elliptic","escapedName":"elliptic","rawSpec":"^6.4.0","saveSpec":null,"fetchSpec":"^6.4.0"},"_requiredBy":["/browserify-sign","/create-ecdh","/eth-lib","/web3-eth-accounts/eth-lib"],"_resolved":"https://registry.npmjs.org/elliptic/-/elliptic-6.4.1.tgz","_shasum":"c2d0b7776911b86722c632c3c06c60f2f819939a","_spec":"elliptic@^6.4.0","_where":"/Users/kedarchandrayan/workspace/forks/openst.js/node_modules/eth-lib","author":{"name":"Fedor Indutny","email":"fedor@indutny.com"},"bugs":{"url":"https://github.com/indutny/elliptic/issues"},"bundleDependencies":false,"dependencies":{"bn.js":"^4.4.0","brorand":"^1.0.1","hash.js":"^1.0.0","hmac-drbg":"^1.0.0","inherits":"^2.0.1","minimalistic-assert":"^1.0.0","minimalistic-crypto-utils":"^1.0.0"},"deprecated":false,"description":"EC cryptography","devDependencies":{"brfs":"^1.4.3","coveralls":"^2.11.3","grunt":"^0.4.5","grunt-browserify":"^5.0.0","grunt-cli":"^1.2.0","grunt-contrib-connect":"^1.0.0","grunt-contrib-copy":"^1.0.0","grunt-contrib-uglify":"^1.0.1","grunt-mocha-istanbul":"^3.0.1","grunt-saucelabs":"^8.6.2","istanbul":"^0.4.2","jscs":"^2.9.0","jshint":"^2.6.0","mocha":"^2.1.0"},"files":["lib"],"homepage":"https://github.com/indutny/elliptic","keywords":["EC","Elliptic","curve","Cryptography"],"license":"MIT","main":"lib/elliptic.js","name":"elliptic","repository":{"type":"git","url":"git+ssh://git@github.com/indutny/elliptic.git"},"scripts":{"jscs":"jscs benchmarks/*.js lib/*.js lib/**/*.js lib/**/**/*.js test/index.js","jshint":"jscs benchmarks/*.js lib/*.js lib/**/*.js lib/**/**/*.js test/index.js","lint":"npm run jscs && npm run jshint","test":"npm run lint && npm run unit","unit":"istanbul test _mocha --reporter=spec test/index.js","version":"grunt dist && git add dist/"},"version":"6.4.1"};
 
 /***/ }),
 /* 435 */
@@ -41928,7 +41933,7 @@ decoders.pem = __webpack_require__(463);
 /***/ (function(module, exports, __webpack_require__) {
 
 var inherits = __webpack_require__(1);
-var Buffer = __webpack_require__(2).Buffer;
+var Buffer = __webpack_require__(6).Buffer;
 
 var DERDecoder = __webpack_require__(193);
 
@@ -42151,7 +42156,7 @@ module.exports = function (okey, password) {
   }
 }
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(2).Buffer))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(6).Buffer))
 
 /***/ }),
 /* 469 */
@@ -42241,7 +42246,7 @@ function checkValue (b, q) {
 
 module.exports = verify
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(2).Buffer))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(6).Buffer))
 
 /***/ }),
 /* 470 */
@@ -42372,237 +42377,228 @@ function formatReturnValue (bn, enc, len) {
   }
 }
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(2).Buffer))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(6).Buffer))
 
 /***/ }),
 /* 471 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports.publicEncrypt = __webpack_require__(472);
-exports.privateDecrypt = __webpack_require__(473);
+exports.publicEncrypt = __webpack_require__(472)
+exports.privateDecrypt = __webpack_require__(473)
 
-exports.privateEncrypt = function privateEncrypt(key, buf) {
-  return exports.publicEncrypt(key, buf, true);
-};
+exports.privateEncrypt = function privateEncrypt (key, buf) {
+  return exports.publicEncrypt(key, buf, true)
+}
 
-exports.publicDecrypt = function publicDecrypt(key, buf) {
-  return exports.privateDecrypt(key, buf, true);
-};
+exports.publicDecrypt = function publicDecrypt (key, buf) {
+  return exports.privateDecrypt(key, buf, true)
+}
+
 
 /***/ }),
 /* 472 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(Buffer) {var parseKeys = __webpack_require__(90);
-var randomBytes = __webpack_require__(63);
-var createHash = __webpack_require__(68);
-var mgf = __webpack_require__(196);
-var xor = __webpack_require__(197);
-var bn = __webpack_require__(9);
-var withPublic = __webpack_require__(198);
-var crt = __webpack_require__(132);
+var parseKeys = __webpack_require__(90)
+var randomBytes = __webpack_require__(63)
+var createHash = __webpack_require__(68)
+var mgf = __webpack_require__(196)
+var xor = __webpack_require__(197)
+var BN = __webpack_require__(9)
+var withPublic = __webpack_require__(198)
+var crt = __webpack_require__(132)
+var Buffer = __webpack_require__(2).Buffer
 
-var constants = {
-  RSA_PKCS1_OAEP_PADDING: 4,
-  RSA_PKCS1_PADDIN: 1,
-  RSA_NO_PADDING: 3
-};
-
-module.exports = function publicEncrypt(public_key, msg, reverse) {
-  var padding;
-  if (public_key.padding) {
-    padding = public_key.padding;
+module.exports = function publicEncrypt (publicKey, msg, reverse) {
+  var padding
+  if (publicKey.padding) {
+    padding = publicKey.padding
   } else if (reverse) {
-    padding = 1;
+    padding = 1
   } else {
-    padding = 4;
+    padding = 4
   }
-  var key = parseKeys(public_key);
-  var paddedMsg;
+  var key = parseKeys(publicKey)
+  var paddedMsg
   if (padding === 4) {
-    paddedMsg = oaep(key, msg);
+    paddedMsg = oaep(key, msg)
   } else if (padding === 1) {
-    paddedMsg = pkcs1(key, msg, reverse);
+    paddedMsg = pkcs1(key, msg, reverse)
   } else if (padding === 3) {
-    paddedMsg = new bn(msg);
+    paddedMsg = new BN(msg)
     if (paddedMsg.cmp(key.modulus) >= 0) {
-      throw new Error('data too long for modulus');
+      throw new Error('data too long for modulus')
     }
   } else {
-    throw new Error('unknown padding');
+    throw new Error('unknown padding')
   }
   if (reverse) {
-    return crt(paddedMsg, key);
+    return crt(paddedMsg, key)
   } else {
-    return withPublic(paddedMsg, key);
+    return withPublic(paddedMsg, key)
   }
-};
+}
 
-function oaep(key, msg){
-  var k = key.modulus.byteLength();
-  var mLen = msg.length;
-  var iHash = createHash('sha1').update(new Buffer('')).digest();
-  var hLen = iHash.length;
-  var hLen2 = 2 * hLen;
+function oaep (key, msg) {
+  var k = key.modulus.byteLength()
+  var mLen = msg.length
+  var iHash = createHash('sha1').update(Buffer.alloc(0)).digest()
+  var hLen = iHash.length
+  var hLen2 = 2 * hLen
   if (mLen > k - hLen2 - 2) {
-    throw new Error('message too long');
+    throw new Error('message too long')
   }
-  var ps = new Buffer(k - mLen - hLen2 - 2);
-  ps.fill(0);
-  var dblen = k - hLen - 1;
-  var seed = randomBytes(hLen);
-  var maskedDb = xor(Buffer.concat([iHash, ps, new Buffer([1]), msg], dblen), mgf(seed, dblen));
-  var maskedSeed = xor(seed, mgf(maskedDb, hLen));
-  return new bn(Buffer.concat([new Buffer([0]), maskedSeed, maskedDb], k));
+  var ps = Buffer.alloc(k - mLen - hLen2 - 2)
+  var dblen = k - hLen - 1
+  var seed = randomBytes(hLen)
+  var maskedDb = xor(Buffer.concat([iHash, ps, Buffer.alloc(1, 1), msg], dblen), mgf(seed, dblen))
+  var maskedSeed = xor(seed, mgf(maskedDb, hLen))
+  return new BN(Buffer.concat([Buffer.alloc(1), maskedSeed, maskedDb], k))
 }
-function pkcs1(key, msg, reverse){
-  var mLen = msg.length;
-  var k = key.modulus.byteLength();
+function pkcs1 (key, msg, reverse) {
+  var mLen = msg.length
+  var k = key.modulus.byteLength()
   if (mLen > k - 11) {
-    throw new Error('message too long');
+    throw new Error('message too long')
   }
-  var ps;
+  var ps
   if (reverse) {
-    ps = new Buffer(k - mLen - 3);
-    ps.fill(0xff);
+    ps = Buffer.alloc(k - mLen - 3, 0xff)
   } else {
-    ps = nonZero(k - mLen - 3);
+    ps = nonZero(k - mLen - 3)
   }
-  return new bn(Buffer.concat([new Buffer([0, reverse?1:2]), ps, new Buffer([0]), msg], k));
+  return new BN(Buffer.concat([Buffer.from([0, reverse ? 1 : 2]), ps, Buffer.alloc(1), msg], k))
 }
-function nonZero(len, crypto) {
-  var out = new Buffer(len);
-  var i = 0;
-  var cache = randomBytes(len*2);
-  var cur = 0;
-  var num;
+function nonZero (len) {
+  var out = Buffer.allocUnsafe(len)
+  var i = 0
+  var cache = randomBytes(len * 2)
+  var cur = 0
+  var num
   while (i < len) {
     if (cur === cache.length) {
-      cache = randomBytes(len*2);
-      cur = 0;
+      cache = randomBytes(len * 2)
+      cur = 0
     }
-    num = cache[cur++];
+    num = cache[cur++]
     if (num) {
-      out[i++] = num;
+      out[i++] = num
     }
   }
-  return out;
+  return out
 }
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(2).Buffer))
+
 
 /***/ }),
 /* 473 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(Buffer) {var parseKeys = __webpack_require__(90);
-var mgf = __webpack_require__(196);
-var xor = __webpack_require__(197);
-var bn = __webpack_require__(9);
-var crt = __webpack_require__(132);
-var createHash = __webpack_require__(68);
-var withPublic = __webpack_require__(198);
-module.exports = function privateDecrypt(private_key, enc, reverse) {
-  var padding;
-  if (private_key.padding) {
-    padding = private_key.padding;
-  } else if (reverse) {
-    padding = 1;
-  } else {
-    padding = 4;
-  }
-  
-  var key = parseKeys(private_key);
-  var k = key.modulus.byteLength();
-  if (enc.length > k || new bn(enc).cmp(key.modulus) >= 0) {
-    throw new Error('decryption error');
-  }
-  var msg;
-  if (reverse) {
-    msg = withPublic(new bn(enc), key);
-  } else {
-    msg = crt(enc, key);
-  }
-  var zBuffer = new Buffer(k - msg.length);
-  zBuffer.fill(0);
-  msg = Buffer.concat([zBuffer, msg], k);
-  if (padding === 4) {
-    return oaep(key, msg);
-  } else if (padding === 1) {
-    return pkcs1(key, msg, reverse);
-  } else if (padding === 3) {
-    return msg;
-  } else {
-    throw new Error('unknown padding');
-  }
-};
+var parseKeys = __webpack_require__(90)
+var mgf = __webpack_require__(196)
+var xor = __webpack_require__(197)
+var BN = __webpack_require__(9)
+var crt = __webpack_require__(132)
+var createHash = __webpack_require__(68)
+var withPublic = __webpack_require__(198)
+var Buffer = __webpack_require__(2).Buffer
 
-function oaep(key, msg){
-  var n = key.modulus;
-  var k = key.modulus.byteLength();
-  var mLen = msg.length;
-  var iHash = createHash('sha1').update(new Buffer('')).digest();
-  var hLen = iHash.length;
-  var hLen2 = 2 * hLen;
+module.exports = function privateDecrypt (privateKey, enc, reverse) {
+  var padding
+  if (privateKey.padding) {
+    padding = privateKey.padding
+  } else if (reverse) {
+    padding = 1
+  } else {
+    padding = 4
+  }
+
+  var key = parseKeys(privateKey)
+  var k = key.modulus.byteLength()
+  if (enc.length > k || new BN(enc).cmp(key.modulus) >= 0) {
+    throw new Error('decryption error')
+  }
+  var msg
+  if (reverse) {
+    msg = withPublic(new BN(enc), key)
+  } else {
+    msg = crt(enc, key)
+  }
+  var zBuffer = Buffer.alloc(k - msg.length)
+  msg = Buffer.concat([zBuffer, msg], k)
+  if (padding === 4) {
+    return oaep(key, msg)
+  } else if (padding === 1) {
+    return pkcs1(key, msg, reverse)
+  } else if (padding === 3) {
+    return msg
+  } else {
+    throw new Error('unknown padding')
+  }
+}
+
+function oaep (key, msg) {
+  var k = key.modulus.byteLength()
+  var iHash = createHash('sha1').update(Buffer.alloc(0)).digest()
+  var hLen = iHash.length
   if (msg[0] !== 0) {
-    throw new Error('decryption error');
+    throw new Error('decryption error')
   }
-  var maskedSeed = msg.slice(1, hLen + 1);
-  var maskedDb =  msg.slice(hLen + 1);
-  var seed = xor(maskedSeed, mgf(maskedDb, hLen));
-  var db = xor(maskedDb, mgf(seed, k - hLen - 1));
+  var maskedSeed = msg.slice(1, hLen + 1)
+  var maskedDb = msg.slice(hLen + 1)
+  var seed = xor(maskedSeed, mgf(maskedDb, hLen))
+  var db = xor(maskedDb, mgf(seed, k - hLen - 1))
   if (compare(iHash, db.slice(0, hLen))) {
-    throw new Error('decryption error');
+    throw new Error('decryption error')
   }
-  var i = hLen;
+  var i = hLen
   while (db[i] === 0) {
-    i++;
+    i++
   }
   if (db[i++] !== 1) {
-    throw new Error('decryption error');
+    throw new Error('decryption error')
   }
-  return db.slice(i);
+  return db.slice(i)
 }
 
-function pkcs1(key, msg, reverse){
-  var p1 = msg.slice(0, 2);
-  var i = 2;
-  var status = 0;
+function pkcs1 (key, msg, reverse) {
+  var p1 = msg.slice(0, 2)
+  var i = 2
+  var status = 0
   while (msg[i++] !== 0) {
     if (i >= msg.length) {
-      status++;
-      break;
+      status++
+      break
     }
   }
-  var ps = msg.slice(2, i - 1);
-  var p2 = msg.slice(i - 1, i);
+  var ps = msg.slice(2, i - 1)
 
-  if ((p1.toString('hex') !== '0002' && !reverse) || (p1.toString('hex') !== '0001' && reverse)){
-    status++;
+  if ((p1.toString('hex') !== '0002' && !reverse) || (p1.toString('hex') !== '0001' && reverse)) {
+    status++
   }
   if (ps.length < 8) {
-    status++;
+    status++
   }
   if (status) {
-    throw new Error('decryption error');
+    throw new Error('decryption error')
   }
-  return  msg.slice(i);
+  return msg.slice(i)
 }
-function compare(a, b){
-  a = new Buffer(a);
-  b = new Buffer(b);
-  var dif = 0;
-  var len = a.length;
+function compare (a, b) {
+  a = Buffer.from(a)
+  b = Buffer.from(b)
+  var dif = 0
+  var len = a.length
   if (a.length !== b.length) {
-    dif++;
-    len = Math.min(a.length, b.length);
+    dif++
+    len = Math.min(a.length, b.length)
   }
-  var i = -1;
+  var i = -1
   while (++i < len) {
-    dif += (a[i] ^ b[i]);
+    dif += (a[i] ^ b[i])
   }
-  return dif;
+  return dif
 }
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(2).Buffer))
+
 
 /***/ }),
 /* 474 */
@@ -42614,7 +42610,7 @@ function compare(a, b){
 function oldBrowser () {
   throw new Error('secure random number generation not supported by this browser\nuse chrome, FireFox or Internet Explorer 11')
 }
-var safeBuffer = __webpack_require__(3)
+var safeBuffer = __webpack_require__(2)
 var randombytes = __webpack_require__(63)
 var Buffer = safeBuffer.Buffer
 var kBufferMaxLength = safeBuffer.kMaxLength
@@ -43847,7 +43843,7 @@ module.exports = {
 
   var Buffer;
   try {
-    Buffer = __webpack_require__(2).Buffer;
+    Buffer = __webpack_require__(6).Buffer;
   } catch (e) {
   }
 
@@ -47281,7 +47277,7 @@ module.exports = {
 
   var Buffer;
   try {
-    Buffer = __webpack_require__(2).Buffer;
+    Buffer = __webpack_require__(6).Buffer;
   } catch (e) {
   }
 
@@ -51325,7 +51321,7 @@ module.exports = window.crypto;
 
   var Buffer;
   try {
-    Buffer = __webpack_require__(2).Buffer;
+    Buffer = __webpack_require__(6).Buffer;
   } catch (e) {
   }
 
@@ -55247,7 +55243,7 @@ WebsocketProvider.prototype.reset = function () {
 
 module.exports = WebsocketProvider;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(2).Buffer))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(6).Buffer))
 
 /***/ }),
 /* 494 */
@@ -55308,7 +55304,7 @@ module.exports = __webpack_require__(496).version;
 /* 496 */
 /***/ (function(module) {
 
-module.exports = {"_from":"git://github.com/frozeman/WebSocket-Node.git#browserifyCompatible","_id":"websocket@1.0.26","_inBundle":false,"_integrity":"","_location":"/websocket","_phantomChildren":{},"_requested":{"type":"git","raw":"websocket@git://github.com/frozeman/WebSocket-Node.git#browserifyCompatible","name":"websocket","escapedName":"websocket","rawSpec":"git://github.com/frozeman/WebSocket-Node.git#browserifyCompatible","saveSpec":"git://github.com/frozeman/WebSocket-Node.git#browserifyCompatible","fetchSpec":"git://github.com/frozeman/WebSocket-Node.git","gitCommittish":"browserifyCompatible"},"_requiredBy":["/web3-providers-ws"],"_resolved":"git://github.com/frozeman/WebSocket-Node.git#6c72925e3f8aaaea8dc8450f97627e85263999f2","_spec":"websocket@git://github.com/frozeman/WebSocket-Node.git#browserifyCompatible","_where":"/Users/ashutoshlodhi/Documents/workspace/rachinOpenstjs/openst.js/node_modules/web3-providers-ws","author":{"name":"Brian McKelvey","email":"brian@worlize.com","url":"https://www.worlize.com/"},"browser":"lib/browser.js","bugs":{"url":"https://github.com/theturtle32/WebSocket-Node/issues"},"bundleDependencies":false,"config":{"verbose":false},"contributors":[{"name":"Iñaki Baz Castillo","email":"ibc@aliax.net","url":"http://dev.sipdoc.net"}],"dependencies":{"debug":"^2.2.0","nan":"^2.3.3","typedarray-to-buffer":"^3.1.2","yaeti":"^0.0.6"},"deprecated":false,"description":"Websocket Client & Server Library implementing the WebSocket protocol as specified in RFC 6455.","devDependencies":{"buffer-equal":"^1.0.0","faucet":"^0.0.1","gulp":"git+https://github.com/gulpjs/gulp.git#4.0","gulp-jshint":"^2.0.4","jshint":"^2.0.0","jshint-stylish":"^2.2.1","tape":"^4.0.1"},"directories":{"lib":"./lib"},"engines":{"node":">=0.10.0"},"homepage":"https://github.com/theturtle32/WebSocket-Node","keywords":["websocket","websockets","socket","networking","comet","push","RFC-6455","realtime","server","client"],"license":"Apache-2.0","main":"index","name":"websocket","repository":{"type":"git","url":"git+https://github.com/theturtle32/WebSocket-Node.git"},"scripts":{"gulp":"gulp","install":"(node-gyp rebuild 2> builderror.log) || (exit 0)","test":"faucet test/unit"},"version":"1.0.26"};
+module.exports = {"_from":"git://github.com/frozeman/WebSocket-Node.git#browserifyCompatible","_id":"websocket@1.0.26","_inBundle":false,"_integrity":"","_location":"/websocket","_phantomChildren":{},"_requested":{"type":"git","raw":"websocket@git://github.com/frozeman/WebSocket-Node.git#browserifyCompatible","name":"websocket","escapedName":"websocket","rawSpec":"git://github.com/frozeman/WebSocket-Node.git#browserifyCompatible","saveSpec":"git://github.com/frozeman/WebSocket-Node.git#browserifyCompatible","fetchSpec":"git://github.com/frozeman/WebSocket-Node.git","gitCommittish":"browserifyCompatible"},"_requiredBy":["/web3-providers-ws"],"_resolved":"git://github.com/frozeman/WebSocket-Node.git#6c72925e3f8aaaea8dc8450f97627e85263999f2","_spec":"websocket@git://github.com/frozeman/WebSocket-Node.git#browserifyCompatible","_where":"/Users/kedarchandrayan/workspace/forks/openst.js/node_modules/web3-providers-ws","author":{"name":"Brian McKelvey","email":"brian@worlize.com","url":"https://www.worlize.com/"},"browser":"lib/browser.js","bugs":{"url":"https://github.com/theturtle32/WebSocket-Node/issues"},"bundleDependencies":false,"config":{"verbose":false},"contributors":[{"name":"Iñaki Baz Castillo","email":"ibc@aliax.net","url":"http://dev.sipdoc.net"}],"dependencies":{"debug":"^2.2.0","nan":"^2.3.3","typedarray-to-buffer":"^3.1.2","yaeti":"^0.0.6"},"deprecated":false,"description":"Websocket Client & Server Library implementing the WebSocket protocol as specified in RFC 6455.","devDependencies":{"buffer-equal":"^1.0.0","faucet":"^0.0.1","gulp":"git+https://github.com/gulpjs/gulp.git#4.0","gulp-jshint":"^2.0.4","jshint":"^2.0.0","jshint-stylish":"^2.2.1","tape":"^4.0.1"},"directories":{"lib":"./lib"},"engines":{"node":">=0.10.0"},"homepage":"https://github.com/theturtle32/WebSocket-Node","keywords":["websocket","websockets","socket","networking","comet","push","RFC-6455","realtime","server","client"],"license":"Apache-2.0","main":"index","name":"websocket","repository":{"type":"git","url":"git+https://github.com/theturtle32/WebSocket-Node.git"},"scripts":{"gulp":"gulp","install":"(node-gyp rebuild 2> builderror.log) || (exit 0)","test":"faucet test/unit"},"version":"1.0.26"};
 
 /***/ }),
 /* 497 */
@@ -60514,7 +60510,7 @@ module.exports = {
   encodeSignature: encodeSignature,
   decodeSignature: decodeSignature
 };
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(2).Buffer))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(6).Buffer))
 
 /***/ }),
 /* 512 */
@@ -60752,7 +60748,7 @@ function arraycopy (src, srcPos, dest, destPos, length) {
 
 module.exports = scrypt
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(2).Buffer))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(6).Buffer))
 
 /***/ }),
 /* 515 */
@@ -61063,10 +61059,6 @@ AbiBinProvider.prototype = {
   _read: function _read(filePath) {}
 };
 module.exports = AbiBinProvider;
-AbiBinProvider.prototype.addBIN('MockToken', "608060405234801561001057600080fd5b5060008054600160a060020a031916331790556040805180820190915260048082527f4d4f434b00000000000000000000000000000000000000000000000000000000602090920191825261006791600391610128565b5060408051808201909152600a8082527f4d6f636b20546f6b656e0000000000000000000000000000000000000000000060209092019182526100ac91600291610128565b506004805460ff191660121790556b0295be96e640669720000000600581905560008054600160a060020a0390811682526006602090815260408084208590558354815195865290519216937fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef929081900390910190a36101c3565b828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f1061016957805160ff1916838001178555610196565b82800160010185558215610196579182015b8281111561019657825182559160200191906001019061017b565b506101a29291506101a6565b5090565b6101c091905b808211156101a257600081556001016101ac565b90565b610951806101d26000396000f3006080604052600436106101065763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166306fdde03811461010b578063095ea7b31461019557806318160ddd146101cd57806318821400146101f457806323b872dd146102095780632a90531814610233578063313ce567146102485780635b7f415c1461027357806370a08231146102885780638bc04eb7146102a95780638da5cb5b146102be57806395d89b41146102ef578063a67e91a814610304578063a7f4377914610319578063a9059cbb14610330578063c0b6f56114610354578063d153b60c14610375578063dd62ed3e1461038a578063e71a7811146103b1575b600080fd5b34801561011757600080fd5b506101206103c6565b6040805160208082528351818301528351919283929083019185019080838360005b8381101561015a578181015183820152602001610142565b50505050905090810190601f1680156101875780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b3480156101a157600080fd5b506101b9600160a060020a0360043516602435610459565b604080519115158252519081900360200190f35b3480156101d957600080fd5b506101e26104bf565b60408051918252519081900360200190f35b34801561020057600080fd5b506101206104c5565b34801561021557600080fd5b506101b9600160a060020a03600435811690602435166044356104fc565b34801561023f57600080fd5b50610120610607565b34801561025457600080fd5b5061025d61063e565b6040805160ff9092168252519081900360200190f35b34801561027f57600080fd5b5061025d610647565b34801561029457600080fd5b506101e2600160a060020a036004351661064c565b3480156102b557600080fd5b506101e2610667565b3480156102ca57600080fd5b506102d3610673565b60408051600160a060020a039092168252519081900360200190f35b3480156102fb57600080fd5b50610120610682565b34801561031057600080fd5b506101e26106e3565b34801561032557600080fd5b5061032e6106f3565b005b34801561033c57600080fd5b506101b9600160a060020a036004351660243561070a565b34801561036057600080fd5b506101b9600160a060020a03600435166107ba565b34801561038157600080fd5b506102d361082c565b34801561039657600080fd5b506101e2600160a060020a036004358116906024351661083b565b3480156103bd57600080fd5b506101b9610866565b60028054604080516020601f600019610100600187161502019094168590049384018190048102820181019092528281526060939092909183018282801561044f5780601f106104245761010080835404028352916020019161044f565b820191906000526020600020905b81548152906001019060200180831161043257829003601f168201915b5050505050905090565b336000818152600760209081526040808320600160a060020a038716808552908352818420869055815186815291519394909390927f8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925928290030190a350600192915050565b60055490565b60408051808201909152600a81527f4d6f636b20546f6b656e00000000000000000000000000000000000000000000602082015281565b600160a060020a038316600090815260066020526040812054610525908363ffffffff6108e916565b600160a060020a0385166000908152600660209081526040808320939093556007815282822033835290522054610562908363ffffffff6108e916565b600160a060020a0380861660009081526007602090815260408083203384528252808320949094559186168152600690915220546105a6908363ffffffff6108fb16565b600160a060020a0380851660008181526006602090815260409182902094909455805186815290519193928816927fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef92918290030190a35060019392505050565b60408051808201909152600481527f4d4f434b00000000000000000000000000000000000000000000000000000000602082015281565b60045460ff1690565b601281565b600160a060020a031660009081526006602052604090205490565b670de0b6b3a764000081565b600054600160a060020a031681565b60038054604080516020601f600260001961010060018816150201909516949094049384018190048102820181019092528281526060939092909183018282801561044f5780601f106104245761010080835404028352916020019161044f565b6b0295be96e64066972000000081565b6106fc33610911565b151561070757600080fd5b33ff5b3360009081526006602052604081205461072a908363ffffffff6108e916565b3360009081526006602052604080822092909255600160a060020a0385168152205461075c908363ffffffff6108fb16565b600160a060020a0384166000818152600660209081526040918290209390935580518581529051919233927fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef9281900390910190a350600192915050565b60006107c533610911565b15156107d057600080fd5b6001805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a0384169081179091556040517f20f5afdf40bf7b43c89031a5d4369a30b159e512d164aa46124bcb706b4a1caf90600090a2506001919050565b600154600160a060020a031681565b600160a060020a03918216600090815260076020908152604080832093909416825291909152205490565b600154600090600160a060020a0316331461088057600080fd5b6001805460008054600160a060020a0380841673ffffffffffffffffffffffffffffffffffffffff19928316178084559190931690935560405192909116917f624adc4c72536289dd9d5439ccdeccd8923cb9af95fb626b21935447c77b84079190a250600190565b6000828211156108f557fe5b50900390565b60008282018381101561090a57fe5b9392505050565b600054600160a060020a03908116911614905600a165627a7a72305820e6c5c8e24d6caf24965cabc5ffdf39ce3ce09677dbcd6990f9c91e8053ea7f7b0029");
-AbiBinProvider.prototype.addBIN('TokenHolder', "60806040523480156200001157600080fd5b50604051620037003803806200370083398101604090815281516020830151918301516060840151930180519193909182908290600090828181118015906200005957508015155b80156200006557508115155b1515620000f957604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152602360248201527f526571756972656d656e742076616c6964697479206e6f742066756c66696c6c60448201527f65642e0000000000000000000000000000000000000000000000000000000000606482015290519081900360840190fd5b600092505b8451831015620002945784516000908690859081106200011a57fe5b60209081029091010151600160a060020a031614156200019b57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601460248201527f57616c6c6574206164647265737320697320302e000000000000000000000000604482015290519081900360640190fd5b600160008685815181101515620001ae57fe5b6020908102909101810151600160a060020a031682528101919091526040016000205460ff16156200024157604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601960248201527f4475706c69636174652077616c6c657420616464726573732e00000000000000604482015290519081900360640190fd5b600180600087868151811015156200025557fe5b602090810291909101810151600160a060020a03168252810191909152604001600020805460ff191691151591909117905560019290920191620000fe565b8451620002a9906002906020880190620003fd565b5050506000919091555050600160a060020a03841615156200032c57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601f60248201527f546f6b656e20636f6e74726163742061646472657373206973206e756c6c2e00604482015290519081900360640190fd5b600160a060020a0383161515620003c957604080517f08c379a0000000000000000000000000000000000000000000000000000000008152602060048201526024808201527f546f6b656e52756c657320636f6e74726163742061646472657373206973206e60448201527f756c6c2e00000000000000000000000000000000000000000000000000000000606482015290519081900360840190fd5b505060068054600160a060020a03938416600160a060020a0319918216179091556008805492909316911617905562000491565b82805482825590600052602060002090810192821562000455579160200282015b82811115620004555782518254600160a060020a031916600160a060020a039091161782556020909201916001909101906200041e565b506200046392915062000467565b5090565b6200048e91905b8082111562000463578054600160a060020a03191681556001016200046e565b90565b61325f80620004a16000396000f3006080604052600436106101a05763ffffffff7c0100000000000000000000000000000000000000000000000000000000600035041663028c979d81146101a557806309d43931146101ce5780630b1cd2c0146102005780630cdac8461461022c5780631988f9cc146102655780631fa5d6a41461027a57806320ea8d861461029b57806329b57c69146102b35780632d0b691f146102c85780632eb79f60146102ef5780632f938e64146103075780633411c81c1461036157806336dae4261461038557806351491e0c146103a657806359793b00146103bb5780637ad71f72146104365780637d90cc511461046a57806383c7f14c1461047f57806387fe2feb146104d85780639ace38c2146104f95780639c144d5e146105a3578063a75fe8e1146105b8578063b77bf600146105d9578063ba51a6df146105ee578063c01a8c8414610606578063c763a4ba1461061e578063ce5570ec14610633578063d348050c14610654578063dc8452cd14610669578063e50b2bc21461067e578063ee22610b146106a5578063efeb5f1f146106bd578063f0073530146106de575b600080fd5b3480156101b157600080fd5b506101cc600160a060020a03600435166024356044356106f3565b005b3480156101da57600080fd5b506101e36108ec565b60408051600160e060020a03199092168252519081900360200190f35b34801561020c57600080fd5b50610218600435610947565b604080519115158252519081900360200190f35b34801561023857600080fd5b50610253600160a060020a0360043581169060243516610a74565b60408051918252519081900360200190f35b34801561027157600080fd5b506101e3610cc5565b34801561028657600080fd5b506101cc600160a060020a0360043516610cfa565b3480156102a757600080fd5b506101cc600435610e35565b3480156102bf57600080fd5b50610253611065565b3480156102d457600080fd5b50610253600160a060020a036004351660243560443561106c565b3480156102fb57600080fd5b5061025360043561133e565b34801561031357600080fd5b50610328600160a060020a03600435166114c7565b6040518085815260200184815260200183815260200182600281111561034a57fe5b60ff16815260200194505050505060405180910390f35b34801561036d57600080fd5b50610218600435600160a060020a03602435166114f1565b34801561039157600080fd5b50610253600160a060020a0360043516611511565b3480156103b257600080fd5b506101e3611773565b3480156103c757600080fd5b5060408051602060046024803582810135601f8101859004850286018501909652858552610218958335600160a060020a03169536956044949193909101919081908401838280828437509497505084359550505050602082013560ff169160408101359150606001356117ce565b34801561044257600080fd5b5061044e600435611b80565b60408051600160a060020a039092168252519081900360200190f35b34801561047657600080fd5b506101e3611ba8565b34801561048b57600080fd5b506040805160206004803580820135601f81018490048402850184019095528484526101e3943694929360249392840191908190840183828082843750949750611bdd9650505050505050565b3480156104e457600080fd5b50610253600160a060020a0360043516611cf4565b34801561050557600080fd5b50610511600435611efb565b60408051600160a060020a038516815282151591810191909152606060208083018281528551928401929092528451608084019186019080838360005b8381101561056657818101518382015260200161054e565b50505050905090810190601f1680156105935780820380516001836020036101000a031916815260200191505b5094505050505060405180910390f35b3480156105af57600080fd5b5061044e611fb8565b3480156105c457600080fd5b506101cc600160a060020a0360043516611fc7565b3480156105e557600080fd5b50610253612195565b3480156105fa57600080fd5b506101cc60043561219b565b34801561061257600080fd5b506101cc600435612265565b34801561062a57600080fd5b506101e3612433565b34801561063f57600080fd5b50610218600160a060020a0360043516612468565b34801561066057600080fd5b5061044e61247d565b34801561067557600080fd5b5061025361248c565b34801561068a57600080fd5b506101cc600160a060020a0360043581169060243516612492565b3480156106b157600080fd5b506101cc6004356126c9565b3480156106c957600080fd5b506101cc600160a060020a03600435166129d4565b3480156106ea57600080fd5b506101e3612bcf565b6000333014610747576040805160e560020a62461bcd02815260206004820152602160248201526000805160206131d4833981519152604482015260f960020a601702606482015290519081900360840190fd5b83600160a060020a03811615156107a8576040805160e560020a62461bcd02815260206004820152601460248201527f4b65792061646472657373206973206e756c6c2e000000000000000000000000604482015290519081900360640190fd5b600160a060020a038516600090815260076020526040812060030154869160ff909116908160028111156107d857fe5b1461082d576040805160e560020a62461bcd02815260206004820152600b60248201527f4b6579206578697374732e000000000000000000000000000000000000000000604482015290519081900360640190fd5b4385116108aa576040805160e560020a62461bcd02815260206004820152603560248201527f45787069726174696f6e20686569676874206973206c746520746f207468652060448201527f63757272656e7420626c6f636b206865696768742e0000000000000000000000606482015290519081900360840190fd5b50505050600160a060020a039290921660009081526007602052604081209182556002820192909255600180820192909255600301805460ff19169091179055565b604080517f617574686f72697a6553657373696f6e28616464726573732c75696e7432353681527f2c75696e743235362900000000000000000000000000000000000000000000006020820152905190819003602901902081565b600080600083600460008281526020019081526020016000206001018054600181600116156101000203166002900490506000141515156109c0576040805160e560020a62461bcd02815260206004820152601b6024820152600080516020613154833981519152604482015290519081900360640190fd5b60008581526004602052604090206002015460ff16156109e35760019350610a6c565b60009250600091505b600254821015610a675760008581526003602052604081206002805491929185908110610a1557fe5b6000918252602080832090910154600160a060020a0316835282019290925260400190205460ff1615610a49576001830192505b600054831415610a5c5760019350610a6c565b6001909101906109ec565b600093505b505050919050565b3360009081526001602052604081205460ff161515610acb576040805160e560020a62461bcd02815260206004820152601f6024820152600080516020613174833981519152604482015290519081900360640190fd5b600160a060020a038316600090815260016020526040902054839060ff161515610b2d576040805160e560020a62461bcd0281526020600482015260166024820152600080516020613194833981519152604482015290519081900360640190fd5b82600160a060020a0381161515610b7c576040805160e560020a62461bcd02815260206004820152601760248201526000805160206131f4833981519152604482015290519081900360640190fd5b600160a060020a038416600090815260016020526040902054849060ff1615610bdd576040805160e560020a62461bcd02815260206004820152600e60248201526000805160206131b4833981519152604482015290519081900360640190fd5b604080517f7265706c61636557616c6c657428616464726573732c616464726573732900008152815190819003601e018120600160a060020a03808a1660248401528816604480840191909152835180840390910181526064909201909252602081018051600160e060020a0316600160e060020a031990931692909217909152610c69903090612c04565b60408051600160a060020a03808a16825288166020820152815192965086927f385ef46d7ab7d0d8628198545974c898282544fef2e9e6c6d18087148b95cb5f929181900390910190a2610cbc84612265565b50505092915050565b604080517f72656d6f766557616c6c657428616464726573732900000000000000000000008152905190819003601501902081565b3360009081526001602052604090205460ff161515610d51576040805160e560020a62461bcd02815260206004820152601f6024820152600080516020613174833981519152604482015290519081900360640190fd5b600160a060020a038116600090815260076020526040902060030154819060ff166001816002811115610d8057fe5b14610dd5576040805160e560020a62461bcd02815260206004820152601660248201527f4b6579206973206e6f7420617574686f72697a65642e00000000000000000000604482015290519081900360640190fd5b600160a060020a038316600081815260076020908152604091829020600301805460ff19166002179055815192835290517f2991ab7bfda4556c9e662762b3dfa89a1df391084c4278286d466c1c187e55239281900390910190a1505050565b3360009081526001602052604090205460ff161515610e8c576040805160e560020a62461bcd02815260206004820152601f6024820152600080516020613174833981519152604482015290519081900360640190fd5b8060046000828152602001908152602001600020600101805460018160011615610100020316600290049050600014151515610f00576040805160e560020a62461bcd02815260206004820152601b6024820152600080516020613154833981519152604482015290519081900360640190fd5b60008281526003602090815260408083203380855292529091205483919060ff161515610f9d576040805160e560020a62461bcd02815260206004820152602b60248201527f5472616e73616374696f6e206973206e6f7420636f6e6669726d65642062792060448201527f7468652077616c6c65742e000000000000000000000000000000000000000000606482015290519081900360840190fd5b600084815260046020526040902060020154849060ff1615611009576040805160e560020a62461bcd02815260206004820152601860248201527f5472616e73616374696f6e2069732065786563757465642e0000000000000000604482015290519081900360640190fd5b60008581526003602090815260408083203380855290835292819020805460ff1916905580519283525187927fc604bfed3acf21d53a27ee0735b712b9d3e6691f4df5888f91a0bb5f128f5d1392908290030190a25050505050565b6002545b90565b3360009081526001602052604081205460ff1615156110c3576040805160e560020a62461bcd02815260206004820152601f6024820152600080516020613174833981519152604482015290519081900360640190fd5b83600160a060020a0381161515611124576040805160e560020a62461bcd02815260206004820152601460248201527f4b65792061646472657373206973206e756c6c2e000000000000000000000000604482015290519081900360640190fd5b600160a060020a038516600090815260076020526040812060030154869160ff9091169081600281111561115457fe5b146111a9576040805160e560020a62461bcd02815260206004820152600b60248201527f4b6579206578697374732e000000000000000000000000000000000000000000604482015290519081900360640190fd5b438511611226576040805160e560020a62461bcd02815260206004820152603560248201527f45787069726174696f6e20686569676874206973206c746520746f207468652060448201527f63757272656e7420626c6f636b206865696768742e0000000000000000000000606482015290519081900360840190fd5b604080517f617574686f72697a6553657373696f6e28616464726573732c75696e7432353681527f2c75696e743235362900000000000000000000000000000000000000000000006020808301919091528251918290036029018220600160a060020a038b166024840152604483018a905260648084018a905284518085039091018152608490930190935281018051600160e060020a0316600160e060020a0319909316929092179091526112dd903090612c04565b60408051600160a060020a038a16815260208101899052808201889052905191955085917f6619ec03c5dd2519d2107a7829f566e12d2fa61f97b804420b93c4d1b721fd1b9181900360600190a261133484612265565b5050509392505050565b3360009081526001602052604081205460ff161515611395576040805160e560020a62461bcd02815260206004820152601f6024820152600080516020613174833981519152604482015290519081900360640190fd5b600254828181118015906113a857508015155b80156113b357508115155b1515611406576040805160e560020a62461bcd0281526020600482015260236024820152600080516020613214833981519152604482015260e960020a6232b21702606482015290519081900360840190fd5b604080517f6368616e6765526571756972656d656e742875696e74323536290000000000008152815190819003601a0181206024808301889052835180840390910181526044909201909252602081018051600160e060020a0316600160e060020a03199093169290921790915261147f903090612c04565b60408051868152905191945084917f762499bdaf3774f418baf7d6c8030e584abb195e0aa8c90b122e7951500b06699181900360200190a26114c083612265565b5050919050565b60076020526000908152604090208054600182015460028301546003909301549192909160ff1684565b600360209081526000928352604080842090915290825290205460ff1681565b3360009081526001602052604081205460ff161515611568576040805160e560020a62461bcd02815260206004820152601f6024820152600080516020613174833981519152604482015290519081900360640190fd5b81600160a060020a03811615156115b7576040805160e560020a62461bcd02815260206004820152601760248201526000805160206131f4833981519152604482015290519081900360640190fd5b600160a060020a038316600090815260016020526040902054839060ff1615611618576040805160e560020a62461bcd02815260206004820152600e60248201526000805160206131b4833981519152604482015290519081900360640190fd5b60025461162c90600163ffffffff612d6216565b60005481811115801561163e57508015155b801561164957508115155b151561169c576040805160e560020a62461bcd0281526020600482015260236024820152600080516020613214833981519152604482015260e960020a6232b21702606482015290519081900360840190fd5b604080517f61646457616c6c6574286164647265737329000000000000000000000000000081528151908190036012018120600160a060020a038916602480840191909152835180840390910181526044909201909252602081018051600160e060020a0316600160e060020a031990931692909217909152611720903090612c04565b60408051600160a060020a0389168152905191965086917f39c5400ee7e5a4b5250fc9b0ee573eec66cb9ab74b4878cf0493089511414b179181900360200190a261176a85612265565b50505050919050565b604080517f6578656375746552756c6528616464726573732c62797465732c75696e74323581527f362c75696e74382c627974657333322c627974657333322900000000000000006020820152905190819003603801902081565b604080517f6578656375746552756c6528616464726573732c62797465732c75696e74323581527f362c75696e74382c627974657333322c62797465733332290000000000000000602082015290519081900360380190206000908190819081908190611840908c8c8c8c8c8c612d78565b600160a060020a0380821660009081526007602052604080822060085482517f2185810b0000000000000000000000000000000000000000000000000000000081529251969a5094985096509290911692632185810b92600480820193929182900301818387803b1580156118b457600080fd5b505af11580156118c8573d6000803e3d6000fd5b50506006546008548554604080517f095ea7b3000000000000000000000000000000000000000000000000000000008152600160a060020a03938416600482015260248101929092525191909216935063095ea7b3925060448083019260209291908290030181600087803b15801561194057600080fd5b505af1158015611954573d6000803e3d6000fd5b505050506040513d602081101561196a57600080fd5b50506040518a51600160a060020a038d16918c918190602084019080838360005b838110156119a357818101518382015260200161198b565b50505050905090810190601f1680156119d05780820380516001836020036101000a031916815260200191505b509150506000604051808303816000865af1600654600854604080517f095ea7b3000000000000000000000000000000000000000000000000000000008152600160a060020a0392831660048201526000602482018190529151949b5091909216945063095ea7b39350604480820193602093909283900390910190829087803b158015611a5d57600080fd5b505af1158015611a71573d6000803e3d6000fd5b505050506040513d6020811015611a8757600080fd5b5050600854604080517f212c81570000000000000000000000000000000000000000000000000000000081529051600160a060020a039092169163212c81579160048082019260009290919082900301818387803b158015611ae857600080fd5b505af1158015611afc573d6000803e3d6000fd5b50505050611b098a611bdd565b60408051600160e060020a031983168152600160a060020a0386811660208301528183018d90526060820188905288151560808301529151929350908d16917ffbb5484a0dd6b447026498c439ffeb076e26c3330d8eab2f86c5f9e86f1ac6759181900360a00190a2505050509695505050505050565b6002805482908110611b8e57fe5b600091825260209091200154600160a060020a0316905081565b604080517f6368616e6765526571756972656d656e742875696e74323536290000000000008152905190819003601a01902081565b6000806004835110151515611c62576040805160e560020a62461bcd02815260206004820152602260248201527f496e707574206279746573206c656e677468206973206c657373207468616e2060448201527f342e000000000000000000000000000000000000000000000000000000000000606482015290519081900360840190fd5b5060005b60048160ff161015611cee578060080260ff16838260ff16815181101515611c8a57fe5b60209101015160029190910a7f0100000000000000000000000000000000000000000000000000000000000000918290049091027fff0000000000000000000000000000000000000000000000000000000000000016049190911790600101611c66565b50919050565b3360009081526001602052604081205460ff161515611d4b576040805160e560020a62461bcd02815260206004820152601f6024820152600080516020613174833981519152604482015290519081900360640190fd5b600160a060020a038216600090815260016020526040902054829060ff161515611dad576040805160e560020a62461bcd0281526020600482015260166024820152600080516020613194833981519152604482015290519081900360640190fd5b600254600110611e2d576040805160e560020a62461bcd02815260206004820152602c60248201527f4c6173742077616c6c65742063616e6e6f74206265207375626d69747465642060448201527f666f722072656d6f76616c2e0000000000000000000000000000000000000000606482015290519081900360840190fd5b604080517f72656d6f766557616c6c6574286164647265737329000000000000000000000081528151908190036015018120600160a060020a038616602480840191909152835180840390910181526044909201909252602081018051600160e060020a0316600160e060020a031990931692909217909152611eb1903090612c04565b60408051600160a060020a0386168152905191935083917f4b516a5cb9faadf0d22d8b829b7e7d06cb38f45c53d9e379403f6a43a79044339181900360200190a2611cee82612265565b6004602090815260009182526040918290208054600180830180548651600261010094831615949094026000190190911692909204601f8101869004860283018601909652858252600160a060020a03909216949293909290830182828015611fa55780601f10611f7a57610100808354040283529160200191611fa5565b820191906000526020600020905b815481529060010190602001808311611f8857829003601f168201915b5050506002909301549192505060ff1683565b600854600160a060020a031681565b600033301461201b576040805160e560020a62461bcd02815260206004820152602160248201526000805160206131d4833981519152604482015260f960020a601702606482015290519081900360840190fd5b600160a060020a038216600090815260016020526040902054829060ff16151561207d576040805160e560020a62461bcd0281526020600482015260166024820152600080516020613194833981519152604482015290519081900360640190fd5b600160a060020a0383166000908152600160205260408120805460ff1916905591505b600254600019018210156121585782600160a060020a03166002838154811015156120c757fe5b600091825260209091200154600160a060020a0316141561214d576002805460001981019081106120f457fe5b60009182526020909120015460028054600160a060020a03909216918490811061211a57fe5b9060005260206000200160006101000a815481600160a060020a030219169083600160a060020a03160217905550612158565b6001909101906120a0565b60025461216c90600163ffffffff612f6916565b612177600282613097565b506002546000541115612190576002546121909061219b565b505050565b60055481565b3330146121ed576040805160e560020a62461bcd02815260206004820152602160248201526000805160206131d4833981519152604482015260f960020a601702606482015290519081900360840190fd5b6002548181811180159061220057508015155b801561220b57508115155b151561225e576040805160e560020a62461bcd0281526020600482015260236024820152600080516020613214833981519152604482015260e960020a6232b21702606482015290519081900360840190fd5b5050600055565b3360009081526001602052604090205460ff1615156122bc576040805160e560020a62461bcd02815260206004820152601f6024820152600080516020613174833981519152604482015290519081900360640190fd5b8060046000828152602001908152602001600020600101805460018160011615610100020316600290049050600014151515612330576040805160e560020a62461bcd02815260206004820152601b6024820152600080516020613154833981519152604482015290519081900360640190fd5b60008281526003602090815260408083203380855292529091205483919060ff16156123cc576040805160e560020a62461bcd02815260206004820152602760248201527f5472616e73616374696f6e20697320636f6e6669726d6564206279207468652060448201527f77616c6c65742e00000000000000000000000000000000000000000000000000606482015290519081900360840190fd5b60008481526003602090815260408083203380855290835292819020805460ff1916600117905580519283525186927f15c2f311c9e0f53b50388279894aeff029a3457884a6601e924fca879e12adcc92908290030190a261242d846126c9565b50505050565b604080517f7265706c61636557616c6c657428616464726573732c616464726573732900008152905190819003601e01902081565b60016020526000908152604090205460ff1681565b600654600160a060020a031681565b60005481565b60003330146124e6576040805160e560020a62461bcd02815260206004820152602160248201526000805160206131d4833981519152604482015260f960020a601702606482015290519081900360840190fd5b600160a060020a038316600090815260016020526040902054839060ff161515612548576040805160e560020a62461bcd0281526020600482015260166024820152600080516020613194833981519152604482015290519081900360640190fd5b82600160a060020a0381161515612597576040805160e560020a62461bcd02815260206004820152601760248201526000805160206131f4833981519152604482015290519081900360640190fd5b600160a060020a038416600090815260016020526040902054849060ff16156125f8576040805160e560020a62461bcd02815260206004820152600e60248201526000805160206131b4833981519152604482015290519081900360640190fd5b600093505b6002548410156126895785600160a060020a031660028581548110151561262057fe5b600091825260209091200154600160a060020a0316141561267e578460028581548110151561264b57fe5b9060005260206000200160006101000a815481600160a060020a030219169083600160a060020a03160217905550612689565b6001909301926125fd565b505050600160a060020a039283166000908152600160208190526040808320805460ff199081169091559490951682529390208054909216909217905550565b3360009081526001602052604081205460ff161515612720576040805160e560020a62461bcd02815260206004820152601f6024820152600080516020613174833981519152604482015290519081900360640190fd5b8160046000828152602001908152602001600020600101805460018160011615610100020316600290049050600014151515612794576040805160e560020a62461bcd02815260206004820152601b6024820152600080516020613154833981519152604482015290519081900360640190fd5b60008381526003602090815260408083203380855292529091205484919060ff161515612831576040805160e560020a62461bcd02815260206004820152602b60248201527f5472616e73616374696f6e206973206e6f7420636f6e6669726d65642062792060448201527f7468652077616c6c65742e000000000000000000000000000000000000000000606482015290519081900360840190fd5b600085815260046020526040902060020154859060ff161561289d576040805160e560020a62461bcd02815260206004820152601860248201527f5472616e73616374696f6e2069732065786563757465642e0000000000000000604482015290519081900360640190fd5b6128a686610947565b156129cc57600086815260046020526040908190208054915160018083018054939950600160a060020a0390941693928291849160026000199282161561010002929092011604801561293a5780601f1061290f5761010080835404028352916020019161293a565b820191906000526020600020905b81548152906001019060200180831161291d57829003601f168201915b50509150506000604051808303816000865af1915050156129945760028501805460ff1916600117905560405186907f82eadc3561110557a572bd74af5c06b37c7e9c14a8bf55a47abcaabd6b9d63df90600090a26129cc565b60028501805460ff1916905560405186907f2724cfb6dd99839f245928a05f4efb76270bb8ff17f88c75d139204bd91c83d090600090a25b505050505050565b333014612a26576040805160e560020a62461bcd02815260206004820152602160248201526000805160206131d4833981519152604482015260f960020a601702606482015290519081900360840190fd5b80600160a060020a0381161515612a75576040805160e560020a62461bcd02815260206004820152601760248201526000805160206131f4833981519152604482015290519081900360640190fd5b600160a060020a038216600090815260016020526040902054829060ff1615612ad6576040805160e560020a62461bcd02815260206004820152600e60248201526000805160206131b4833981519152604482015290519081900360640190fd5b600254612aea90600163ffffffff612d6216565b600054818111158015612afc57508015155b8015612b0757508115155b1515612b5a576040805160e560020a62461bcd0281526020600482015260236024820152600080516020613214833981519152604482015260e960020a6232b21702606482015290519081900360840190fd5b50505050600160a060020a031660008181526001602081905260408220805460ff1916821790556002805491820181559091527f405787fa12a823e0f2b7631cc41b3ba8828b3321ca811111fa75cd3aa3bb5ace01805473ffffffffffffffffffffffffffffffffffffffff19169091179055565b604080517f61646457616c6c657428616464726573732900000000000000000000000000008152905190819003601201902081565b6000600160a060020a0383161515612c66576040805160e560020a62461bcd02815260206004820152601c60248201527f44657374696e6174696f6e2061646472657373206973206e756c6c2e00000000604482015290519081900360640190fd5b81511515612cbe576040805160e560020a62461bcd02815260206004820152601960248201527f5061796c6f61642064617461206c656e67746820697320302e00000000000000604482015290519081900360640190fd5b5060055460408051606081018252600160a060020a0385811682526020808301868152600084860181905286815260048352949094208351815473ffffffffffffffffffffffffffffffffffffffff191693169290921782559251805192939192612d2f92600185019201906130bb565b50604091909101516002909101805460ff1916911515919091179055600554612d59906001612d62565b60055592915050565b600082820183811015612d7157fe5b9392505050565b600080600080612de68b8b8b6040518082805190602001908083835b60208310612db35780518252601f199092019160209182019101612d94565b6001836020036101000a03801982511681845116808217855250505050505090500191505060405180910390208b612f7b565b604080516000808252602080830180855285905260ff8c1683850152606083018b9052608083018a9052925193975060019360a08084019493601f19830193908390039091019190865af1158015612e42573d6000803e3d6000fd5b505060408051601f190151600160a060020a0381166000908152600760205291909120909450925060019050600383015460ff166002811115612e8157fe5b148015612e915750438260020154115b1515612ee7576040805160e560020a62461bcd02815260206004820152601c60248201527f457068656d6572616c206b6579206973206e6f74206163746976652e00000000604482015290519081900360640190fd5b600182810154612efc9163ffffffff612d6216565b9050878114612f55576040805160e560020a62461bcd02815260206004820152601f60248201527f546865206e657874206e6f6e6365206973206e6f742070726f76696465642e00604482015290519081900360640190fd5b600190910155909890975095505050505050565b600082821115612f7557fe5b50900390565b604080517f19000000000000000000000000000000000000000000000000000000000000006020808301919091526000602183018190526c010000000000000000000000003081026022850152600160a060020a038816026036840152604a8301819052604b8301869052606b8301859052608b8301819052608c8301819052608d8301819052600160e060020a03198816608e8401526092830181905260938084018290528451808503909101815260b39093019384905282519093918291908401908083835b602083106130625780518252601f199092019160209182019101613043565b5181516020939093036101000a6000190180199091169216919091179052604051920182900390912098975050505050505050565b81548183558181111561219057600083815260209020612190918101908301613139565b828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f106130fc57805160ff1916838001178555613129565b82800160010185558215613129579182015b8281111561312957825182559160200191906001019061310e565b50613135929150613139565b5090565b61106991905b80821115613135576000815560010161313f56005472616e73616374696f6e20646f6573206e6f742065786973742e00000000004f6e6c792077616c6c657420697320616c6c6f77656420746f2063616c6c2e0057616c6c657420646f6573206e6f742065786973742e0000000000000000000057616c6c6574206578697374732e0000000000000000000000000000000000004f6e6c79206d756c746973696720697320616c6c6f77656420746f2063616c6c57616c6c65742061646472657373206973206e756c6c2e000000000000000000526571756972656d656e742076616c6964697479206e6f742066756c66696c6ca165627a7a723058208e0aee6293783887f44dc6aa7a556da565072d720aab77999dedf7c3e054a1820029");
-AbiBinProvider.prototype.addBIN('TokenRules', "608060405234801561001057600080fd5b50604051604080611836833981016040528051602090910151600160a060020a03821615156100a057604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601d60248201527f4f7267616e697a6174696f6e2061646472657373206973206e756c6c2e000000604482015290519081900360640190fd5b600160a060020a038116151561011757604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601660248201527f546f6b656e2061646472657373206973206e756c6c2e00000000000000000000604482015290519081900360640190fd5b60048054600160a060020a03938416600160a060020a031991821617909155600580549290931691161790556116e4806101526000396000f3006080604052600436106100c15763ffffffff60e060020a60003504166304d6ded481146100c6578063212c8157146101d55780632185810b146101ec57806322f468ea1461020157806323bd4d7a146102325780633e290e5c14610263578063488b38141461029c5780635f30e581146102bd57806365ab1ae8146102de578063661309ac146102f657806369cc40031461032b578063a6a192da146103c7578063c3a90bf914610400578063d6a7d22614610427578063fc0c546a14610448575b600080fd5b3480156100d257600080fd5b506100de60043561045d565b604051808060200184600160a060020a0316600160a060020a0316815260200180602001838103835286818151815260200191508051906020019080838360005b8381101561013757818101518382015260200161011f565b50505050905090810190601f1680156101645780820380516001836020036101000a031916815260200191505b50838103825284518152845160209182019186019080838360005b8381101561019757818101518382015260200161017f565b50505050905090810190601f1680156101c45780820380516001836020036101000a031916815260200191505b509550505050505060405180910390f35b3480156101e157600080fd5b506101ea6105b2565b005b3480156101f857600080fd5b506101ea6105cb565b34801561020d57600080fd5b506102196004356105e7565b6040805192835290151560208301528051918290030190f35b34801561023e57600080fd5b50610247610603565b60408051600160a060020a039092168252519081900360200190f35b34801561026f57600080fd5b506101ea602460048035828101929082013591600160a060020a0382351691604435908101910135610612565b3480156102a857600080fd5b506101ea600160a060020a0360043516610b58565b3480156102c957600080fd5b506101ea600160a060020a0360043516610cb7565b3480156102ea57600080fd5b50610247600435610ebf565b34801561030257600080fd5b50610317600160a060020a0360043516610ee7565b604080519115158252519081900360200190f35b34801561033757600080fd5b50604080516020600460248035828101358481028087018601909752808652610317968435600160a060020a031696369660449591949091019291829185019084908082843750506040805187358901803560208181028481018201909552818452989b9a998901989297509082019550935083925085019084908082843750949750610efc9650505050505050565b3480156103d357600080fd5b506101ea60048035600160a060020a031690602480358082019290810135916044359081019101356110eb565b34801561040c57600080fd5b50610415611460565b60408051918252519081900360200190f35b34801561043357600080fd5b50610219600160a060020a0360043516611467565b34801561045457600080fd5b50610247611483565b600080548290811061046b57fe5b60009182526020918290206003919091020180546040805160026001841615610100026000190190931692909204601f8101859004850283018501909152808252919350918391908301828280156105045780601f106104d957610100808354040283529160200191610504565b820191906000526020600020905b8154815290600101906020018083116104e757829003601f168201915b505050506001838101546002808601805460408051602061010097841615979097026000190190921693909304601f81018690048602820186019093528281529596600160a060020a039093169592945091928301828280156105a85780601f1061057d576101008083540402835291602001916105a8565b820191906000526020600020905b81548152906001019060200180831161058b57829003601f168201915b5050505050905083565b336000908152600660205260409020805460ff19169055565b336000908152600660205260409020805460ff19166001179055565b6002602052600090815260409020805460019091015460ff1682565b600454600160a060020a031681565b600061061c6115ca565b6106246115e9565b600454600160a060020a031633146106ac576040805160e560020a62461bcd02815260206004820152602560248201527f4f6e6c79206f7267616e697a6174696f6e20697320616c6c6f77656420746f2060448201527f63616c6c2e000000000000000000000000000000000000000000000000000000606482015290519081900360840190fd5b861515610703576040805160e560020a62461bcd02815260206004820152601360248201527f52756c65206e616d6520697320656d7074792e00000000000000000000000000604482015290519081900360640190fd5b600160a060020a0386161515610763576040805160e560020a62461bcd02815260206004820152601560248201527f52756c652061646472657373206973206e756c6c2e0000000000000000000000604482015290519081900360640190fd5b8315156107ba576040805160e560020a62461bcd02815260206004820152601260248201527f52756c652041424920697320656d7074792e0000000000000000000000000000604482015290519081900360640190fd5b8787604051602001808383808284378201915050925050506040516020818303038152906040526040518082805190602001908083835b602083106108105780518252601f1990920191602091820191016107f1565b51815160209384036101000a6000190180199092169116179052604080519290940182900390912060008181526002909252929020600101549196505060ff161591506108cf9050576040805160e560020a62461bcd02815260206004820152602c60248201527f52756c6520776974682074686520737065636966696564206e616d6520616c7260448201527f65616479206578697374732e0000000000000000000000000000000000000000606482015290519081900360840190fd5b600160a060020a0386166000908152600160208190526040909120015460ff161561096a576040805160e560020a62461bcd02815260206004820152602f60248201527f52756c652077697468207468652073706563696669656420616464726573732060448201527f616c7265616479206578697374732e0000000000000000000000000000000000606482015290519081900360840190fd5b6040805160806020601f8b0181900402820181019092526060810189815290918291908b908b9081908501838280828437820191505050505050815260200187600160a060020a0316815260200186868080601f01602080910402602001604051908101604052809392919081815260200183838082843750505092909352505060408051808201825260008054825260016020808401828152600160a060020a038e168452828252858420855181558151908401805491151560ff199283161790558b85526002835295842085518155905190830180549115159190961617909455815490810180835591805285518051969850929650909487945060039091027f290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e5630192610a9d928492910190611600565b5060208281015160018301805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a0390921691909117905560408301518051610ae99260028501920190611600565b505060408051600160a060020a038a1660208201528181529081018a90527f4d39292a7c76562755f38e419d757d846579699af484d88be86a1811dca7321592508a91508990899080606081018585808284376040519201829003965090945050505050a15050505050505050565b600454600090600160a060020a03163314610be3576040805160e560020a62461bcd02815260206004820152602560248201527f4f6e6c79206f7267616e697a6174696f6e20697320616c6c6f77656420746f2060448201527f63616c6c2e000000000000000000000000000000000000000000000000000000606482015290519081900360840190fd5b610bec82611492565b600354909150811415610c6e576040805160e560020a62461bcd028152602060048201526024808201527f436f6e73747261696e7420746f2072656d6f766520646f6573206e6f7420657860448201527f6973742e00000000000000000000000000000000000000000000000000000000606482015290519081900360840190fd5b610c77816114e4565b60408051600160a060020a038416815290517fb610065a665f9558073a05bb32a6827cd9552a65f12c576632b85f75a624bf819181900360200190a15050565b600454600090600160a060020a03163314610d42576040805160e560020a62461bcd02815260206004820152602560248201527f4f6e6c79206f7267616e697a6174696f6e20697320616c6c6f77656420746f2060448201527f63616c6c2e000000000000000000000000000000000000000000000000000000606482015290519081900360840190fd5b600160a060020a0382161515610da2576040805160e560020a62461bcd02815260206004820152601a60248201527f436f6e73747261696e7420746f20616464206973206e756c6c2e000000000000604482015290519081900360640190fd5b610dab82611492565b6003549091508114610e2d576040805160e560020a62461bcd02815260206004820152602160248201527f436f6e73747261696e7420746f2061646420616c72656164792065786973747360448201527f2e00000000000000000000000000000000000000000000000000000000000000606482015290519081900360840190fd5b600380546001810182556000919091527fc2575a0e9e593c00f959f8c92f12db2869c3395a3b0502d05e2516446f71f85b018054600160a060020a03841673ffffffffffffffffffffffffffffffffffffffff19909116811790915560408051918252517f3fc8f7d9dd3ec32e95a79dede9e9ea171475382d20c24f7c6e6589c2d7416db29181900360200190a15050565b6003805482908110610ecd57fe5b600091825260209091200154600160a060020a0316905081565b60066020526000908152604090205460ff1681565b60008082518451141515610f80576040805160e560020a62461bcd02815260206004820152603960248201527f27746f2720616e642027616d6f756e7427207472616e7366657220617272617960448201527f7327206c656e6774687320617265206e6f7420657175616c2e00000000000000606482015290519081900360840190fd5b506001905060005b60035481108015610f965750815b156110e3576003805482908110610fa957fe5b9060005260206000200160009054906101000a9004600160a060020a0316600160a060020a03166360156dbc8686866040518463ffffffff1660e060020a0281526004018084600160a060020a0316600160a060020a031681526020018060200180602001838103835285818151815260200191508051906020019060200280838360005b8381101561104657818101518382015260200161102e565b50505050905001838103825284818151815260200191508051906020019060200280838360005b8381101561108557818101518382015260200161106d565b5050505090500195505050505050602060405180830381600087803b1580156110ad57600080fd5b505af11580156110c1573d6000803e3d6000fd5b505050506040513d60208110156110d757600080fd5b50519150600101610f88565b509392505050565b3360009081526001602081905260408220015460ff16151561117d576040805160e560020a62461bcd02815260206004820152602860248201527f4f6e6c7920726567697374657265642072756c6520697320616c6c6f7765642060448201527f746f2063616c6c2e000000000000000000000000000000000000000000000000606482015290519081900360840190fd5b600160a060020a03861660009081526006602052604090205460ff161515611215576040805160e560020a62461bcd02815260206004820152602b60248201527f5472616e73666572732066726f6d20746865206164647265737320617265206e60448201527f6f7420616c6c6f7765642e000000000000000000000000000000000000000000606482015290519081900360840190fd5b838214611292576040805160e560020a62461bcd02815260206004820152603960248201527f27746f2720616e642027616d6f756e7427207472616e7366657220617272617960448201527f7327206c656e6774687320617265206e6f7420657175616c2e00000000000000606482015290519081900360840190fd5b6112f4868686808060200260200160405190810160405280939291908181526020018383602002808284375050604080516020808c0282810182019093528b82529095508b94508a935083925085019084908082843750610efc945050505050565b151561134a576040805160e560020a62461bcd02815260206004820152601b60248201527f436f6e73747261696e7473206e6f742066756c6c66696c6c65642e0000000000604482015290519081900360640190fd5b5060005b8381101561143857600554600160a060020a03166323b872dd8787878581811061137457fe5b90506020020135600160a060020a0316868686818110151561139257fe5b905060200201356040518463ffffffff1660e060020a0281526004018084600160a060020a0316600160a060020a0316815260200183600160a060020a0316600160a060020a031681526020018281526020019350505050602060405180830381600087803b15801561140457600080fd5b505af1158015611418573d6000803e3d6000fd5b505050506040513d602081101561142e57600080fd5b505060010161134e565b505050600160a060020a039092166000908152600660205260409020805460ff191690555050565b6003545b90565b6001602081905260009182526040909120805491015460ff1682565b600554600160a060020a031681565b60005b600354811080156114d2575081600160a060020a03166003828154811015156114ba57fe5b600091825260209091200154600160a060020a031614155b156114df57600101611495565b919050565b6003546000908210611540576040805160e560020a62461bcd02815260206004820152601660248201527f496e646578206973206f7574206f662072616e67652e00000000000000000000604482015290519081900360640190fd5b5060038054600019810191908290811061155657fe5b60009182526020909120015460038054600160a060020a03909216918490811061157c57fe5b6000918252602090912001805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a03929092169190911790556003805460001901906115c5908261167e565b505050565b6040805160608181018352808252600060208301529181019190915290565b604080518082019091526000808252602082015290565b828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f1061164157805160ff191683800117855561166e565b8280016001018555821561166e579182015b8281111561166e578251825591602001919060010190611653565b5061167a92915061169e565b5090565b8154818355818111156115c5576000838152602090206115c59181019083015b61146491905b8082111561167a57600081556001016116a45600a165627a7a723058204263d72d08f80f6636389c8dc684701a9d2c39ca9c80932ea3e221f9adf5829c0029");
-AbiBinProvider.prototype.addBIN('TransferRule', "608060405234801561001057600080fd5b506040516020806103898339810160405251600160a060020a038116151561009957604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601c60248201527f546f6b656e2072756c65732061646472657373206973206e756c6c2e00000000604482015290519081900360640190fd5b60008054600160a060020a03909216600160a060020a03199092169190911790556102c0806100c96000396000f3006080604052600436106100405763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166323b872dd8114610045575b600080fd5b34801561005157600080fd5b5061007c73ffffffffffffffffffffffffffffffffffffffff60043581169060243516604435610090565b604080519115158252519081900360200190f35b604080516001808252818301909252600091606091829160208083019080388339019050509150848260008151811015156100c757fe5b73ffffffffffffffffffffffffffffffffffffffff929092166020928302919091018201526040805160018082528183019092529182810190803883390190505090508381600081518110151561011a57fe5b90602001906020020181815250506000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1663a6a192da8784846040518463ffffffff167c0100000000000000000000000000000000000000000000000000000000028152600401808473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018060200180602001838103835285818151815260200191508051906020019060200280838360005b838110156102095781810151838201526020016101f1565b50505050905001838103825284818151815260200191508051906020019060200280838360005b83811015610248578181015183820152602001610230565b5050505090500195505050505050600060405180830381600087803b15801561027057600080fd5b505af1158015610284573d6000803e3d6000fd5b50600199985050505050505050505600a165627a7a72305820c8734e25b339f0844cef4a4c2119867487c4c91ce54a74c01ce980d11bafcacf0029");
 AbiBinProvider.prototype.addABI('MockToken', [{
   "constant": true,
   "inputs": [],
@@ -62273,6 +62265,10 @@ AbiBinProvider.prototype.addABI('TransferRule', [{
   "stateMutability": "nonpayable",
   "type": "constructor"
 }]);
+AbiBinProvider.prototype.addBIN('MockToken', "608060405234801561001057600080fd5b5060008054600160a060020a031916331790556040805180820190915260048082527f4d4f434b00000000000000000000000000000000000000000000000000000000602090920191825261006791600391610128565b5060408051808201909152600a8082527f4d6f636b20546f6b656e0000000000000000000000000000000000000000000060209092019182526100ac91600291610128565b506004805460ff191660121790556b0295be96e640669720000000600581905560008054600160a060020a0390811682526006602090815260408084208590558354815195865290519216937fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef929081900390910190a36101c3565b828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f1061016957805160ff1916838001178555610196565b82800160010185558215610196579182015b8281111561019657825182559160200191906001019061017b565b506101a29291506101a6565b5090565b6101c091905b808211156101a257600081556001016101ac565b90565b610951806101d26000396000f3006080604052600436106101065763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166306fdde03811461010b578063095ea7b31461019557806318160ddd146101cd57806318821400146101f457806323b872dd146102095780632a90531814610233578063313ce567146102485780635b7f415c1461027357806370a08231146102885780638bc04eb7146102a95780638da5cb5b146102be57806395d89b41146102ef578063a67e91a814610304578063a7f4377914610319578063a9059cbb14610330578063c0b6f56114610354578063d153b60c14610375578063dd62ed3e1461038a578063e71a7811146103b1575b600080fd5b34801561011757600080fd5b506101206103c6565b6040805160208082528351818301528351919283929083019185019080838360005b8381101561015a578181015183820152602001610142565b50505050905090810190601f1680156101875780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b3480156101a157600080fd5b506101b9600160a060020a0360043516602435610459565b604080519115158252519081900360200190f35b3480156101d957600080fd5b506101e26104bf565b60408051918252519081900360200190f35b34801561020057600080fd5b506101206104c5565b34801561021557600080fd5b506101b9600160a060020a03600435811690602435166044356104fc565b34801561023f57600080fd5b50610120610607565b34801561025457600080fd5b5061025d61063e565b6040805160ff9092168252519081900360200190f35b34801561027f57600080fd5b5061025d610647565b34801561029457600080fd5b506101e2600160a060020a036004351661064c565b3480156102b557600080fd5b506101e2610667565b3480156102ca57600080fd5b506102d3610673565b60408051600160a060020a039092168252519081900360200190f35b3480156102fb57600080fd5b50610120610682565b34801561031057600080fd5b506101e26106e3565b34801561032557600080fd5b5061032e6106f3565b005b34801561033c57600080fd5b506101b9600160a060020a036004351660243561070a565b34801561036057600080fd5b506101b9600160a060020a03600435166107ba565b34801561038157600080fd5b506102d361082c565b34801561039657600080fd5b506101e2600160a060020a036004358116906024351661083b565b3480156103bd57600080fd5b506101b9610866565b60028054604080516020601f600019610100600187161502019094168590049384018190048102820181019092528281526060939092909183018282801561044f5780601f106104245761010080835404028352916020019161044f565b820191906000526020600020905b81548152906001019060200180831161043257829003601f168201915b5050505050905090565b336000818152600760209081526040808320600160a060020a038716808552908352818420869055815186815291519394909390927f8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925928290030190a350600192915050565b60055490565b60408051808201909152600a81527f4d6f636b20546f6b656e00000000000000000000000000000000000000000000602082015281565b600160a060020a038316600090815260066020526040812054610525908363ffffffff6108e916565b600160a060020a0385166000908152600660209081526040808320939093556007815282822033835290522054610562908363ffffffff6108e916565b600160a060020a0380861660009081526007602090815260408083203384528252808320949094559186168152600690915220546105a6908363ffffffff6108fb16565b600160a060020a0380851660008181526006602090815260409182902094909455805186815290519193928816927fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef92918290030190a35060019392505050565b60408051808201909152600481527f4d4f434b00000000000000000000000000000000000000000000000000000000602082015281565b60045460ff1690565b601281565b600160a060020a031660009081526006602052604090205490565b670de0b6b3a764000081565b600054600160a060020a031681565b60038054604080516020601f600260001961010060018816150201909516949094049384018190048102820181019092528281526060939092909183018282801561044f5780601f106104245761010080835404028352916020019161044f565b6b0295be96e64066972000000081565b6106fc33610911565b151561070757600080fd5b33ff5b3360009081526006602052604081205461072a908363ffffffff6108e916565b3360009081526006602052604080822092909255600160a060020a0385168152205461075c908363ffffffff6108fb16565b600160a060020a0384166000818152600660209081526040918290209390935580518581529051919233927fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef9281900390910190a350600192915050565b60006107c533610911565b15156107d057600080fd5b6001805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a0384169081179091556040517f20f5afdf40bf7b43c89031a5d4369a30b159e512d164aa46124bcb706b4a1caf90600090a2506001919050565b600154600160a060020a031681565b600160a060020a03918216600090815260076020908152604080832093909416825291909152205490565b600154600090600160a060020a0316331461088057600080fd5b6001805460008054600160a060020a0380841673ffffffffffffffffffffffffffffffffffffffff19928316178084559190931690935560405192909116917f624adc4c72536289dd9d5439ccdeccd8923cb9af95fb626b21935447c77b84079190a250600190565b6000828211156108f557fe5b50900390565b60008282018381101561090a57fe5b9392505050565b600054600160a060020a03908116911614905600a165627a7a72305820e6c5c8e24d6caf24965cabc5ffdf39ce3ce09677dbcd6990f9c91e8053ea7f7b0029");
+AbiBinProvider.prototype.addBIN('TokenHolder', "60806040523480156200001157600080fd5b50604051620037003803806200370083398101604090815281516020830151918301516060840151930180519193909182908290600090828181118015906200005957508015155b80156200006557508115155b1515620000f957604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152602360248201527f526571756972656d656e742076616c6964697479206e6f742066756c66696c6c60448201527f65642e0000000000000000000000000000000000000000000000000000000000606482015290519081900360840190fd5b600092505b8451831015620002945784516000908690859081106200011a57fe5b60209081029091010151600160a060020a031614156200019b57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601460248201527f57616c6c6574206164647265737320697320302e000000000000000000000000604482015290519081900360640190fd5b600160008685815181101515620001ae57fe5b6020908102909101810151600160a060020a031682528101919091526040016000205460ff16156200024157604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601960248201527f4475706c69636174652077616c6c657420616464726573732e00000000000000604482015290519081900360640190fd5b600180600087868151811015156200025557fe5b602090810291909101810151600160a060020a03168252810191909152604001600020805460ff191691151591909117905560019290920191620000fe565b8451620002a9906002906020880190620003fd565b5050506000919091555050600160a060020a03841615156200032c57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601f60248201527f546f6b656e20636f6e74726163742061646472657373206973206e756c6c2e00604482015290519081900360640190fd5b600160a060020a0383161515620003c957604080517f08c379a0000000000000000000000000000000000000000000000000000000008152602060048201526024808201527f546f6b656e52756c657320636f6e74726163742061646472657373206973206e60448201527f756c6c2e00000000000000000000000000000000000000000000000000000000606482015290519081900360840190fd5b505060068054600160a060020a03938416600160a060020a0319918216179091556008805492909316911617905562000491565b82805482825590600052602060002090810192821562000455579160200282015b82811115620004555782518254600160a060020a031916600160a060020a039091161782556020909201916001909101906200041e565b506200046392915062000467565b5090565b6200048e91905b8082111562000463578054600160a060020a03191681556001016200046e565b90565b61325f80620004a16000396000f3006080604052600436106101a05763ffffffff7c0100000000000000000000000000000000000000000000000000000000600035041663028c979d81146101a557806309d43931146101ce5780630b1cd2c0146102005780630cdac8461461022c5780631988f9cc146102655780631fa5d6a41461027a57806320ea8d861461029b57806329b57c69146102b35780632d0b691f146102c85780632eb79f60146102ef5780632f938e64146103075780633411c81c1461036157806336dae4261461038557806351491e0c146103a657806359793b00146103bb5780637ad71f72146104365780637d90cc511461046a57806383c7f14c1461047f57806387fe2feb146104d85780639ace38c2146104f95780639c144d5e146105a3578063a75fe8e1146105b8578063b77bf600146105d9578063ba51a6df146105ee578063c01a8c8414610606578063c763a4ba1461061e578063ce5570ec14610633578063d348050c14610654578063dc8452cd14610669578063e50b2bc21461067e578063ee22610b146106a5578063efeb5f1f146106bd578063f0073530146106de575b600080fd5b3480156101b157600080fd5b506101cc600160a060020a03600435166024356044356106f3565b005b3480156101da57600080fd5b506101e36108ec565b60408051600160e060020a03199092168252519081900360200190f35b34801561020c57600080fd5b50610218600435610947565b604080519115158252519081900360200190f35b34801561023857600080fd5b50610253600160a060020a0360043581169060243516610a74565b60408051918252519081900360200190f35b34801561027157600080fd5b506101e3610cc5565b34801561028657600080fd5b506101cc600160a060020a0360043516610cfa565b3480156102a757600080fd5b506101cc600435610e35565b3480156102bf57600080fd5b50610253611065565b3480156102d457600080fd5b50610253600160a060020a036004351660243560443561106c565b3480156102fb57600080fd5b5061025360043561133e565b34801561031357600080fd5b50610328600160a060020a03600435166114c7565b6040518085815260200184815260200183815260200182600281111561034a57fe5b60ff16815260200194505050505060405180910390f35b34801561036d57600080fd5b50610218600435600160a060020a03602435166114f1565b34801561039157600080fd5b50610253600160a060020a0360043516611511565b3480156103b257600080fd5b506101e3611773565b3480156103c757600080fd5b5060408051602060046024803582810135601f8101859004850286018501909652858552610218958335600160a060020a03169536956044949193909101919081908401838280828437509497505084359550505050602082013560ff169160408101359150606001356117ce565b34801561044257600080fd5b5061044e600435611b80565b60408051600160a060020a039092168252519081900360200190f35b34801561047657600080fd5b506101e3611ba8565b34801561048b57600080fd5b506040805160206004803580820135601f81018490048402850184019095528484526101e3943694929360249392840191908190840183828082843750949750611bdd9650505050505050565b3480156104e457600080fd5b50610253600160a060020a0360043516611cf4565b34801561050557600080fd5b50610511600435611efb565b60408051600160a060020a038516815282151591810191909152606060208083018281528551928401929092528451608084019186019080838360005b8381101561056657818101518382015260200161054e565b50505050905090810190601f1680156105935780820380516001836020036101000a031916815260200191505b5094505050505060405180910390f35b3480156105af57600080fd5b5061044e611fb8565b3480156105c457600080fd5b506101cc600160a060020a0360043516611fc7565b3480156105e557600080fd5b50610253612195565b3480156105fa57600080fd5b506101cc60043561219b565b34801561061257600080fd5b506101cc600435612265565b34801561062a57600080fd5b506101e3612433565b34801561063f57600080fd5b50610218600160a060020a0360043516612468565b34801561066057600080fd5b5061044e61247d565b34801561067557600080fd5b5061025361248c565b34801561068a57600080fd5b506101cc600160a060020a0360043581169060243516612492565b3480156106b157600080fd5b506101cc6004356126c9565b3480156106c957600080fd5b506101cc600160a060020a03600435166129d4565b3480156106ea57600080fd5b506101e3612bcf565b6000333014610747576040805160e560020a62461bcd02815260206004820152602160248201526000805160206131d4833981519152604482015260f960020a601702606482015290519081900360840190fd5b83600160a060020a03811615156107a8576040805160e560020a62461bcd02815260206004820152601460248201527f4b65792061646472657373206973206e756c6c2e000000000000000000000000604482015290519081900360640190fd5b600160a060020a038516600090815260076020526040812060030154869160ff909116908160028111156107d857fe5b1461082d576040805160e560020a62461bcd02815260206004820152600b60248201527f4b6579206578697374732e000000000000000000000000000000000000000000604482015290519081900360640190fd5b4385116108aa576040805160e560020a62461bcd02815260206004820152603560248201527f45787069726174696f6e20686569676874206973206c746520746f207468652060448201527f63757272656e7420626c6f636b206865696768742e0000000000000000000000606482015290519081900360840190fd5b50505050600160a060020a039290921660009081526007602052604081209182556002820192909255600180820192909255600301805460ff19169091179055565b604080517f617574686f72697a6553657373696f6e28616464726573732c75696e7432353681527f2c75696e743235362900000000000000000000000000000000000000000000006020820152905190819003602901902081565b600080600083600460008281526020019081526020016000206001018054600181600116156101000203166002900490506000141515156109c0576040805160e560020a62461bcd02815260206004820152601b6024820152600080516020613154833981519152604482015290519081900360640190fd5b60008581526004602052604090206002015460ff16156109e35760019350610a6c565b60009250600091505b600254821015610a675760008581526003602052604081206002805491929185908110610a1557fe5b6000918252602080832090910154600160a060020a0316835282019290925260400190205460ff1615610a49576001830192505b600054831415610a5c5760019350610a6c565b6001909101906109ec565b600093505b505050919050565b3360009081526001602052604081205460ff161515610acb576040805160e560020a62461bcd02815260206004820152601f6024820152600080516020613174833981519152604482015290519081900360640190fd5b600160a060020a038316600090815260016020526040902054839060ff161515610b2d576040805160e560020a62461bcd0281526020600482015260166024820152600080516020613194833981519152604482015290519081900360640190fd5b82600160a060020a0381161515610b7c576040805160e560020a62461bcd02815260206004820152601760248201526000805160206131f4833981519152604482015290519081900360640190fd5b600160a060020a038416600090815260016020526040902054849060ff1615610bdd576040805160e560020a62461bcd02815260206004820152600e60248201526000805160206131b4833981519152604482015290519081900360640190fd5b604080517f7265706c61636557616c6c657428616464726573732c616464726573732900008152815190819003601e018120600160a060020a03808a1660248401528816604480840191909152835180840390910181526064909201909252602081018051600160e060020a0316600160e060020a031990931692909217909152610c69903090612c04565b60408051600160a060020a03808a16825288166020820152815192965086927f385ef46d7ab7d0d8628198545974c898282544fef2e9e6c6d18087148b95cb5f929181900390910190a2610cbc84612265565b50505092915050565b604080517f72656d6f766557616c6c657428616464726573732900000000000000000000008152905190819003601501902081565b3360009081526001602052604090205460ff161515610d51576040805160e560020a62461bcd02815260206004820152601f6024820152600080516020613174833981519152604482015290519081900360640190fd5b600160a060020a038116600090815260076020526040902060030154819060ff166001816002811115610d8057fe5b14610dd5576040805160e560020a62461bcd02815260206004820152601660248201527f4b6579206973206e6f7420617574686f72697a65642e00000000000000000000604482015290519081900360640190fd5b600160a060020a038316600081815260076020908152604091829020600301805460ff19166002179055815192835290517f2991ab7bfda4556c9e662762b3dfa89a1df391084c4278286d466c1c187e55239281900390910190a1505050565b3360009081526001602052604090205460ff161515610e8c576040805160e560020a62461bcd02815260206004820152601f6024820152600080516020613174833981519152604482015290519081900360640190fd5b8060046000828152602001908152602001600020600101805460018160011615610100020316600290049050600014151515610f00576040805160e560020a62461bcd02815260206004820152601b6024820152600080516020613154833981519152604482015290519081900360640190fd5b60008281526003602090815260408083203380855292529091205483919060ff161515610f9d576040805160e560020a62461bcd02815260206004820152602b60248201527f5472616e73616374696f6e206973206e6f7420636f6e6669726d65642062792060448201527f7468652077616c6c65742e000000000000000000000000000000000000000000606482015290519081900360840190fd5b600084815260046020526040902060020154849060ff1615611009576040805160e560020a62461bcd02815260206004820152601860248201527f5472616e73616374696f6e2069732065786563757465642e0000000000000000604482015290519081900360640190fd5b60008581526003602090815260408083203380855290835292819020805460ff1916905580519283525187927fc604bfed3acf21d53a27ee0735b712b9d3e6691f4df5888f91a0bb5f128f5d1392908290030190a25050505050565b6002545b90565b3360009081526001602052604081205460ff1615156110c3576040805160e560020a62461bcd02815260206004820152601f6024820152600080516020613174833981519152604482015290519081900360640190fd5b83600160a060020a0381161515611124576040805160e560020a62461bcd02815260206004820152601460248201527f4b65792061646472657373206973206e756c6c2e000000000000000000000000604482015290519081900360640190fd5b600160a060020a038516600090815260076020526040812060030154869160ff9091169081600281111561115457fe5b146111a9576040805160e560020a62461bcd02815260206004820152600b60248201527f4b6579206578697374732e000000000000000000000000000000000000000000604482015290519081900360640190fd5b438511611226576040805160e560020a62461bcd02815260206004820152603560248201527f45787069726174696f6e20686569676874206973206c746520746f207468652060448201527f63757272656e7420626c6f636b206865696768742e0000000000000000000000606482015290519081900360840190fd5b604080517f617574686f72697a6553657373696f6e28616464726573732c75696e7432353681527f2c75696e743235362900000000000000000000000000000000000000000000006020808301919091528251918290036029018220600160a060020a038b166024840152604483018a905260648084018a905284518085039091018152608490930190935281018051600160e060020a0316600160e060020a0319909316929092179091526112dd903090612c04565b60408051600160a060020a038a16815260208101899052808201889052905191955085917f6619ec03c5dd2519d2107a7829f566e12d2fa61f97b804420b93c4d1b721fd1b9181900360600190a261133484612265565b5050509392505050565b3360009081526001602052604081205460ff161515611395576040805160e560020a62461bcd02815260206004820152601f6024820152600080516020613174833981519152604482015290519081900360640190fd5b600254828181118015906113a857508015155b80156113b357508115155b1515611406576040805160e560020a62461bcd0281526020600482015260236024820152600080516020613214833981519152604482015260e960020a6232b21702606482015290519081900360840190fd5b604080517f6368616e6765526571756972656d656e742875696e74323536290000000000008152815190819003601a0181206024808301889052835180840390910181526044909201909252602081018051600160e060020a0316600160e060020a03199093169290921790915261147f903090612c04565b60408051868152905191945084917f762499bdaf3774f418baf7d6c8030e584abb195e0aa8c90b122e7951500b06699181900360200190a26114c083612265565b5050919050565b60076020526000908152604090208054600182015460028301546003909301549192909160ff1684565b600360209081526000928352604080842090915290825290205460ff1681565b3360009081526001602052604081205460ff161515611568576040805160e560020a62461bcd02815260206004820152601f6024820152600080516020613174833981519152604482015290519081900360640190fd5b81600160a060020a03811615156115b7576040805160e560020a62461bcd02815260206004820152601760248201526000805160206131f4833981519152604482015290519081900360640190fd5b600160a060020a038316600090815260016020526040902054839060ff1615611618576040805160e560020a62461bcd02815260206004820152600e60248201526000805160206131b4833981519152604482015290519081900360640190fd5b60025461162c90600163ffffffff612d6216565b60005481811115801561163e57508015155b801561164957508115155b151561169c576040805160e560020a62461bcd0281526020600482015260236024820152600080516020613214833981519152604482015260e960020a6232b21702606482015290519081900360840190fd5b604080517f61646457616c6c6574286164647265737329000000000000000000000000000081528151908190036012018120600160a060020a038916602480840191909152835180840390910181526044909201909252602081018051600160e060020a0316600160e060020a031990931692909217909152611720903090612c04565b60408051600160a060020a0389168152905191965086917f39c5400ee7e5a4b5250fc9b0ee573eec66cb9ab74b4878cf0493089511414b179181900360200190a261176a85612265565b50505050919050565b604080517f6578656375746552756c6528616464726573732c62797465732c75696e74323581527f362c75696e74382c627974657333322c627974657333322900000000000000006020820152905190819003603801902081565b604080517f6578656375746552756c6528616464726573732c62797465732c75696e74323581527f362c75696e74382c627974657333322c62797465733332290000000000000000602082015290519081900360380190206000908190819081908190611840908c8c8c8c8c8c612d78565b600160a060020a0380821660009081526007602052604080822060085482517f2185810b0000000000000000000000000000000000000000000000000000000081529251969a5094985096509290911692632185810b92600480820193929182900301818387803b1580156118b457600080fd5b505af11580156118c8573d6000803e3d6000fd5b50506006546008548554604080517f095ea7b3000000000000000000000000000000000000000000000000000000008152600160a060020a03938416600482015260248101929092525191909216935063095ea7b3925060448083019260209291908290030181600087803b15801561194057600080fd5b505af1158015611954573d6000803e3d6000fd5b505050506040513d602081101561196a57600080fd5b50506040518a51600160a060020a038d16918c918190602084019080838360005b838110156119a357818101518382015260200161198b565b50505050905090810190601f1680156119d05780820380516001836020036101000a031916815260200191505b509150506000604051808303816000865af1600654600854604080517f095ea7b3000000000000000000000000000000000000000000000000000000008152600160a060020a0392831660048201526000602482018190529151949b5091909216945063095ea7b39350604480820193602093909283900390910190829087803b158015611a5d57600080fd5b505af1158015611a71573d6000803e3d6000fd5b505050506040513d6020811015611a8757600080fd5b5050600854604080517f212c81570000000000000000000000000000000000000000000000000000000081529051600160a060020a039092169163212c81579160048082019260009290919082900301818387803b158015611ae857600080fd5b505af1158015611afc573d6000803e3d6000fd5b50505050611b098a611bdd565b60408051600160e060020a031983168152600160a060020a0386811660208301528183018d90526060820188905288151560808301529151929350908d16917ffbb5484a0dd6b447026498c439ffeb076e26c3330d8eab2f86c5f9e86f1ac6759181900360a00190a2505050509695505050505050565b6002805482908110611b8e57fe5b600091825260209091200154600160a060020a0316905081565b604080517f6368616e6765526571756972656d656e742875696e74323536290000000000008152905190819003601a01902081565b6000806004835110151515611c62576040805160e560020a62461bcd02815260206004820152602260248201527f496e707574206279746573206c656e677468206973206c657373207468616e2060448201527f342e000000000000000000000000000000000000000000000000000000000000606482015290519081900360840190fd5b5060005b60048160ff161015611cee578060080260ff16838260ff16815181101515611c8a57fe5b60209101015160029190910a7f0100000000000000000000000000000000000000000000000000000000000000918290049091027fff0000000000000000000000000000000000000000000000000000000000000016049190911790600101611c66565b50919050565b3360009081526001602052604081205460ff161515611d4b576040805160e560020a62461bcd02815260206004820152601f6024820152600080516020613174833981519152604482015290519081900360640190fd5b600160a060020a038216600090815260016020526040902054829060ff161515611dad576040805160e560020a62461bcd0281526020600482015260166024820152600080516020613194833981519152604482015290519081900360640190fd5b600254600110611e2d576040805160e560020a62461bcd02815260206004820152602c60248201527f4c6173742077616c6c65742063616e6e6f74206265207375626d69747465642060448201527f666f722072656d6f76616c2e0000000000000000000000000000000000000000606482015290519081900360840190fd5b604080517f72656d6f766557616c6c6574286164647265737329000000000000000000000081528151908190036015018120600160a060020a038616602480840191909152835180840390910181526044909201909252602081018051600160e060020a0316600160e060020a031990931692909217909152611eb1903090612c04565b60408051600160a060020a0386168152905191935083917f4b516a5cb9faadf0d22d8b829b7e7d06cb38f45c53d9e379403f6a43a79044339181900360200190a2611cee82612265565b6004602090815260009182526040918290208054600180830180548651600261010094831615949094026000190190911692909204601f8101869004860283018601909652858252600160a060020a03909216949293909290830182828015611fa55780601f10611f7a57610100808354040283529160200191611fa5565b820191906000526020600020905b815481529060010190602001808311611f8857829003601f168201915b5050506002909301549192505060ff1683565b600854600160a060020a031681565b600033301461201b576040805160e560020a62461bcd02815260206004820152602160248201526000805160206131d4833981519152604482015260f960020a601702606482015290519081900360840190fd5b600160a060020a038216600090815260016020526040902054829060ff16151561207d576040805160e560020a62461bcd0281526020600482015260166024820152600080516020613194833981519152604482015290519081900360640190fd5b600160a060020a0383166000908152600160205260408120805460ff1916905591505b600254600019018210156121585782600160a060020a03166002838154811015156120c757fe5b600091825260209091200154600160a060020a0316141561214d576002805460001981019081106120f457fe5b60009182526020909120015460028054600160a060020a03909216918490811061211a57fe5b9060005260206000200160006101000a815481600160a060020a030219169083600160a060020a03160217905550612158565b6001909101906120a0565b60025461216c90600163ffffffff612f6916565b612177600282613097565b506002546000541115612190576002546121909061219b565b505050565b60055481565b3330146121ed576040805160e560020a62461bcd02815260206004820152602160248201526000805160206131d4833981519152604482015260f960020a601702606482015290519081900360840190fd5b6002548181811180159061220057508015155b801561220b57508115155b151561225e576040805160e560020a62461bcd0281526020600482015260236024820152600080516020613214833981519152604482015260e960020a6232b21702606482015290519081900360840190fd5b5050600055565b3360009081526001602052604090205460ff1615156122bc576040805160e560020a62461bcd02815260206004820152601f6024820152600080516020613174833981519152604482015290519081900360640190fd5b8060046000828152602001908152602001600020600101805460018160011615610100020316600290049050600014151515612330576040805160e560020a62461bcd02815260206004820152601b6024820152600080516020613154833981519152604482015290519081900360640190fd5b60008281526003602090815260408083203380855292529091205483919060ff16156123cc576040805160e560020a62461bcd02815260206004820152602760248201527f5472616e73616374696f6e20697320636f6e6669726d6564206279207468652060448201527f77616c6c65742e00000000000000000000000000000000000000000000000000606482015290519081900360840190fd5b60008481526003602090815260408083203380855290835292819020805460ff1916600117905580519283525186927f15c2f311c9e0f53b50388279894aeff029a3457884a6601e924fca879e12adcc92908290030190a261242d846126c9565b50505050565b604080517f7265706c61636557616c6c657428616464726573732c616464726573732900008152905190819003601e01902081565b60016020526000908152604090205460ff1681565b600654600160a060020a031681565b60005481565b60003330146124e6576040805160e560020a62461bcd02815260206004820152602160248201526000805160206131d4833981519152604482015260f960020a601702606482015290519081900360840190fd5b600160a060020a038316600090815260016020526040902054839060ff161515612548576040805160e560020a62461bcd0281526020600482015260166024820152600080516020613194833981519152604482015290519081900360640190fd5b82600160a060020a0381161515612597576040805160e560020a62461bcd02815260206004820152601760248201526000805160206131f4833981519152604482015290519081900360640190fd5b600160a060020a038416600090815260016020526040902054849060ff16156125f8576040805160e560020a62461bcd02815260206004820152600e60248201526000805160206131b4833981519152604482015290519081900360640190fd5b600093505b6002548410156126895785600160a060020a031660028581548110151561262057fe5b600091825260209091200154600160a060020a0316141561267e578460028581548110151561264b57fe5b9060005260206000200160006101000a815481600160a060020a030219169083600160a060020a03160217905550612689565b6001909301926125fd565b505050600160a060020a039283166000908152600160208190526040808320805460ff199081169091559490951682529390208054909216909217905550565b3360009081526001602052604081205460ff161515612720576040805160e560020a62461bcd02815260206004820152601f6024820152600080516020613174833981519152604482015290519081900360640190fd5b8160046000828152602001908152602001600020600101805460018160011615610100020316600290049050600014151515612794576040805160e560020a62461bcd02815260206004820152601b6024820152600080516020613154833981519152604482015290519081900360640190fd5b60008381526003602090815260408083203380855292529091205484919060ff161515612831576040805160e560020a62461bcd02815260206004820152602b60248201527f5472616e73616374696f6e206973206e6f7420636f6e6669726d65642062792060448201527f7468652077616c6c65742e000000000000000000000000000000000000000000606482015290519081900360840190fd5b600085815260046020526040902060020154859060ff161561289d576040805160e560020a62461bcd02815260206004820152601860248201527f5472616e73616374696f6e2069732065786563757465642e0000000000000000604482015290519081900360640190fd5b6128a686610947565b156129cc57600086815260046020526040908190208054915160018083018054939950600160a060020a0390941693928291849160026000199282161561010002929092011604801561293a5780601f1061290f5761010080835404028352916020019161293a565b820191906000526020600020905b81548152906001019060200180831161291d57829003601f168201915b50509150506000604051808303816000865af1915050156129945760028501805460ff1916600117905560405186907f82eadc3561110557a572bd74af5c06b37c7e9c14a8bf55a47abcaabd6b9d63df90600090a26129cc565b60028501805460ff1916905560405186907f2724cfb6dd99839f245928a05f4efb76270bb8ff17f88c75d139204bd91c83d090600090a25b505050505050565b333014612a26576040805160e560020a62461bcd02815260206004820152602160248201526000805160206131d4833981519152604482015260f960020a601702606482015290519081900360840190fd5b80600160a060020a0381161515612a75576040805160e560020a62461bcd02815260206004820152601760248201526000805160206131f4833981519152604482015290519081900360640190fd5b600160a060020a038216600090815260016020526040902054829060ff1615612ad6576040805160e560020a62461bcd02815260206004820152600e60248201526000805160206131b4833981519152604482015290519081900360640190fd5b600254612aea90600163ffffffff612d6216565b600054818111158015612afc57508015155b8015612b0757508115155b1515612b5a576040805160e560020a62461bcd0281526020600482015260236024820152600080516020613214833981519152604482015260e960020a6232b21702606482015290519081900360840190fd5b50505050600160a060020a031660008181526001602081905260408220805460ff1916821790556002805491820181559091527f405787fa12a823e0f2b7631cc41b3ba8828b3321ca811111fa75cd3aa3bb5ace01805473ffffffffffffffffffffffffffffffffffffffff19169091179055565b604080517f61646457616c6c657428616464726573732900000000000000000000000000008152905190819003601201902081565b6000600160a060020a0383161515612c66576040805160e560020a62461bcd02815260206004820152601c60248201527f44657374696e6174696f6e2061646472657373206973206e756c6c2e00000000604482015290519081900360640190fd5b81511515612cbe576040805160e560020a62461bcd02815260206004820152601960248201527f5061796c6f61642064617461206c656e67746820697320302e00000000000000604482015290519081900360640190fd5b5060055460408051606081018252600160a060020a0385811682526020808301868152600084860181905286815260048352949094208351815473ffffffffffffffffffffffffffffffffffffffff191693169290921782559251805192939192612d2f92600185019201906130bb565b50604091909101516002909101805460ff1916911515919091179055600554612d59906001612d62565b60055592915050565b600082820183811015612d7157fe5b9392505050565b600080600080612de68b8b8b6040518082805190602001908083835b60208310612db35780518252601f199092019160209182019101612d94565b6001836020036101000a03801982511681845116808217855250505050505090500191505060405180910390208b612f7b565b604080516000808252602080830180855285905260ff8c1683850152606083018b9052608083018a9052925193975060019360a08084019493601f19830193908390039091019190865af1158015612e42573d6000803e3d6000fd5b505060408051601f190151600160a060020a0381166000908152600760205291909120909450925060019050600383015460ff166002811115612e8157fe5b148015612e915750438260020154115b1515612ee7576040805160e560020a62461bcd02815260206004820152601c60248201527f457068656d6572616c206b6579206973206e6f74206163746976652e00000000604482015290519081900360640190fd5b600182810154612efc9163ffffffff612d6216565b9050878114612f55576040805160e560020a62461bcd02815260206004820152601f60248201527f546865206e657874206e6f6e6365206973206e6f742070726f76696465642e00604482015290519081900360640190fd5b600190910155909890975095505050505050565b600082821115612f7557fe5b50900390565b604080517f19000000000000000000000000000000000000000000000000000000000000006020808301919091526000602183018190526c010000000000000000000000003081026022850152600160a060020a038816026036840152604a8301819052604b8301869052606b8301859052608b8301819052608c8301819052608d8301819052600160e060020a03198816608e8401526092830181905260938084018290528451808503909101815260b39093019384905282519093918291908401908083835b602083106130625780518252601f199092019160209182019101613043565b5181516020939093036101000a6000190180199091169216919091179052604051920182900390912098975050505050505050565b81548183558181111561219057600083815260209020612190918101908301613139565b828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f106130fc57805160ff1916838001178555613129565b82800160010185558215613129579182015b8281111561312957825182559160200191906001019061310e565b50613135929150613139565b5090565b61106991905b80821115613135576000815560010161313f56005472616e73616374696f6e20646f6573206e6f742065786973742e00000000004f6e6c792077616c6c657420697320616c6c6f77656420746f2063616c6c2e0057616c6c657420646f6573206e6f742065786973742e0000000000000000000057616c6c6574206578697374732e0000000000000000000000000000000000004f6e6c79206d756c746973696720697320616c6c6f77656420746f2063616c6c57616c6c65742061646472657373206973206e756c6c2e000000000000000000526571756972656d656e742076616c6964697479206e6f742066756c66696c6ca165627a7a723058208e0aee6293783887f44dc6aa7a556da565072d720aab77999dedf7c3e054a1820029");
+AbiBinProvider.prototype.addBIN('TokenRules', "608060405234801561001057600080fd5b50604051604080611836833981016040528051602090910151600160a060020a03821615156100a057604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601d60248201527f4f7267616e697a6174696f6e2061646472657373206973206e756c6c2e000000604482015290519081900360640190fd5b600160a060020a038116151561011757604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601660248201527f546f6b656e2061646472657373206973206e756c6c2e00000000000000000000604482015290519081900360640190fd5b60048054600160a060020a03938416600160a060020a031991821617909155600580549290931691161790556116e4806101526000396000f3006080604052600436106100c15763ffffffff60e060020a60003504166304d6ded481146100c6578063212c8157146101d55780632185810b146101ec57806322f468ea1461020157806323bd4d7a146102325780633e290e5c14610263578063488b38141461029c5780635f30e581146102bd57806365ab1ae8146102de578063661309ac146102f657806369cc40031461032b578063a6a192da146103c7578063c3a90bf914610400578063d6a7d22614610427578063fc0c546a14610448575b600080fd5b3480156100d257600080fd5b506100de60043561045d565b604051808060200184600160a060020a0316600160a060020a0316815260200180602001838103835286818151815260200191508051906020019080838360005b8381101561013757818101518382015260200161011f565b50505050905090810190601f1680156101645780820380516001836020036101000a031916815260200191505b50838103825284518152845160209182019186019080838360005b8381101561019757818101518382015260200161017f565b50505050905090810190601f1680156101c45780820380516001836020036101000a031916815260200191505b509550505050505060405180910390f35b3480156101e157600080fd5b506101ea6105b2565b005b3480156101f857600080fd5b506101ea6105cb565b34801561020d57600080fd5b506102196004356105e7565b6040805192835290151560208301528051918290030190f35b34801561023e57600080fd5b50610247610603565b60408051600160a060020a039092168252519081900360200190f35b34801561026f57600080fd5b506101ea602460048035828101929082013591600160a060020a0382351691604435908101910135610612565b3480156102a857600080fd5b506101ea600160a060020a0360043516610b58565b3480156102c957600080fd5b506101ea600160a060020a0360043516610cb7565b3480156102ea57600080fd5b50610247600435610ebf565b34801561030257600080fd5b50610317600160a060020a0360043516610ee7565b604080519115158252519081900360200190f35b34801561033757600080fd5b50604080516020600460248035828101358481028087018601909752808652610317968435600160a060020a031696369660449591949091019291829185019084908082843750506040805187358901803560208181028481018201909552818452989b9a998901989297509082019550935083925085019084908082843750949750610efc9650505050505050565b3480156103d357600080fd5b506101ea60048035600160a060020a031690602480358082019290810135916044359081019101356110eb565b34801561040c57600080fd5b50610415611460565b60408051918252519081900360200190f35b34801561043357600080fd5b50610219600160a060020a0360043516611467565b34801561045457600080fd5b50610247611483565b600080548290811061046b57fe5b60009182526020918290206003919091020180546040805160026001841615610100026000190190931692909204601f8101859004850283018501909152808252919350918391908301828280156105045780601f106104d957610100808354040283529160200191610504565b820191906000526020600020905b8154815290600101906020018083116104e757829003601f168201915b505050506001838101546002808601805460408051602061010097841615979097026000190190921693909304601f81018690048602820186019093528281529596600160a060020a039093169592945091928301828280156105a85780601f1061057d576101008083540402835291602001916105a8565b820191906000526020600020905b81548152906001019060200180831161058b57829003601f168201915b5050505050905083565b336000908152600660205260409020805460ff19169055565b336000908152600660205260409020805460ff19166001179055565b6002602052600090815260409020805460019091015460ff1682565b600454600160a060020a031681565b600061061c6115ca565b6106246115e9565b600454600160a060020a031633146106ac576040805160e560020a62461bcd02815260206004820152602560248201527f4f6e6c79206f7267616e697a6174696f6e20697320616c6c6f77656420746f2060448201527f63616c6c2e000000000000000000000000000000000000000000000000000000606482015290519081900360840190fd5b861515610703576040805160e560020a62461bcd02815260206004820152601360248201527f52756c65206e616d6520697320656d7074792e00000000000000000000000000604482015290519081900360640190fd5b600160a060020a0386161515610763576040805160e560020a62461bcd02815260206004820152601560248201527f52756c652061646472657373206973206e756c6c2e0000000000000000000000604482015290519081900360640190fd5b8315156107ba576040805160e560020a62461bcd02815260206004820152601260248201527f52756c652041424920697320656d7074792e0000000000000000000000000000604482015290519081900360640190fd5b8787604051602001808383808284378201915050925050506040516020818303038152906040526040518082805190602001908083835b602083106108105780518252601f1990920191602091820191016107f1565b51815160209384036101000a6000190180199092169116179052604080519290940182900390912060008181526002909252929020600101549196505060ff161591506108cf9050576040805160e560020a62461bcd02815260206004820152602c60248201527f52756c6520776974682074686520737065636966696564206e616d6520616c7260448201527f65616479206578697374732e0000000000000000000000000000000000000000606482015290519081900360840190fd5b600160a060020a0386166000908152600160208190526040909120015460ff161561096a576040805160e560020a62461bcd02815260206004820152602f60248201527f52756c652077697468207468652073706563696669656420616464726573732060448201527f616c7265616479206578697374732e0000000000000000000000000000000000606482015290519081900360840190fd5b6040805160806020601f8b0181900402820181019092526060810189815290918291908b908b9081908501838280828437820191505050505050815260200187600160a060020a0316815260200186868080601f01602080910402602001604051908101604052809392919081815260200183838082843750505092909352505060408051808201825260008054825260016020808401828152600160a060020a038e168452828252858420855181558151908401805491151560ff199283161790558b85526002835295842085518155905190830180549115159190961617909455815490810180835591805285518051969850929650909487945060039091027f290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e5630192610a9d928492910190611600565b5060208281015160018301805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a0390921691909117905560408301518051610ae99260028501920190611600565b505060408051600160a060020a038a1660208201528181529081018a90527f4d39292a7c76562755f38e419d757d846579699af484d88be86a1811dca7321592508a91508990899080606081018585808284376040519201829003965090945050505050a15050505050505050565b600454600090600160a060020a03163314610be3576040805160e560020a62461bcd02815260206004820152602560248201527f4f6e6c79206f7267616e697a6174696f6e20697320616c6c6f77656420746f2060448201527f63616c6c2e000000000000000000000000000000000000000000000000000000606482015290519081900360840190fd5b610bec82611492565b600354909150811415610c6e576040805160e560020a62461bcd028152602060048201526024808201527f436f6e73747261696e7420746f2072656d6f766520646f6573206e6f7420657860448201527f6973742e00000000000000000000000000000000000000000000000000000000606482015290519081900360840190fd5b610c77816114e4565b60408051600160a060020a038416815290517fb610065a665f9558073a05bb32a6827cd9552a65f12c576632b85f75a624bf819181900360200190a15050565b600454600090600160a060020a03163314610d42576040805160e560020a62461bcd02815260206004820152602560248201527f4f6e6c79206f7267616e697a6174696f6e20697320616c6c6f77656420746f2060448201527f63616c6c2e000000000000000000000000000000000000000000000000000000606482015290519081900360840190fd5b600160a060020a0382161515610da2576040805160e560020a62461bcd02815260206004820152601a60248201527f436f6e73747261696e7420746f20616464206973206e756c6c2e000000000000604482015290519081900360640190fd5b610dab82611492565b6003549091508114610e2d576040805160e560020a62461bcd02815260206004820152602160248201527f436f6e73747261696e7420746f2061646420616c72656164792065786973747360448201527f2e00000000000000000000000000000000000000000000000000000000000000606482015290519081900360840190fd5b600380546001810182556000919091527fc2575a0e9e593c00f959f8c92f12db2869c3395a3b0502d05e2516446f71f85b018054600160a060020a03841673ffffffffffffffffffffffffffffffffffffffff19909116811790915560408051918252517f3fc8f7d9dd3ec32e95a79dede9e9ea171475382d20c24f7c6e6589c2d7416db29181900360200190a15050565b6003805482908110610ecd57fe5b600091825260209091200154600160a060020a0316905081565b60066020526000908152604090205460ff1681565b60008082518451141515610f80576040805160e560020a62461bcd02815260206004820152603960248201527f27746f2720616e642027616d6f756e7427207472616e7366657220617272617960448201527f7327206c656e6774687320617265206e6f7420657175616c2e00000000000000606482015290519081900360840190fd5b506001905060005b60035481108015610f965750815b156110e3576003805482908110610fa957fe5b9060005260206000200160009054906101000a9004600160a060020a0316600160a060020a03166360156dbc8686866040518463ffffffff1660e060020a0281526004018084600160a060020a0316600160a060020a031681526020018060200180602001838103835285818151815260200191508051906020019060200280838360005b8381101561104657818101518382015260200161102e565b50505050905001838103825284818151815260200191508051906020019060200280838360005b8381101561108557818101518382015260200161106d565b5050505090500195505050505050602060405180830381600087803b1580156110ad57600080fd5b505af11580156110c1573d6000803e3d6000fd5b505050506040513d60208110156110d757600080fd5b50519150600101610f88565b509392505050565b3360009081526001602081905260408220015460ff16151561117d576040805160e560020a62461bcd02815260206004820152602860248201527f4f6e6c7920726567697374657265642072756c6520697320616c6c6f7765642060448201527f746f2063616c6c2e000000000000000000000000000000000000000000000000606482015290519081900360840190fd5b600160a060020a03861660009081526006602052604090205460ff161515611215576040805160e560020a62461bcd02815260206004820152602b60248201527f5472616e73666572732066726f6d20746865206164647265737320617265206e60448201527f6f7420616c6c6f7765642e000000000000000000000000000000000000000000606482015290519081900360840190fd5b838214611292576040805160e560020a62461bcd02815260206004820152603960248201527f27746f2720616e642027616d6f756e7427207472616e7366657220617272617960448201527f7327206c656e6774687320617265206e6f7420657175616c2e00000000000000606482015290519081900360840190fd5b6112f4868686808060200260200160405190810160405280939291908181526020018383602002808284375050604080516020808c0282810182019093528b82529095508b94508a935083925085019084908082843750610efc945050505050565b151561134a576040805160e560020a62461bcd02815260206004820152601b60248201527f436f6e73747261696e7473206e6f742066756c6c66696c6c65642e0000000000604482015290519081900360640190fd5b5060005b8381101561143857600554600160a060020a03166323b872dd8787878581811061137457fe5b90506020020135600160a060020a0316868686818110151561139257fe5b905060200201356040518463ffffffff1660e060020a0281526004018084600160a060020a0316600160a060020a0316815260200183600160a060020a0316600160a060020a031681526020018281526020019350505050602060405180830381600087803b15801561140457600080fd5b505af1158015611418573d6000803e3d6000fd5b505050506040513d602081101561142e57600080fd5b505060010161134e565b505050600160a060020a039092166000908152600660205260409020805460ff191690555050565b6003545b90565b6001602081905260009182526040909120805491015460ff1682565b600554600160a060020a031681565b60005b600354811080156114d2575081600160a060020a03166003828154811015156114ba57fe5b600091825260209091200154600160a060020a031614155b156114df57600101611495565b919050565b6003546000908210611540576040805160e560020a62461bcd02815260206004820152601660248201527f496e646578206973206f7574206f662072616e67652e00000000000000000000604482015290519081900360640190fd5b5060038054600019810191908290811061155657fe5b60009182526020909120015460038054600160a060020a03909216918490811061157c57fe5b6000918252602090912001805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a03929092169190911790556003805460001901906115c5908261167e565b505050565b6040805160608181018352808252600060208301529181019190915290565b604080518082019091526000808252602082015290565b828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f1061164157805160ff191683800117855561166e565b8280016001018555821561166e579182015b8281111561166e578251825591602001919060010190611653565b5061167a92915061169e565b5090565b8154818355818111156115c5576000838152602090206115c59181019083015b61146491905b8082111561167a57600081556001016116a45600a165627a7a723058204263d72d08f80f6636389c8dc684701a9d2c39ca9c80932ea3e221f9adf5829c0029");
+AbiBinProvider.prototype.addBIN('TransferRule', "608060405234801561001057600080fd5b506040516020806103898339810160405251600160a060020a038116151561009957604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601c60248201527f546f6b656e2072756c65732061646472657373206973206e756c6c2e00000000604482015290519081900360640190fd5b60008054600160a060020a03909216600160a060020a03199092169190911790556102c0806100c96000396000f3006080604052600436106100405763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166323b872dd8114610045575b600080fd5b34801561005157600080fd5b5061007c73ffffffffffffffffffffffffffffffffffffffff60043581169060243516604435610090565b604080519115158252519081900360200190f35b604080516001808252818301909252600091606091829160208083019080388339019050509150848260008151811015156100c757fe5b73ffffffffffffffffffffffffffffffffffffffff929092166020928302919091018201526040805160018082528183019092529182810190803883390190505090508381600081518110151561011a57fe5b90602001906020020181815250506000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1663a6a192da8784846040518463ffffffff167c0100000000000000000000000000000000000000000000000000000000028152600401808473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018060200180602001838103835285818151815260200191508051906020019060200280838360005b838110156102095781810151838201526020016101f1565b50505050905001838103825284818151815260200191508051906020019060200280838360005b83811015610248578181015183820152602001610230565b5050505090500195505050505050600060405180830381600087803b15801561027057600080fd5b505af1158015610284573d6000803e3d6000fd5b50600199985050505050505050505600a165627a7a72305820c8734e25b339f0844cef4a4c2119867487c4c91ce54a74c01ce980d11bafcacf0029");
 
 /***/ }),
 /* 518 */
@@ -62323,7 +62319,7 @@ module.exports = ChainWeb3;
 /* 519 */
 /***/ (function(module) {
 
-module.exports = {"_from":"web3@1.0.0-beta.34","_id":"web3@1.0.0-beta.34","_inBundle":false,"_integrity":"sha1-NH5WG3hAmMtVYzFfSQR5odkfKrE=","_location":"/web3","_phantomChildren":{},"_requested":{"type":"version","registry":true,"raw":"web3@1.0.0-beta.34","name":"web3","escapedName":"web3","rawSpec":"1.0.0-beta.34","saveSpec":null,"fetchSpec":"1.0.0-beta.34"},"_requiredBy":["/"],"_resolved":"http://registry.npmjs.org/web3/-/web3-1.0.0-beta.34.tgz","_shasum":"347e561b784098cb5563315f490479a1d91f2ab1","_spec":"web3@1.0.0-beta.34","_where":"/Users/ashutoshlodhi/Documents/workspace/rachinOpenstjs/openst.js","author":{"name":"ethereum.org"},"authors":[{"name":"Fabian Vogelsteller","email":"fabian@ethereum.org","homepage":"http://frozeman.de"},{"name":"Marek Kotewicz","email":"marek@parity.io","url":"https://github.com/debris"},{"name":"Marian Oancea","url":"https://github.com/cubedro"},{"name":"Gav Wood","email":"g@parity.io","homepage":"http://gavwood.com"},{"name":"Jeffery Wilcke","email":"jeffrey.wilcke@ethereum.org","url":"https://github.com/obscuren"}],"bugs":{"url":"https://github.com/ethereum/web3.js/issues"},"bundleDependencies":false,"dependencies":{"web3-bzz":"1.0.0-beta.34","web3-core":"1.0.0-beta.34","web3-eth":"1.0.0-beta.34","web3-eth-personal":"1.0.0-beta.34","web3-net":"1.0.0-beta.34","web3-shh":"1.0.0-beta.34","web3-utils":"1.0.0-beta.34"},"deprecated":false,"description":"Ethereum JavaScript API","keywords":["Ethereum","JavaScript","API"],"license":"LGPL-3.0","main":"src/index.js","name":"web3","namespace":"ethereum","repository":{"type":"git","url":"https://github.com/ethereum/web3.js/tree/master/packages/web3"},"types":"index.d.ts","version":"1.0.0-beta.34"};
+module.exports = {"_from":"web3@1.0.0-beta.34","_id":"web3@1.0.0-beta.34","_inBundle":false,"_integrity":"sha1-NH5WG3hAmMtVYzFfSQR5odkfKrE=","_location":"/web3","_phantomChildren":{},"_requested":{"type":"version","registry":true,"raw":"web3@1.0.0-beta.34","name":"web3","escapedName":"web3","rawSpec":"1.0.0-beta.34","saveSpec":null,"fetchSpec":"1.0.0-beta.34"},"_requiredBy":["/"],"_resolved":"http://registry.npmjs.org/web3/-/web3-1.0.0-beta.34.tgz","_shasum":"347e561b784098cb5563315f490479a1d91f2ab1","_spec":"web3@1.0.0-beta.34","_where":"/Users/kedarchandrayan/workspace/forks/openst.js","author":{"name":"ethereum.org"},"authors":[{"name":"Fabian Vogelsteller","email":"fabian@ethereum.org","homepage":"http://frozeman.de"},{"name":"Marek Kotewicz","email":"marek@parity.io","url":"https://github.com/debris"},{"name":"Marian Oancea","url":"https://github.com/cubedro"},{"name":"Gav Wood","email":"g@parity.io","homepage":"http://gavwood.com"},{"name":"Jeffery Wilcke","email":"jeffrey.wilcke@ethereum.org","url":"https://github.com/obscuren"}],"bugs":{"url":"https://github.com/ethereum/web3.js/issues"},"bundleDependencies":false,"dependencies":{"web3-bzz":"1.0.0-beta.34","web3-core":"1.0.0-beta.34","web3-eth":"1.0.0-beta.34","web3-eth-personal":"1.0.0-beta.34","web3-net":"1.0.0-beta.34","web3-shh":"1.0.0-beta.34","web3-utils":"1.0.0-beta.34"},"deprecated":false,"description":"Ethereum JavaScript API","keywords":["Ethereum","JavaScript","API"],"license":"LGPL-3.0","main":"src/index.js","name":"web3","namespace":"ethereum","repository":{"type":"git","url":"https://github.com/ethereum/web3.js/tree/master/packages/web3"},"types":"index.d.ts","version":"1.0.0-beta.34"};
 
 /***/ }),
 /* 520 */
@@ -62859,7 +62855,7 @@ module.exports = Eth;
 
   var Buffer;
   try {
-    Buffer = __webpack_require__(2).Buffer;
+    Buffer = __webpack_require__(6).Buffer;
   } catch (e) {
   }
 
@@ -69010,9 +69006,9 @@ var Deployer = function Deployer(options) {
 };
 
 Deployer.prototype = {
-  deployERC20Token: function deployERC20Token() {
+  deployEIP20Token: function deployEIP20Token() {
     var oThis = this;
-    var ServiceClass = oThis.ic().ERC20TokenDeployer();
+    var ServiceClass = oThis.ic().EIP20TokenDeployer();
     var serviceParams = Object.assign({}, oThis.options, {
       args: Array.from(arguments)
     });
@@ -69072,14 +69068,14 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 var InstanceComposer = __webpack_require__(27),
     deployContract = __webpack_require__(94);
 
-var ERC20TokenDeployer = function ERC20TokenDeployer(params) {
+var EIP20TokenDeployer = function EIP20TokenDeployer(params) {
   var oThis = this;
   oThis.from = params.from;
   oThis.gasPrice = params.gasPrice;
   oThis.gas = params.gas;
 };
 
-ERC20TokenDeployer.prototype = {
+EIP20TokenDeployer.prototype = {
   perform: function perform() {
     var oThis = this;
     return oThis.deployEIP20TokenOnOrigin();
@@ -69112,7 +69108,7 @@ ERC20TokenDeployer.prototype = {
             case 6:
               tokenDeployResponse = _context.sent;
               oThis.tokenContractAddress = tokenDeployResponse.receipt.contractAddress;
-              console.log('ERC20Token ContractAddress :', oThis.tokenContractAddress);
+              console.log('EIP20Token ContractAddress :', oThis.tokenContractAddress);
               return _context.abrupt("return", tokenDeployResponse);
 
             case 10:
@@ -69128,8 +69124,8 @@ ERC20TokenDeployer.prototype = {
     };
   }()
 };
-InstanceComposer.registerShadowableClass(ERC20TokenDeployer, 'ERC20TokenDeployer');
-module.exports = ERC20TokenDeployer;
+InstanceComposer.registerShadowableClass(EIP20TokenDeployer, 'EIP20TokenDeployer');
+module.exports = EIP20TokenDeployer;
 
 /***/ }),
 /* 557 */
@@ -69574,11 +69570,11 @@ var Signer = function Signer(web3Provider) {
 
     if (!_aToPwdMap.hasOwnProperty(String(_from).toLowerCase())) {
       return Promise.reject('Unknown Address: ', _from);
-    }
+    } // console.log('GSS :: Fetching txpool Content');
 
-    console.log('GSS :: Fetching txpool Content');
+
     return web3.txpoolContent().then(function (txpoolContent) {
-      console.log('GSS :: Got txpool Content');
+      // console.log('GSS :: Got txpool Content');
       var pendingTransactions, queuedTransactions;
       pendingTransactions = txpoolContent.pending || {}; //Filter out transactions of our interest.
 
@@ -69596,9 +69592,8 @@ var Signer = function Signer(web3Provider) {
       while (len--) {
         currentNonce = Number(allNonces[len]);
         if (currentNonce > maxNonce) maxNonce = currentNonce;
-      }
+      } // console.log('GSS :: Computed maxNonce:', maxNonce);
 
-      console.log('GSS :: Computed maxNonce:', maxNonce);
 
       if (maxNonce >= 0) {
         return maxNonce + 1;
@@ -69619,16 +69614,15 @@ var Signer = function Signer(web3Provider) {
 
     if (!_aToPwdMap.hasOwnProperty(String(_from).toLowerCase())) {
       return Promise.reject('Unknown Address', _from);
-    }
+    } // console.log('GSS :: Unlocking Account');
 
-    console.log('GSS :: Unlocking Account');
 
     var _fromPassphrase = _aToPwdMap[String(_from).toLowerCase()];
 
     return web3.eth.personal.unlockAccount(_from, _fromPassphrase).then(function () {
-      console.log('GSS :: Account Unlocked! Signing Data');
+      // console.log('GSS :: Account Unlocked! Signing Data');
       return web3.eth.sign(dataToSign, _from).then(function (signedData) {
-        console.log('GSS :: Data Signed');
+        // console.log('GSS :: Data Signed');
         return signedData;
       });
     });
@@ -69663,16 +69657,15 @@ var Signer = function Signer(web3Provider) {
 
     if (!transactionData.hasOwnProperty('data')) {
       transactionData.data = '';
-    }
+    } // console.log('GSS :: Unlocking Account');
 
-    console.log('GSS :: Unlocking Account');
 
     var _fromPassphrase = _aToPwdMap[String(_from).toLowerCase()];
 
     return web3.eth.personal.unlockAccount(_from, _fromPassphrase).then(function () {
-      console.log('GSS :: Account Unlocked! Signing Tx');
+      // console.log('GSS :: Account Unlocked! Signing Tx');
       return web3.eth.signTransaction(transactionData, _fromPassphrase).then(function (signedTx) {
-        console.log('GSS :: Tx Signed');
+        // console.log('GSS :: Tx Signed');
         return signedTx;
       });
     });

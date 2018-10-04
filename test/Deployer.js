@@ -20,7 +20,7 @@ describe('test/deployer', () => {
     bins = {},
     wallets = [config.wallet1, config.wallet2],
     requirement = wallets.length,
-    erc20Address,
+    eip20Address,
     tokenRulesAddress,
     tokenHolderAddress;
 
@@ -69,19 +69,19 @@ describe('test/deployer', () => {
     deployer = new openST.Deployer(deployParams);
   });
 
-  it('should deploy ERC20Token', () => {
+  it('should deploy EIP20Token', () => {
     return deployer
-      .deployERC20Token()
+      .deployEIP20Token()
       .then(validateDeploymentReceipt)
       .then((receipt) => {
-        erc20Address = receipt.contractAddress;
+        eip20Address = receipt.contractAddress;
       });
   });
 
   it('should deploy TokenRules', () => {
     let organizationAddress = config.organizationAddress;
     return deployer
-      .deployTokenRules(organizationAddress, erc20Address)
+      .deployTokenRules(organizationAddress, eip20Address)
       .then(validateDeploymentReceipt)
       .then((receipt) => {
         tokenRulesAddress = receipt.contractAddress;
@@ -90,7 +90,7 @@ describe('test/deployer', () => {
 
   it('should deploy TokenHolder', () => {
     return deployer
-      .deployTokenHolder(erc20Address, tokenRulesAddress, wallets, requirement)
+      .deployTokenHolder(eip20Address, tokenRulesAddress, wallets, requirement)
       .then(validateDeploymentReceipt)
       .then((receipt) => {
         tokenHolderAddress = receipt.contractAddress;
