@@ -366,12 +366,7 @@ let requirement = wallets.length;
 let tokenHolderAddress = null;
 
 // Deploy TokenHolder contract
-deployer.deployTokenHolder(
-
-
-
-
-Address, tokenRulesAddress, requirement, wallets).then(function(receipt){
+deployer.deployTokenHolder(erc20Address, tokenRulesAddress, wallets, requirement).then(function(receipt){
   tokenHolderAddress = receipt.contractAddress;
   console.log('tokenHolderAddress noted down:', tokenHolderAddress);
 });
@@ -425,7 +420,7 @@ let authorizeSession = async function(openST, tokenHolderAddress, ephemeralKey, 
 
   console.log('SessionAuthorizationSubmitted Event', JSON.stringify(submitAuthorizeSessionReceipt.events.SessionAuthorizationSubmitted, null, 2));
 
-  let transactionId = submitAuthorizeSessionReceipt.events.SessionAuthorizationSubmitted.returnValues._transactionId;
+  let transactionId = submitAuthorizeSessionReceipt.events.SessionAuthorizationSubmitted.returnValues._transactionID;
 
   while (len--) {
     let currWallet = wallets[len];
@@ -474,7 +469,7 @@ let fundERC20Tokens = async function() {
 
   let mockToken = new (openST.web3()).eth.Contract(mockTokenAbi, erc20Address);
 
-  mockToken.methods
+  return mockToken.methods
     .transfer(tokenHolderAddress, amountToTransfer.toString(10))
     .send({
       from: deployerAddress,
@@ -527,7 +522,7 @@ let executeSampleRule = async function(tokenRulesContractAddress, tokenHolderCon
     .ephemeralKeys(ephemeralKey)
     .call({})
     .then((ephemeralKeyData) => {
-      let nonceBigNumber = new BigNumber(ephemeralKeyData[1]);
+      let nonceBigNumber = (new BigNumber(ephemeralKeyData[1])).add(1);
       return nonceBigNumber.toString(10);
     });
 

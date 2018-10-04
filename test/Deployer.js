@@ -90,7 +90,7 @@ describe('test/deployer', () => {
 
   it('should deploy TokenHolder', () => {
     return deployer
-      .deployTokenHolder(erc20Address, tokenRulesAddress, requirement, wallets)
+      .deployTokenHolder(erc20Address, tokenRulesAddress, wallets, requirement)
       .then(validateDeploymentReceipt)
       .then((receipt) => {
         tokenHolderAddress = receipt.contractAddress;
