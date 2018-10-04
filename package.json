@@ -7,9 +7,9 @@
     "openST",
     "OST",
     "simpletoken",
-    "utility-token",
     "ethereum",
-    "eip20"
+    "eip20",
+    "utility-token"
   ],
   "homepage": "https://openst.org",
   "author": "OpenST Ltd.",
