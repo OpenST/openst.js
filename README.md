@@ -17,7 +17,7 @@ OpenST is a framework for building token economies. Here are steps to get starte
 2. [Setting up the developer environment](#setting-up-the-developer-environment)
 3. [Creating an OpenST object](#creating-an-openst-object)
 4. [Adding accounts](#adding-accounts)
-5. [Deploying an ERC20 contract](#deploying-an-erc20-contract)
+5. [Deploying an EIP20 contract](#deploying-an-erc20-contract)
 6. [Economy setup](#economy-setup)
 7. [User setup](#user-setup)
 8. [Balance verification: Before execute rule](#balance-verification-before-execute-rule)
@@ -169,7 +169,7 @@ OpenST.js comes with an in-built abi-bin provider for managing abi(s) and bin(s)
 
 The abiBinProvider provides developers with following abi(s) and bin(s):
 
-* [MockToken](https://github.com/OpenSTFoundation/mosaic-contracts/blob/v0.9.3-rc1/contracts/SimpleToken/MockToken.sol) (an ERC20 contract with name 'MockToken')
+* [MockToken](https://github.com/OpenSTFoundation/mosaic-contracts/blob/v0.9.3-rc1/contracts/SimpleToken/MockToken.sol) (an EIP20 contract with name 'MockToken')
 * [TokenRules](https://github.com/OpenSTFoundation/openst-contracts/blob/develop/contracts/TokenRules.sol) (a registry of rule contracts and the conduit for transfers)
 * [TokenHolder](https://github.com/OpenSTFoundation/openst-contracts/blob/develop/contracts/TokenHolder.sol) (a multi-sig wallet that can hold tokens)
 * [TransferRule](https://github.com/OpenSTFoundation/openst-contracts/blob/develop/contracts/TransferRule.sol) (a simple transfer rule contract)
@@ -282,12 +282,13 @@ let deployerParams = {
 let deployer = new openST.Deployer( deployerParams );
 ```
 
-#### Deploying an ERC20 contract
+#### Deploying an EIP20 contract
 
-To create a token economy, you will want an ERC20 contract. You can either use a pre-deployed ERC20 contract or deploy a new one as shown below.
+To create a token economy, you will want an EIP20 contract. You can either use a pre-deployed EIP20 contract or deploy a new one as shown below.
 
 ```js
-// Deploy ERC20 if needed (not mandatory)
+// Deploy EIP20 
+if needed (not mandatory)
 let erc20Address = null;
 deployer.deployERC20Token().then(function( receipt ){
   erc20Address = receipt.contractAddress;
@@ -312,7 +313,7 @@ deployer.deployTokenRules(organizationAddress, erc20Address).then(function( rece
 
 ###### Deploy a rule contract (TransferRule)
 
-OpenST.js comes with a TransferRule contract that transfers ERC20 tokens. We encourage you to deploy and use your own rule contracts.
+OpenST.js comes with a TransferRule contract that transfers EIP20 tokens. We encourage you to deploy and use your own rule contracts.
 
 Here we shall deploy the TransferRule contract. Later, this rule contract will be registered in the TokenRules contract by the Organization.
 
@@ -453,12 +454,12 @@ let authorizeSession = async function(openST, tokenHolderAddress, ephemeralKey, 
 authorizeSession(openST, tokenHolderAddress, ephemeralKeyAddress, wallets);
 ```
 
-###### Fund ERC20 tokens
+###### Fund EIP20 tokens
 
 The TokenHolder contract address must be funded with tokens for the transfer rule to be executed.
 
 ```js
-// Fund the tokenHolderAddress with ERC20 tokens
+// Fund the tokenHolderAddress with EIP20 tokens
 // If you are using MockToken, the following method can help you
 let fundERC20Tokens = async function() {
   const BigNumber = require('bignumber.js');
