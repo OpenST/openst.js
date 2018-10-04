@@ -1,0 +1,18 @@
+# OSX
+.DS_Store
+
+.idea/
+
+# Vagrant
+.vagrant/
+ubuntu-xenial-16.04-cloudimg-console.log
+
+# don't commit node_modules
+node_modules
+
+package-lock.json
+build/
+openst-setup/
+
+tmp/*
+!tmp/.gitkeep
