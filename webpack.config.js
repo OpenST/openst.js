@@ -17,7 +17,7 @@ const webpackOption = {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js'
   },
-  plugins: [new webpack.NormalModuleReplacementPlugin(/utils\/AbiBinProvider\.js/, '../bin/temp/AbiBinProvider.js')],
+  plugins: [new webpack.NormalModuleReplacementPlugin(/utils\/AbiBinProvider\.js/, '../tmp/AbiBinProvider.js')],
   module: {
     rules: [
       {

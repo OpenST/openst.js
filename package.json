@@ -17,7 +17,7 @@
     "webpack-build": "webpack --mode=production",
     "web-pre-build": "node webPreBuild.js",
     "web-build": "npm-run-all web-pre-build webpack-build",
-    "web-post-build" : "git add dist/."
+    "web-post-build": "git add dist/."
   },
   "dependencies": {
     "bignumber.js": "4.1.0",
@@ -47,8 +47,8 @@
     "webpack-cli": "3.1.0",
     "webpack-uglify-js-plugin": "1.1.9"
   },
-  "pre-commit":{
-    "run" : [
+  "pre-commit": {
+    "run": [
       "web-build",
       "web-post-build",
       "pre-commit"
