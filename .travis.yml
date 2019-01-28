@@ -1,0 +1,33 @@
+dist: trusty
+language: node_js
+sudo: required
+branches:
+  only:
+  - master
+  - develop
+notifications:
+  email:
+    recipients:
+      - ci.report@ost.com
+    on_success: always
+    on_failure: always
+node_js:
+  - "9"
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install nodejs
+  - sudo apt-get install npm
+  - sudo apt-get install software-properties-common
+  - sudo add-apt-repository -y ppa:ethereum/ethereum
+  - sudo apt-get update
+  - sudo bash tools/setup/install_geth_1_8_3.sh
+  - geth version
+install:
+  - npm install
+  - npm install -g mocha
+before_script:
+  - node tools/initDevEnv.js ~
+script:
+  - mocha --timeout 120000 test/* --exit
+after_script:
+  - kill $(ps aux | grep 'openst-setup/origin-geth' | awk '{print $2}')
