@@ -1,13 +1,13 @@
 const chai = require('chai'),
   Web3 = require('web3');
 
-const TokenRules = require('../../../lib/helpers/setup/TokenRules'),
+const TokenRules = require('../../../lib/setup/TokenRules'),
   config = require('../../utils/configReader'),
   Web3WalletHelper = require('../../utils/Web3WalletHelper'),
-  AbiBinProvider = require('../../../lib/helpers/AbiBinProvider');
+  AbiBinProvider = require('../../../lib/AbiBinProvider');
 
-const web3 = new Web3(config.gethRpcEndPoint),
-  web3WalletHelper = new Web3WalletHelper(web3),
+const auxiliaryWeb3 = new Web3(config.gethRpcEndPoint),
+  web3WalletHelper = new Web3WalletHelper(auxiliaryWeb3),
   abiBinProvider = new AbiBinProvider(),
   assert = chai.assert;
 
@@ -23,7 +23,7 @@ describe('TokenRules', async function() {
     this.timeout(3 * 60000);
     //This hook could take long time.
     return web3WalletHelper
-      .init(web3)
+      .init(auxiliaryWeb3)
       .then(function (_out) {
 
         wallets = web3WalletHelper.web3Object.eth.accounts.wallet;
@@ -37,11 +37,12 @@ describe('TokenRules', async function() {
 
     const mockToken = wallets[2].address,
       mockOrganization = wallets[1].address;
-    const tokenRules = new TokenRules(web3, '');
+    const tokenRules = new TokenRules(auxiliaryWeb3, '');
 
-    const response = await tokenRules.deploy(mockOrganization, mockToken, options, web3);
+    const response = await tokenRules.deploy(mockOrganization, mockToken, options, auxiliaryWeb3);
+
     let jsonInterface = abiBinProvider.getABI('TokenRules');
-    let contract = new web3.eth.Contract(jsonInterface, response.contractAddress, options);
+    let contract = new auxiliaryWeb3.eth.Contract(jsonInterface, response.receipt.contractAddress, options);
 
     // Verifying stored organization and token address.
     assert.strictEqual(mockToken, await contract.methods.token().call(), "Token address is incorrect");

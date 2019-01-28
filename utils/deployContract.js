@@ -1,56 +1,29 @@
 'use strict';
 
-const DeployContract = function(params) {
+const DeployContract = function (params) {
   const oThis = this;
 
   Object.assign(oThis, params);
-  if (!oThis.bin) {
-    throw 'Invalid Contract Bin. Please provide params.bin.';
-  }
-  oThis.bin = String(oThis.bin);
+
 };
 
 DeployContract.prototype = {
   deploy: async function() {
     const oThis = this;
 
-    let txOptions = {
-      from: oThis.from,
-      gas: oThis.gas,
-      gasPrice: oThis.gasPrice
-    };
-
-    if (oThis.args) {
-      txOptions.arguments = oThis.args;
-    }
-
-    if (oThis.bin.indexOf('0x') !== 0) {
-      oThis.bin = '0x' + oThis.bin;
-    }
-
-    //console.log('oThis.bin', oThis.bin);
-    const contract = new oThis.web3.eth.Contract(oThis.abi, null, txOptions);
-
-    let deployOptions = {
-      data: oThis.bin,
-      arguments: oThis.args || []
-    };
-
-    let tx = contract.deploy(deployOptions),
-      transactionHash = null,
-      receipt = null;
-
+    let receipt = null,
+      transactionHash = null;
     console.log('Deploying contract ' + oThis.contractName);
-    let instance = await tx
-      .send(txOptions)
-      .on('receipt', function(value) {
+    let instance = await oThis.tx
+      .send(oThis.txOptions)
+      .on('receipt', function (value) {
         receipt = value;
       })
-      .on('transactionHash', function(value) {
+      .on('transactionHash', function (value) {
         console.log('transaction hash: ' + value);
         transactionHash = value;
       })
-      .on('error', function(error) {
+      .on('error', function (error) {
         return Promise.reject(error);
       });
 
