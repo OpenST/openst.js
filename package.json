@@ -13,8 +13,12 @@
     "url": "https://github.com/OpenSTFoundation/openst.js/issues"
   },
   "scripts": {},
-  "dependencies": {},
+  "dependencies": {
+    "path": "0.12.7"
+  },
   "devDependencies": {
-    "web3": "1.0.0-beta.33"
+    "chai": "4.1.2",
+    "mocha": "5.0.0",
+    "web3": "1.0.0-beta.37"
   }
 }
