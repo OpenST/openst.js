@@ -29,11 +29,7 @@
     "web-post-build": "git add dist/."
   },
   "dependencies": {
-    "bignumber.js": "4.1.0",
-    "node-cmd": "3.0.0",
-    "path": "0.12.7",
-    "shelljs": "0.8.1",
-    "web3": "1.0.0-beta.34"
+    "@openstfoundation/mosaic-tbd": "https://github.com/OpenSTFoundation/mosaic-tbd.git"
   },
   "devDependencies": {
     "@babel/core": "7.1.0",
