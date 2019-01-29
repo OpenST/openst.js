@@ -4,14 +4,14 @@
  * 1. Clone openst-contracts
  * 2. Checkout develop or any branch of your liking.
  * 3. run: ./node_modules/.bin/truffle compile
- * 4. Come back to branded-token.js/contracts
+ * 4. Come back to openst.js/contracts
  * 5. run: node ./generateAbiBins.js
  * 6. Make sure commit only the contracts that are needed.
  */
 const fs = require('fs');
 const path = require('path');
 
-let contractsRepoPath = path.join(__dirname, '../../brandedtoken-contracts/build/contracts/');
+let contractsRepoPath = path.join(__dirname, '../../openst-contracts/build/contracts/');
 let abiOutputPath = path.join(__dirname, './abi');
 let binOutputPath = path.join(__dirname, './bin');
 
@@ -32,6 +32,7 @@ let metadata = {
   },
   total: 0
 };
+
 //Read all files.
 fs.readdir(contractsRepoPath, function(err, items) {
   metadata.total = items.length;
