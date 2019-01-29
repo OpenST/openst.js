@@ -16,7 +16,7 @@ describe('TokenRules', async function() {
   let options = {
     from: config.deployerAddress,
     gasPrice: config.gasPrice,
-    gas: '8000000'
+    gas: config.gas
   };
 
   before(function () {

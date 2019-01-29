@@ -14,16 +14,16 @@ DeployContract.prototype = {
     let receipt = null,
       transactionHash = null;
     console.log('Deploying contract ' + oThis.contractName);
-    let instance = await oThis.tx
+    let instance = await oThis.txObject
       .send(oThis.txOptions)
-      .on('receipt', function (value) {
+      .on('receipt', function(value) {
         receipt = value;
       })
-      .on('transactionHash', function (value) {
+      .on('transactionHash', function(value) {
         console.log('transaction hash: ' + value);
         transactionHash = value;
       })
-      .on('error', function (error) {
+      .on('error', function(error) {
         return Promise.reject(error);
       });
 
