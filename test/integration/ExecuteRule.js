@@ -5,21 +5,21 @@ const TokenRule = require('../../lib/setup/TokenRules'),
   UserSetup = require('../../lib/setup/UserSetup'),
   config = require('../utils/configReader'),
   Web3WalletHelper = require('../utils/Web3WalletHelper'),
-  AbiBinProvider = require('../../lib/AbiBinProvider'),
   Contracts = require('../../lib/Contracts');
 
 const auxiliaryWeb3 = new Web3(config.gethRpcEndPoint),
   web3WalletHelper = new Web3WalletHelper(auxiliaryWeb3),
-  abiBinProvider = new AbiBinProvider(),
   assert = chai.assert;
 
-describe('ExecuteRule', async function() {
-  let txOptions = {
-    from: config.deployerAddress,
-    gasPrice: config.gasPrice,
-    gas: config.gas
-  };
+let txOptions = {
+  from: config.deployerAddress,
+  gasPrice: config.gasPrice,
+  gas: config.gas
+};
 
+let wallets;
+
+describe('ExecuteRule', async function() {
   before(function() {
     this.timeout(60000);
     //This hook could take long time.
@@ -54,23 +54,23 @@ describe('ExecuteRule', async function() {
     this.timeout(60000);
 
     const userSetup = new UserSetup(auxiliaryWeb3);
-    const multiSigtxReceipt = await userSetup.deployMultiSigMasterCopy(txOptions);
-    assert.strictEqual(multiSigtxReceipt.status, true);
+    const multiSigTxResponse = await userSetup.deployMultiSigMasterCopy(txOptions);
+    assert.strictEqual(multiSigTxResponse.receipt.status, true);
   });
 
   it('Should deploy TokenHolder MasterCopy contract', async function() {
     this.timeout(60000);
 
     const userSetup = new UserSetup(auxiliaryWeb3);
-    const tokenHolderTXReceipt = await userSetup.deployTokenHolderMasterCopy(txOptions);
-    assert.strictEqual(tokenHolderTXReceipt.status, true);
+    const tokenHolderTxResponse = await userSetup.deployTokenHolderMasterCopy(txOptions);
+    assert.strictEqual(tokenHolderTxResponse.receipt.status, true);
   });
 
   it('Should deploy UserWalletFactory contract', async function() {
     this.timeout(60000);
 
     const userSetup = new UserSetup(auxiliaryWeb3);
-    const userWalletFactoryReceipt = await userSetup.deployUserWalletFactory(txOptions);
-    assert.strictEqual(userWalletFactoryReceipt.status, true);
+    const userWalletFactoryResponse = await userSetup.deployUserWalletFactory(txOptions);
+    assert.strictEqual(userWalletFactoryResponse.receipt.status, true);
   });
 });

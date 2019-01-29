@@ -94,7 +94,7 @@ fs.readdir(contractsRepoPath, function(err, items) {
   }
 
   console.log('------ Task Completed ------');
-  console.log('Total Trfuule Artifacts:', metadata.total);
+  console.log('Total truffle Artifacts:', metadata.total);
   console.log(
     'Abi File generated for',
     metadata.abi.generated.length,
