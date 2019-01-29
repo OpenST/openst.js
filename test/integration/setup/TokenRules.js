@@ -37,7 +37,7 @@ describe('TokenRules', async function() {
 
     const mockToken = wallets[2].address,
       mockOrganization = wallets[1].address;
-    const tokenRules = new TokenRules(auxiliaryWeb3, '');
+    const tokenRules = new TokenRules(auxiliaryWeb3);
 
     const response = await tokenRules.deploy(mockOrganization, mockToken, options, auxiliaryWeb3);
 
