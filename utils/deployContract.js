@@ -1,6 +1,6 @@
 'use strict';
 
-const DeployContract = function (params) {
+const DeployContract = function(params) {
   const oThis = this;
 
   Object.assign(oThis, params);
