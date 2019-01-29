@@ -1,14 +1,14 @@
 'use strict';
 
-// TODO Documentation
-// TODO class format
+// TODO Gulshan: Documentation
+// TODO Gulshan: class format
 const DeployContract = function(params) {
   const oThis = this;
 
   Object.assign(oThis, params);
 };
 
-// TODO Documentation
+// TODO Gulshan: Documentation
 DeployContract.prototype = {
   deploy: async function() {
     const oThis = this;
