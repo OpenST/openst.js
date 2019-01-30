@@ -10,13 +10,11 @@
  */
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
 
-let contractsRepoPath = path.join(os.homedir(), './openst-contracts/build/contracts/');
-let abiOutputPath = path.join(os.homedir(), './openst-contracts/build/abi');
-let binOutputPath = path.join(os.homedir(), './openst-contracts/build/bin');
-console.log('dir path :- ', os.homedir());
-console.log('path path :- ', contractsRepoPath);
+let contractsRepoPath = path.join(__dirname, '../../openst-contracts/build/contracts/');
+let abiOutputPath = path.join(__dirname, './abi');
+let binOutputPath = path.join(__dirname, './bin');
+
 if (process.argv.length > 2) {
   contractsRepoPath = process.argv[2];
 }
