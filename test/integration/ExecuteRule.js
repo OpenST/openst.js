@@ -1,11 +1,12 @@
 const chai = require('chai'),
-  Web3 = require('web3');
+  Web3 = require('web3'),
+  Package = require('../../index');
 
-const TokenRule = require('../../lib/setup/TokenRules'),
-  UserSetup = require('../../lib/setup/UserSetup'),
+const TokenRulesSetup = Package.Setup.TokenRules,
+  UserSetup = Package.Setup.User,
   config = require('../utils/configReader'),
   Web3WalletHelper = require('../utils/Web3WalletHelper'),
-  Contracts = require('../../lib/Contracts');
+  Contracts = Package.Contracts;
 
 const auxiliaryWeb3 = new Web3(config.gethRpcEndPoint),
   web3WalletHelper = new Web3WalletHelper(auxiliaryWeb3),
@@ -35,7 +36,7 @@ describe('ExecuteRule', async function() {
     // TODO Gulshan: Update with actual mocktoken and organization
     const mockToken = wallets[2].address,
       mockOrganization = wallets[1].address;
-    const tokenRules = new TokenRule(auxiliaryWeb3);
+    const tokenRules = new TokenRulesSetup(auxiliaryWeb3);
 
     const response = await tokenRules.deploy(mockOrganization, mockToken, txOptions, auxiliaryWeb3);
 
