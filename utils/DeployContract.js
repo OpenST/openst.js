@@ -8,7 +8,7 @@ class DeployContract {
    * DeployContract constructor.
    *
    * @param contractName Contract name.
-   * @param txObject Contract tx object.
+   * @param txObject Transaction object.
    * @param web3 Web3 object.
    * @param txOptions Tx options.
    * @constructor
