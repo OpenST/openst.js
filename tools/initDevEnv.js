@@ -97,7 +97,6 @@ InitDevEnv.prototype = {
     let deployerAddress = oThis._generateAddress(gethFolder);
     let facilitator = oThis._generateAddress(gethFolder);
     let miner = oThis._generateAddress(gethFolder);
-    let opsAddress = oThis._generateAddress(gethFolder);
     let organizationAddress = oThis._generateAddress(gethFolder);
     let wallet1 = oThis._generateAddress(gethFolder);
     let wallet2 = oThis._generateAddress(gethFolder);
@@ -123,7 +122,6 @@ InitDevEnv.prototype = {
       deployerAddress: deployerAddress,
       facilitator: facilitator,
       miner: miner,
-      opsAddress: opsAddress,
       organizationAddress: organizationAddress,
       wallet1: wallet1,
       wallet2: wallet2,
@@ -193,7 +191,6 @@ InitDevEnv.prototype = {
       'deployerAddress',
       'facilitator',
       'miner',
-      'opsAddress',
       'organizationAddress',
       'wallet1',
       'wallet2'
