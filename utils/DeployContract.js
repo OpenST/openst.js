@@ -1,39 +1,47 @@
 'use strict';
 
-// TODO: class format
 /**
- * DeployContract constructor.
- *
- * @param contractName Contract name.
- * @param txObject Contract tx object.
- * @param web3 Web3 object.
- * @param txOptions Tx options.
- * @constructor
+ * It is used for deploying a contract.
  */
-const DeployContract = function(contractName, txObject, web3, txOptions) {
-  const oThis = this;
+class DeployContract {
+  /**
+   * DeployContract constructor.
+   *
+   * @param contractName Contract name.
+   * @param txObject Contract tx object.
+   * @param web3 Web3 object.
+   * @param txOptions Tx options.
+   * @constructor
+   */
+  constructor(contractName, txObject, web3, txOptions) {
+    const oThis = this;
 
-  oThis.contractName = contractName;
-  oThis.txObject = txObject;
-  oThis.txOptions = txOptions;
-  oThis.web3 = web3;
-};
+    oThis.contractName = contractName;
+    oThis.txObject = txObject;
+    oThis.txOptions = txOptions;
+    oThis.web3 = web3;
+  }
 
-// TODO Gulshan: Documentation
-DeployContract.prototype = {
-  deploy: async function() {
+  /**
+   * It deploys the contract.
+   *
+   * @returns Promise object.
+   */
+  async deploy() {
     const oThis = this;
 
     let receipt = null,
       transactionHash = null;
+
     console.log('Deploying contract: ' + oThis.contractName);
+
     let instance = await oThis.txObject
       .send(oThis.txOptions)
       .on('receipt', function(value) {
         receipt = value;
       })
       .on('transactionHash', function(value) {
-        console.log('transaction hash: ' + value);
+        console.log('transaction hash for ' + oThis.contractName + ' : ' + value);
         transactionHash = value;
       })
       .on('error', function(error) {
@@ -59,6 +67,6 @@ DeployContract.prototype = {
       instance: instance
     });
   }
-};
+}
 
 module.exports = DeployContract;
