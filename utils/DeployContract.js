@@ -1,11 +1,22 @@
 'use strict';
 
-// TODO Gulshan: Documentation
-// TODO Gulshan: class format
-const DeployContract = function(params) {
+// TODO: class format
+/**
+ * DeployContract constructor.
+ *
+ * @param contractName Contract name.
+ * @param txObject Contract tx object.
+ * @param web3 Web3 object.
+ * @param txOptions Tx options.
+ * @constructor
+ */
+const DeployContract = function(contractName, txObject, web3, txOptions) {
   const oThis = this;
 
-  Object.assign(oThis, params);
+  oThis.contractName = contractName;
+  oThis.txObject = txObject;
+  oThis.txOptions = txOptions;
+  oThis.web3 = web3;
 };
 
 // TODO Gulshan: Documentation
