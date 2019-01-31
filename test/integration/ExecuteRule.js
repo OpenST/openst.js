@@ -1,12 +1,13 @@
 const chai = require('chai'),
-  Web3 = require('web3');
+  Web3 = require('web3'),
+  Package = require('../../index');
 
-const TokenRules = require('../../lib/setup/TokenRules'),
+const TokenRulesSetup = Package.Setup.TokenRules,
+  UserSetup = Package.Setup.User,
   Mosaic = require('@openstfoundation/mosaic-tbd'),
-  UserSetup = require('../../lib/setup/UserSetup'),
   config = require('../utils/configReader'),
   Web3WalletHelper = require('../utils/Web3WalletHelper'),
-  Contracts = require('../../lib/Contracts'),
+  Contracts = Package.Contracts,
   User = require('../../lib/User'),
   MockContractsDeployer = require('./../utils/MockContractsDeployer');
 
@@ -74,7 +75,7 @@ describe('ExecuteRule', async function() {
   it('Should deploy TokenRules contract', async function() {
     this.timeout(3 * 60000);
 
-    const tokenRules = new TokenRules(auxiliaryWeb3);
+    const tokenRules = new TokenRulesSetup(auxiliaryWeb3);
 
     const response = await tokenRules.deploy(organization, mockToken, txOptions, auxiliaryWeb3);
     tokenRulesAddress = response.receipt.contractAddress;
