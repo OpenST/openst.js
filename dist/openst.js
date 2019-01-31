@@ -12694,6 +12694,14 @@ var OpenSTAbiBinProvider =
 function (_AbiBinProvider) {
   _inherits(OpenSTAbiBinProvider, _AbiBinProvider);
 
+  /**
+   * Constructor for OpenSTAbiBinProvider.
+   *
+   * @param abiFolderPath Folder path where abi is present.
+   * @param binFolderPath Folder path where bin is present.
+   * @param mosaicAbiFolderPath Folder path where mosaic abi is present.
+   * @param mosaicBinFolderPath Folder path where mosaic bin is present.
+   */
   function OpenSTAbiBinProvider(abiFolderPath, binFolderPath, mosaicAbiFolderPath, mosaicBinFolderPath) {
     var _this;
 
@@ -32999,95 +33007,118 @@ module.exports = function generate__limitProperties(it, $keyword, $ruleType) {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
- // TODO: class format
 
 /**
- * DeployContract constructor.
- *
- * @param contractName Contract name.
- * @param txObject Contract tx object.
- * @param web3 Web3 object.
- * @param txOptions Tx options.
- * @constructor
+ * It is used for deploying a contract.
  */
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
-var DeployContract = function DeployContract(contractName, txObject, web3, txOptions) {
-  var oThis = this;
-  oThis.contractName = contractName;
-  oThis.txObject = txObject;
-  oThis.txOptions = txOptions;
-  oThis.web3 = web3;
-}; // TODO Gulshan: Documentation
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var DeployContract =
+/*#__PURE__*/
+function () {
+  /**
+   * DeployContract constructor.
+   *
+   * @param contractName Contract name.
+   * @param txObject Transaction object.
+   * @param web3 Web3 object.
+   * @param txOptions Tx options.
+   * @constructor
+   */
+  function DeployContract(contractName, txObject, web3, txOptions) {
+    _classCallCheck(this, DeployContract);
+
+    var oThis = this;
+    oThis.contractName = contractName;
+    oThis.txObject = txObject;
+    oThis.txOptions = txOptions;
+    oThis.web3 = web3;
+  }
+  /**
+   * It deploys the contract.
+   *
+   * @returns Promise object.
+   */
 
 
-DeployContract.prototype = {
-  deploy: function () {
-    var _deploy = _asyncToGenerator(
-    /*#__PURE__*/
-    regeneratorRuntime.mark(function _callee() {
-      var oThis, receipt, transactionHash, instance, contractAddress, code;
-      return regeneratorRuntime.wrap(function _callee$(_context) {
-        while (1) {
-          switch (_context.prev = _context.next) {
-            case 0:
-              oThis = this;
-              receipt = null, transactionHash = null;
-              console.log('Deploying contract: ' + oThis.contractName);
-              _context.next = 5;
-              return oThis.txObject.send(oThis.txOptions).on('receipt', function (value) {
-                receipt = value;
-              }).on('transactionHash', function (value) {
-                console.log('transaction hash: ' + value);
-                transactionHash = value;
-              }).on('error', function (error) {
-                return Promise.reject(error);
-              });
+  _createClass(DeployContract, [{
+    key: "deploy",
+    value: function () {
+      var _deploy = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee() {
+        var oThis, receipt, transactionHash, instance, contractAddress, code;
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                oThis = this;
+                receipt = null, transactionHash = null;
+                console.log('Deploying contract: ' + oThis.contractName);
+                _context.next = 5;
+                return oThis.txObject.send(oThis.txOptions).on('receipt', function (value) {
+                  receipt = value;
+                }).on('transactionHash', function (value) {
+                  console.log('transaction hash for ' + oThis.contractName + ' : ' + value);
+                  transactionHash = value;
+                }).on('error', function (error) {
+                  return Promise.reject(error);
+                });
 
-            case 5:
-              instance = _context.sent;
-              contractAddress = null;
-              contractAddress = instance.options.address; // checking if the contract was deployed at all.
+              case 5:
+                instance = _context.sent;
+                contractAddress = null;
+                contractAddress = instance.options.address; // checking if the contract was deployed at all.
 
-              _context.next = 10;
-              return oThis.web3.eth.getCode(contractAddress);
+                _context.next = 10;
+                return oThis.web3.eth.getCode(contractAddress);
 
-            case 10:
-              code = _context.sent;
+              case 10:
+                code = _context.sent;
 
-              if (!(code.length <= 2)) {
-                _context.next = 13;
-                break;
-              }
+                if (!(code.length <= 2)) {
+                  _context.next = 13;
+                  break;
+                }
 
-              return _context.abrupt("return", Promise.reject('Contract deployment failed. oThis.web3.eth.getCode returned empty code.'));
+                return _context.abrupt("return", Promise.reject('Contract deployment failed. oThis.web3.eth.getCode returned empty code.'));
 
-            case 13:
-              console.log('Address  :', contractAddress);
-              console.log('Gas used :', receipt.gasUsed, '\n');
-              return _context.abrupt("return", Promise.resolve({
-                receipt: receipt,
-                instance: instance
-              }));
+              case 13:
+                console.log('Address  :', contractAddress);
+                console.log('Gas used :', receipt.gasUsed, '\n');
+                return _context.abrupt("return", Promise.resolve({
+                  receipt: receipt,
+                  instance: instance
+                }));
 
-            case 16:
-            case "end":
-              return _context.stop();
+              case 16:
+              case "end":
+                return _context.stop();
+            }
           }
-        }
-      }, _callee, this);
-    }));
+        }, _callee, this);
+      }));
 
-    function deploy() {
-      return _deploy.apply(this, arguments);
-    }
+      function deploy() {
+        return _deploy.apply(this, arguments);
+      }
 
-    return deploy;
-  }()
-};
+      return deploy;
+    }()
+  }]);
+
+  return DeployContract;
+}();
+
 module.exports = DeployContract;
 
 /***/ }),
@@ -37636,7 +37667,7 @@ module.exports = {
     User: User
   },
   AbiBinProvider: AbiBinProvider,
-  Contracts: Contracts,
+  Contracts: Contracts
 };
 
 
