@@ -37661,7 +37661,7 @@ const Contracts = __webpack_require__(636);
 const TokenRules = __webpack_require__(637);
 const User = __webpack_require__(638);
 const UserHelper = __webpack_require__(639);
-const TokenRulesHelper = __webpack_require__(641)
+const TokenRulesHelper = __webpack_require__(641);
 
 module.exports = {
   Setup: {
