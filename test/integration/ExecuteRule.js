@@ -8,7 +8,7 @@ const TokenRulesSetup = Package.Setup.TokenRules,
   config = require('../utils/configReader'),
   Web3WalletHelper = require('../utils/Web3WalletHelper'),
   Contracts = Package.Contracts,
-  User = require('../../lib/User'),
+  User = Package.Helpers.User,
   MockContractsDeployer = require('./../utils/MockContractsDeployer');
 
 const auxiliaryWeb3 = new Web3(config.gethRpcEndPoint),
@@ -31,45 +31,42 @@ let wallets,
   organization,
   beneficiary,
   facilitator,
-  deployer,
   mockToken,
-  owner = config.deployerAddress;
+  owner = config.deployerAddress,
+  tokenHolderProxy,
+  gnosisSafeProxy;
 
 describe('ExecuteRule', async function() {
-  before(function() {
-    this.timeout(60000);
-    //This hook could take long time.
-    return web3WalletHelper
-      .init(auxiliaryWeb3)
-      .then(function(_out) {
-        if (!organization) {
-          console.log('* Setting up Organization');
-          wallets = web3WalletHelper.web3Object.eth.accounts.wallet;
-          worker = wallets[1].address;
-          beneficiary = wallets[2].address;
-          facilitator = wallets[3].address;
-          let orgHelper = new OrganizationHelper(auxiliaryWeb3, organization);
-          const orgConfig = {
-            deployer: config.deployerAddress,
-            owner: owner,
-            workers: worker,
-            workerExpirationHeight: '20000000'
-          };
-          return orgHelper.setup(orgConfig).then(function() {
-            organization = orgHelper.address;
-          });
-        }
-        return _out;
-      })
-      .then(function() {
-        if (!mockToken) {
-          deployer = new MockContractsDeployer(config.deployerAddress, auxiliaryWeb3);
-          return deployer.deployMockToken().then(function() {
-            mockToken = deployer.addresses.MockToken;
-            return mockToken;
-          });
-        }
-      });
+  before(async function() {
+    await web3WalletHelper.init(auxiliaryWeb3);
+    wallets = web3WalletHelper.web3Object.eth.accounts.wallet;
+    worker = wallets[1].address;
+    beneficiary = wallets[2].address;
+    facilitator = wallets[3].address;
+  });
+
+  it('Should deploy Organization contract', async function() {
+    let orgHelper = new OrganizationHelper(auxiliaryWeb3, null);
+    const orgConfig = {
+      deployer: config.deployerAddress,
+      owner: owner,
+      workers: worker,
+      workerExpirationHeight: '20000000'
+    };
+
+    await orgHelper.setup(orgConfig);
+    organization = orgHelper.address;
+
+    assert.isNotNull(organization, 'Organization contract address should not be null.');
+  });
+
+  it('Deploys EIP20Token contract', async function() {
+    const deployerInstance = new MockContractsDeployer(config.deployerAddress, auxiliaryWeb3);
+
+    await deployerInstance.deployMockToken();
+
+    mockToken = deployerInstance.addresses.MockToken;
+    assert.isNotNull(mockToken, 'EIP20Token contract address should not be null.');
   });
 
   it('Should deploy TokenRules contract', async function() {
@@ -130,9 +127,7 @@ describe('ExecuteRule', async function() {
       auxiliaryWeb3
     );
 
-    const ZERO_BYTES = '0x0000000000000000000000000000000000000000000000000000000000000000',
-      NULL_ADDRESS = '0x0000000000000000000000000000000000000000',
-      owners = [wallets[3].address],
+    const owners = [wallets[3].address],
       threshold = 1,
       sessionKeys = [wallets[5].address],
       sessionKeysSpendingLimits = [1000000],
@@ -141,17 +136,21 @@ describe('ExecuteRule', async function() {
     const response = await userInstance.createUserWallet(
       owners,
       threshold,
-      NULL_ADDRESS,
-      ZERO_BYTES,
+      config.NULL_ADDRESS,
+      config.ZERO_BYTES,
       sessionKeys,
       sessionKeysSpendingLimits,
       sessionKeysExpirationHeights,
-      NULL_ADDRESS,
-      NULL_ADDRESS,
-      0,
       txOptions
     );
 
     assert.strictEqual(response.status, true, 'User wallet creation failed.');
+
+    // Fetching the gnosisSafe and tokenholder proxy address for the user.
+    let returnValues = response.events.UserWalletCreated.returnValues;
+    let userWalletEvent = JSON.parse(JSON.stringify(returnValues));
+
+    gnosisSafeProxy = userWalletEvent._gnosisSafeProxy;
+    tokenHolderProxy = userWalletEvent._tokenHolderProxy;
   });
 });
