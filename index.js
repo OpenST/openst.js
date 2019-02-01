@@ -5,6 +5,7 @@ const Contracts = require('./lib/Contracts');
 const TokenRules = require('./lib/setup/TokenRules');
 const User = require('./lib/setup/User');
 const UserHelper = require('./lib/helper/User');
+const TokenRulesHelper = require('./lib/helper/TokenRules');
 
 module.exports = {
   Setup: {
@@ -14,6 +15,7 @@ module.exports = {
   AbiBinProvider: AbiBinProvider,
   Contracts: Contracts,
   Helpers: {
-    User: UserHelper
+    User: UserHelper,
+    TokenRules: TokenRulesHelper
   }
 };

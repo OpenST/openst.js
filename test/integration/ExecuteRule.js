@@ -4,13 +4,14 @@ const chai = require('chai'),
 
 const TokenRulesSetup = Package.Setup.TokenRules,
   UserSetup = Package.Setup.User,
+  MockContractsDeployer = require('./../utils/MockContractsDeployer'),
   Mosaic = require('@openstfoundation/mosaic-tbd'),
   config = require('../utils/configReader'),
   Web3WalletHelper = require('../utils/Web3WalletHelper'),
   Contracts = Package.Contracts,
   User = Package.Helpers.User,
-  MockContractsDeployer = require('./../utils/MockContractsDeployer'),
-  AbiBinProvider = Package.AbiBinProvider;
+  AbiBinProvider = Package.AbiBinProvider,
+  TokenRules = Package.Helpers.TokenRules;
 
 const auxiliaryWeb3 = new Web3(config.gethRpcEndPoint),
   web3WalletHelper = new Web3WalletHelper(auxiliaryWeb3),
@@ -165,7 +166,7 @@ describe('ExecuteRule', async function() {
       gas: config.gas
     };
 
-    const rules = new Rules(tokenRulesAddress, auxiliaryWeb3),
+    const rules = new TokenRules(tokenRulesAddress, auxiliaryWeb3),
       mockRule = 'TestRule',
       mockRuleAddress = tokenRulesAddress,
       abiBinProvider = new AbiBinProvider(),
@@ -175,5 +176,15 @@ describe('ExecuteRule', async function() {
 
     assert.strictEqual(response.events.RuleRegistered['returnValues']._ruleName, mockRule);
     assert.strictEqual(response.events.RuleRegistered['returnValues']._ruleAddress, mockRuleAddress);
+
+    // Verify the rule data using rule name.
+    const ruleByNameData = await rules.getRuleByName(mockRule, txOptions);
+    assert.strictEqual(ruleByNameData.ruleName, mockRule, 'Incorrect rule name was registered');
+    assert.strictEqual(ruleByNameData.ruleAddress, mockRuleAddress, mockRuleAddress, 'Incorrect rule address');
+
+    // Verify the rule data using rule address.
+    const ruleByAddressData = await rules.getRuleByAddress(mockRuleAddress, txOptions);
+    assert.strictEqual(ruleByNameData.ruleName, mockRule, 'Incorrect rule name was registered');
+    assert.strictEqual(ruleByNameData.ruleAddress, mockRuleAddress, mockRuleAddress, 'Incorrect rule address');
   });
 });

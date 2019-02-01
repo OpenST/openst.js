@@ -7875,7 +7875,7 @@ module.exports = __webpack_require__(13) ? function (object, key, value) {
 /***/ (function(module, exports, __webpack_require__) {
 
 // to indexed object, toObject with fallback for non-array-like ES3 strings
-var IObject = __webpack_require__(66);
+var IObject = __webpack_require__(67);
 var defined = __webpack_require__(36);
 module.exports = function (it) {
   return IObject(defined(it));
@@ -7931,7 +7931,7 @@ module.exports = function (it) {
 /* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var pIE = __webpack_require__(67);
+var pIE = __webpack_require__(68);
 var createDesc = __webpack_require__(43);
 var toIObject = __webpack_require__(25);
 var toPrimitive = __webpack_require__(40);
@@ -7977,7 +7977,7 @@ module.exports = function (KEY, exec) {
 // 5 -> Array#find
 // 6 -> Array#findIndex
 var ctx = __webpack_require__(33);
-var IObject = __webpack_require__(66);
+var IObject = __webpack_require__(67);
 var toObject = __webpack_require__(20);
 var toLength = __webpack_require__(11);
 var asc = __webpack_require__(340);
@@ -8382,7 +8382,7 @@ if (__webpack_require__(13)) {
   var toAbsoluteIndex = __webpack_require__(47);
   var toPrimitive = __webpack_require__(40);
   var has = __webpack_require__(23);
-  var classof = __webpack_require__(68);
+  var classof = __webpack_require__(69);
   var isObject = __webpack_require__(7);
   var toObject = __webpack_require__(20);
   var isArrayIter = __webpack_require__(119);
@@ -8394,7 +8394,7 @@ if (__webpack_require__(13)) {
   var wks = __webpack_require__(9);
   var createArrayMethod = __webpack_require__(31);
   var createArrayIncludes = __webpack_require__(80);
-  var speciesConstructor = __webpack_require__(69);
+  var speciesConstructor = __webpack_require__(70);
   var ArrayIterators = __webpack_require__(123);
   var Iterators = __webpack_require__(56);
   var $iterDetect = __webpack_require__(83);
@@ -10350,6 +10350,129 @@ module.exports = function (it, TYPE) {
 
 "use strict";
 
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
+
+function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+var Mosaic = __webpack_require__(180);
+
+var AbiBinProvider = Mosaic.AbiBinProvider;
+var DEFAULT_ABI_FOLDER_PATH, DEFAULT_BIN_FOLDER_PATH;
+/**
+ * The class provides getter to get ABIs and BINs for different contracts.
+ * ABI and BIN files sit in contracts/abi, contracts/bin folder.
+ */
+
+var OpenSTAbiBinProvider =
+/*#__PURE__*/
+function (_AbiBinProvider) {
+  _inherits(OpenSTAbiBinProvider, _AbiBinProvider);
+
+  /**
+   * Constructor for OpenSTAbiBinProvider.
+   *
+   * @param abiFolderPath Folder path where abi is present.
+   * @param binFolderPath Folder path where bin is present.
+   * @param mosaicAbiFolderPath Folder path where mosaic abi is present.
+   * @param mosaicBinFolderPath Folder path where mosaic bin is present.
+   */
+  function OpenSTAbiBinProvider(abiFolderPath, binFolderPath, mosaicAbiFolderPath, mosaicBinFolderPath) {
+    var _this;
+
+    _classCallCheck(this, OpenSTAbiBinProvider);
+
+    abiFolderPath = abiFolderPath || DEFAULT_ABI_FOLDER_PATH;
+    binFolderPath = binFolderPath || DEFAULT_BIN_FOLDER_PATH;
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(OpenSTAbiBinProvider).call(this, abiFolderPath, binFolderPath));
+
+    var oThis = _assertThisInitialized(_assertThisInitialized(_this));
+
+    oThis.mosaicAbiBinProvider = new AbiBinProvider(mosaicAbiFolderPath, mosaicBinFolderPath);
+    return _this;
+  }
+  /**
+   * Getter to get ABI for a contract.
+   * @param contractName Name of the contract.
+   * @returns {String} ABI JSON string.
+   */
+
+
+  _createClass(OpenSTAbiBinProvider, [{
+    key: "getABI",
+    value: function getABI(contractName) {
+      var oThis = this;
+      var abi = null;
+
+      try {
+        abi = _get(_getPrototypeOf(OpenSTAbiBinProvider.prototype), "getABI", this).call(this, contractName);
+      } catch (e) {//Just catch the exception. Do nothing.
+      }
+
+      if (!abi) {
+        //We did not find abi in our location.
+        //Lets get it from mosaicAbiBinProvider.
+        return oThis.mosaicAbiBinProvider.getABI(contractName);
+      }
+
+      return abi;
+    }
+    /**
+     * Getter to get BIN for a contract.
+     * @param contractName Name of the contract.
+     * @returns {String} Binary string.
+     */
+
+  }, {
+    key: "getBIN",
+    value: function getBIN(contractName) {
+      var oThis = this;
+      var bin = null;
+
+      try {
+        bin = _get(_getPrototypeOf(OpenSTAbiBinProvider.prototype), "getBIN", this).call(this, contractName);
+      } catch (e) {//Just catch the exception. Do nothing.
+      }
+
+      if (!bin) {
+        //We did not find abi in our location.
+        //Lets get it from mosaicAbiBinProvider.
+        return oThis.mosaicAbiBinProvider.getBIN(contractName);
+      }
+
+      return bin;
+    }
+  }]);
+
+  return OpenSTAbiBinProvider;
+}(AbiBinProvider);
+
+module.exports = OpenSTAbiBinProvider;
+
+/***/ }),
+/* 63 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 /**
  *  Conversion Utilities
  *
@@ -10614,7 +10737,7 @@ exports.joinSignature = joinSignature;
 
 
 /***/ }),
-/* 63 */
+/* 64 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10660,7 +10783,7 @@ function randomBytes (size, cb) {
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(10), __webpack_require__(22)))
 
 /***/ }),
-/* 64 */
+/* 65 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var Buffer = __webpack_require__(2).Buffer
@@ -10747,7 +10870,7 @@ module.exports = Hash
 
 
 /***/ }),
-/* 65 */
+/* 66 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11021,7 +11144,7 @@ function unescapeJsonPointer(str) {
 
 
 /***/ }),
-/* 66 */
+/* 67 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // fallback for non-array-like ES3 and non-enumerable old V8 strings
@@ -11033,14 +11156,14 @@ module.exports = Object('z').propertyIsEnumerable(0) ? Object : function (it) {
 
 
 /***/ }),
-/* 67 */
+/* 68 */
 /***/ (function(module, exports) {
 
 exports.f = {}.propertyIsEnumerable;
 
 
 /***/ }),
-/* 68 */
+/* 69 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // getting tag from 19.1.3.6 Object.prototype.toString()
@@ -11069,7 +11192,7 @@ module.exports = function (it) {
 
 
 /***/ }),
-/* 69 */
+/* 70 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // 7.3.20 SpeciesConstructor(O, defaultConstructor)
@@ -11082,129 +11205,6 @@ module.exports = function (O, D) {
   return C === undefined || (S = anObject(C)[SPECIES]) == undefined ? D : aFunction(S);
 };
 
-
-/***/ }),
-/* 70 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
-
-function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-var Mosaic = __webpack_require__(180);
-
-var AbiBinProvider = Mosaic.AbiBinProvider;
-var DEFAULT_ABI_FOLDER_PATH, DEFAULT_BIN_FOLDER_PATH;
-/**
- * The class provides getter to get ABIs and BINs for different contracts.
- * ABI and BIN files sit in contracts/abi, contracts/bin folder.
- */
-
-var OpenSTAbiBinProvider =
-/*#__PURE__*/
-function (_AbiBinProvider) {
-  _inherits(OpenSTAbiBinProvider, _AbiBinProvider);
-
-  /**
-   * Constructor for OpenSTAbiBinProvider.
-   *
-   * @param abiFolderPath Folder path where abi is present.
-   * @param binFolderPath Folder path where bin is present.
-   * @param mosaicAbiFolderPath Folder path where mosaic abi is present.
-   * @param mosaicBinFolderPath Folder path where mosaic bin is present.
-   */
-  function OpenSTAbiBinProvider(abiFolderPath, binFolderPath, mosaicAbiFolderPath, mosaicBinFolderPath) {
-    var _this;
-
-    _classCallCheck(this, OpenSTAbiBinProvider);
-
-    abiFolderPath = abiFolderPath || DEFAULT_ABI_FOLDER_PATH;
-    binFolderPath = binFolderPath || DEFAULT_BIN_FOLDER_PATH;
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(OpenSTAbiBinProvider).call(this, abiFolderPath, binFolderPath));
-
-    var oThis = _assertThisInitialized(_assertThisInitialized(_this));
-
-    oThis.mosaicAbiBinProvider = new AbiBinProvider(mosaicAbiFolderPath, mosaicBinFolderPath);
-    return _this;
-  }
-  /**
-   * Getter to get ABI for a contract.
-   * @param contractName Name of the contract.
-   * @returns {String} ABI JSON string.
-   */
-
-
-  _createClass(OpenSTAbiBinProvider, [{
-    key: "getABI",
-    value: function getABI(contractName) {
-      var oThis = this;
-      var abi = null;
-
-      try {
-        abi = _get(_getPrototypeOf(OpenSTAbiBinProvider.prototype), "getABI", this).call(this, contractName);
-      } catch (e) {//Just catch the exception. Do nothing.
-      }
-
-      if (!abi) {
-        //We did not find abi in our location.
-        //Lets get it from mosaicAbiBinProvider.
-        return oThis.mosaicAbiBinProvider.getABI(contractName);
-      }
-
-      return abi;
-    }
-    /**
-     * Getter to get BIN for a contract.
-     * @param contractName Name of the contract.
-     * @returns {String} Binary string.
-     */
-
-  }, {
-    key: "getBIN",
-    value: function getBIN(contractName) {
-      var oThis = this;
-      var bin = null;
-
-      try {
-        bin = _get(_getPrototypeOf(OpenSTAbiBinProvider.prototype), "getBIN", this).call(this, contractName);
-      } catch (e) {//Just catch the exception. Do nothing.
-      }
-
-      if (!bin) {
-        //We did not find abi in our location.
-        //Lets get it from mosaicAbiBinProvider.
-        return oThis.mosaicAbiBinProvider.getBIN(contractName);
-      }
-
-      return bin;
-    }
-  }]);
-
-  return OpenSTAbiBinProvider;
-}(AbiBinProvider);
-
-module.exports = OpenSTAbiBinProvider;
 
 /***/ }),
 /* 71 */
@@ -12079,7 +12079,7 @@ function objectToString(o) {
 "use strict";
 
 
-exports.randomBytes = exports.rng = exports.pseudoRandomBytes = exports.prng = __webpack_require__(63)
+exports.randomBytes = exports.rng = exports.pseudoRandomBytes = exports.prng = __webpack_require__(64)
 exports.createHash = exports.Hash = __webpack_require__(75)
 exports.createHmac = exports.Hmac = __webpack_require__(206)
 
@@ -12483,7 +12483,7 @@ module.exports = function () {
 "use strict";
 
 
-var classof = __webpack_require__(68);
+var classof = __webpack_require__(69);
 var builtinExec = RegExp.prototype.exec;
 
  // `RegExpExec` abstract operation
@@ -14135,7 +14135,7 @@ module.exports = function (object, index, value) {
 /* 121 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var classof = __webpack_require__(68);
+var classof = __webpack_require__(69);
 var ITERATOR = __webpack_require__(9)('iterator');
 var Iterators = __webpack_require__(56);
 module.exports = __webpack_require__(14).getIteratorMethod = function (it) {
@@ -17651,7 +17651,7 @@ module.exports = modes
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(Buffer) {var bn = __webpack_require__(8);
-var randomBytes = __webpack_require__(63);
+var randomBytes = __webpack_require__(64);
 module.exports = crt;
 function blind(priv) {
   var r = getr(priv);
@@ -18015,7 +18015,7 @@ module.exports = OrganizationHelper;
 
 var URI = __webpack_require__(600)
   , equal = __webpack_require__(148)
-  , util = __webpack_require__(65)
+  , util = __webpack_require__(66)
   , SchemaObject = __webpack_require__(239)
   , traverse = __webpack_require__(602);
 
@@ -18486,9 +18486,9 @@ module.exports.f = function getOwnPropertyNames(it) {
 // 19.1.2.1 Object.assign(target, source, ...)
 var getKeys = __webpack_require__(46);
 var gOPS = __webpack_require__(81);
-var pIE = __webpack_require__(67);
+var pIE = __webpack_require__(68);
 var toObject = __webpack_require__(20);
-var IObject = __webpack_require__(66);
+var IObject = __webpack_require__(67);
 var $assign = Object.assign;
 
 // should work with symbols and should have deterministic property order (V8 bug)
@@ -18689,7 +18689,7 @@ module.exports = function (iterator, fn, value, entries) {
 
 var aFunction = __webpack_require__(34);
 var toObject = __webpack_require__(20);
-var IObject = __webpack_require__(66);
+var IObject = __webpack_require__(67);
 var toLength = __webpack_require__(11);
 
 module.exports = function (that, callbackfn, aLen, memo, isRight) {
@@ -18795,13 +18795,13 @@ if (__webpack_require__(13) && /./g.flags != 'g') __webpack_require__(12).f(RegE
 var LIBRARY = __webpack_require__(45);
 var global = __webpack_require__(6);
 var ctx = __webpack_require__(33);
-var classof = __webpack_require__(68);
+var classof = __webpack_require__(69);
 var $export = __webpack_require__(0);
 var isObject = __webpack_require__(7);
 var aFunction = __webpack_require__(34);
 var anInstance = __webpack_require__(59);
 var forOf = __webpack_require__(87);
-var speciesConstructor = __webpack_require__(69);
+var speciesConstructor = __webpack_require__(70);
 var task = __webpack_require__(126).set;
 var microtask = __webpack_require__(361)();
 var newPromiseCapabilityModule = __webpack_require__(172);
@@ -19425,7 +19425,7 @@ module.exports = function (that, maxLength, fillString, left) {
 
 var getKeys = __webpack_require__(46);
 var toIObject = __webpack_require__(25);
-var isEnum = __webpack_require__(67).f;
+var isEnum = __webpack_require__(68).f;
 module.exports = function (isEntries) {
   return function (it) {
     var O = toIObject(it);
@@ -28134,7 +28134,7 @@ module.exports = HashBase
  */
 
 var inherits = __webpack_require__(1)
-var Hash = __webpack_require__(64)
+var Hash = __webpack_require__(65)
 var Buffer = __webpack_require__(2).Buffer
 
 var K = [
@@ -28267,7 +28267,7 @@ module.exports = Sha256
 /***/ (function(module, exports, __webpack_require__) {
 
 var inherits = __webpack_require__(1)
-var Hash = __webpack_require__(64)
+var Hash = __webpack_require__(65)
 var Buffer = __webpack_require__(2).Buffer
 
 var K = [
@@ -28999,7 +28999,7 @@ module.exports = StreamCipher
 /* 217 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var randomBytes = __webpack_require__(63);
+var randomBytes = __webpack_require__(64);
 module.exports = findPrime;
 findPrime.simpleSieve = simpleSieve;
 findPrime.fermatTest = fermatTest;
@@ -32034,7 +32034,7 @@ module.exports = TypedData;
 "use strict";
 
 
-var util = __webpack_require__(65);
+var util = __webpack_require__(66);
 
 module.exports = SchemaObject;
 
@@ -33465,7 +33465,7 @@ if (!USE_NATIVE) {
   $GOPD.f = $getOwnPropertyDescriptor;
   $DP.f = $defineProperty;
   __webpack_require__(49).f = gOPNExt.f = $getOwnPropertyNames;
-  __webpack_require__(67).f = $propertyIsEnumerable;
+  __webpack_require__(68).f = $propertyIsEnumerable;
   __webpack_require__(81).f = $getOwnPropertySymbols;
 
   if (DESCRIPTORS && !__webpack_require__(45)) {
@@ -33558,7 +33558,7 @@ setToStringTag(global.JSON, 'JSON', true);
 // all enumerable object keys, includes symbols
 var getKeys = __webpack_require__(46);
 var gOPS = __webpack_require__(81);
-var pIE = __webpack_require__(67);
+var pIE = __webpack_require__(68);
 module.exports = function (it) {
   var result = getKeys(it);
   var getSymbols = gOPS.f;
@@ -33776,7 +33776,7 @@ $export($export.S, 'Object', { setPrototypeOf: __webpack_require__(108).set });
 "use strict";
 
 // 19.1.3.6 Object.prototype.toString()
-var classof = __webpack_require__(68);
+var classof = __webpack_require__(69);
 var test = {};
 test[__webpack_require__(9)('toStringTag')] = 'z';
 if (test + '' != '[object z]') {
@@ -35079,7 +35079,7 @@ var toIObject = __webpack_require__(25);
 var arrayJoin = [].join;
 
 // fallback for not array-like strings
-$export($export.P + $export.F * (__webpack_require__(66) != Object || !__webpack_require__(27)(arrayJoin)), 'Array', {
+$export($export.P + $export.F * (__webpack_require__(67) != Object || !__webpack_require__(27)(arrayJoin)), 'Array', {
   join: function join(separator) {
     return arrayJoin.call(toIObject(this), separator === undefined ? ',' : separator);
   }
@@ -35729,7 +35729,7 @@ __webpack_require__(86)('search', 1, function (defined, SEARCH, $search, maybeCa
 
 var isRegExp = __webpack_require__(117);
 var anObject = __webpack_require__(5);
-var speciesConstructor = __webpack_require__(69);
+var speciesConstructor = __webpack_require__(70);
 var advanceStringIndex = __webpack_require__(125);
 var toLength = __webpack_require__(11);
 var callRegExpExec = __webpack_require__(85);
@@ -36097,7 +36097,7 @@ var toAbsoluteIndex = __webpack_require__(47);
 var toLength = __webpack_require__(11);
 var isObject = __webpack_require__(7);
 var ArrayBuffer = __webpack_require__(6).ArrayBuffer;
-var speciesConstructor = __webpack_require__(69);
+var speciesConstructor = __webpack_require__(70);
 var $ArrayBuffer = buffer.ArrayBuffer;
 var $DataView = buffer.DataView;
 var $isView = $typed.ABV && ArrayBuffer.isView;
@@ -36780,7 +36780,7 @@ module.exports = __webpack_require__(14).Promise['finally'];
 var $export = __webpack_require__(0);
 var core = __webpack_require__(14);
 var global = __webpack_require__(6);
-var speciesConstructor = __webpack_require__(69);
+var speciesConstructor = __webpack_require__(70);
 var promiseResolve = __webpack_require__(173);
 
 $export($export.P + $export.R, 'Promise', { 'finally': function (onFinally) {
@@ -37656,11 +37656,12 @@ for (var collections = getKeys(DOMIterables), i = 0; i < collections.length; i++
 "use strict";
 
 
-const AbiBinProvider = __webpack_require__(70);
+const AbiBinProvider = __webpack_require__(62);
 const Contracts = __webpack_require__(636);
 const TokenRules = __webpack_require__(637);
 const User = __webpack_require__(638);
 const UserHelper = __webpack_require__(639);
+const TokenRulesHelper = __webpack_require__(641)
 
 module.exports = {
   Setup: {
@@ -37670,7 +37671,8 @@ module.exports = {
   AbiBinProvider: AbiBinProvider,
   Contracts: Contracts,
   Helpers: {
-    User: UserHelper
+    User: UserHelper,
+    TokenRules: TokenRulesHelper
   }
 };
 
@@ -57813,7 +57815,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // See: https://github.com/ethereum/wiki/wiki/Ethereum-Contract-ABI
 var address_1 = __webpack_require__(474);
 var bignumber_1 = __webpack_require__(479);
-var bytes_1 = __webpack_require__(62);
+var bytes_1 = __webpack_require__(63);
 var utf8_1 = __webpack_require__(481);
 var properties_1 = __webpack_require__(199);
 var errors = __importStar(__webpack_require__(95));
@@ -58722,7 +58724,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 // We use this for base 36 maths
 var bn_js_1 = __importDefault(__webpack_require__(8));
-var bytes_1 = __webpack_require__(62);
+var bytes_1 = __webpack_require__(63);
 var keccak256_1 = __webpack_require__(476);
 var rlp_1 = __webpack_require__(478);
 var errors = __webpack_require__(95);
@@ -58855,7 +58857,7 @@ exports.getContractAddress = getContractAddress;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var sha3 = __webpack_require__(477);
-var bytes_1 = __webpack_require__(62);
+var bytes_1 = __webpack_require__(63);
 function keccak256(data) {
     return '0x' + sha3.keccak_256(bytes_1.arrayify(data));
 }
@@ -59352,7 +59354,7 @@ exports.keccak256 = keccak256;
 
 //See: https://github.com/ethereum/wiki/wiki/RLP
 Object.defineProperty(exports, "__esModule", { value: true });
-var bytes_1 = __webpack_require__(62);
+var bytes_1 = __webpack_require__(63);
 function arrayifyInteger(value) {
     var result = [];
     while (value) {
@@ -59502,7 +59504,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  *
  */
 var bn_js_1 = __importDefault(__webpack_require__(8));
-var bytes_1 = __webpack_require__(62);
+var bytes_1 = __webpack_require__(63);
 var properties_1 = __webpack_require__(199);
 var types_1 = __webpack_require__(480);
 var errors = __importStar(__webpack_require__(95));
@@ -59735,7 +59737,7 @@ exports.HDNode = HDNode;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var bytes_1 = __webpack_require__(62);
+var bytes_1 = __webpack_require__(63);
 var UnicodeNormalizationForm;
 (function (UnicodeNormalizationForm) {
     UnicodeNormalizationForm["current"] = "";
@@ -62178,7 +62180,7 @@ module.exports = __webpack_require__(72).PassThrough
  */
 
 var inherits = __webpack_require__(1)
-var Hash = __webpack_require__(64)
+var Hash = __webpack_require__(65)
 var Buffer = __webpack_require__(2).Buffer
 
 var K = [
@@ -62279,7 +62281,7 @@ module.exports = Sha
  */
 
 var inherits = __webpack_require__(1)
-var Hash = __webpack_require__(64)
+var Hash = __webpack_require__(65)
 var Buffer = __webpack_require__(2).Buffer
 
 var K = [
@@ -62384,7 +62386,7 @@ module.exports = Sha1
 
 var inherits = __webpack_require__(1)
 var Sha256 = __webpack_require__(204)
-var Hash = __webpack_require__(64)
+var Hash = __webpack_require__(65)
 var Buffer = __webpack_require__(2).Buffer
 
 var W = new Array(64)
@@ -62435,7 +62437,7 @@ module.exports = Sha224
 
 var inherits = __webpack_require__(1)
 var SHA512 = __webpack_require__(205)
-var Hash = __webpack_require__(64)
+var Hash = __webpack_require__(65)
 var Buffer = __webpack_require__(2).Buffer
 
 var W = new Array(160)
@@ -64109,7 +64111,7 @@ var TEN = new BN(10);
 var THREE = new BN(3);
 var SEVEN = new BN(7);
 var primes = __webpack_require__(217);
-var randomBytes = __webpack_require__(63);
+var randomBytes = __webpack_require__(64);
 module.exports = DH;
 
 function setPublicKey(pub, enc) {
@@ -70571,7 +70573,7 @@ exports.publicDecrypt = function publicDecrypt (key, buf) {
 /***/ (function(module, exports, __webpack_require__) {
 
 var parseKeys = __webpack_require__(99)
-var randomBytes = __webpack_require__(63)
+var randomBytes = __webpack_require__(64)
 var createHash = __webpack_require__(75)
 var mgf = __webpack_require__(229)
 var xor = __webpack_require__(230)
@@ -70782,7 +70784,7 @@ function oldBrowser () {
   throw new Error('secure random number generation not supported by this browser\nuse chrome, FireFox or Internet Explorer 11')
 }
 var safeBuffer = __webpack_require__(2)
-var randombytes = __webpack_require__(63)
+var randombytes = __webpack_require__(64)
 var Buffer = safeBuffer.Buffer
 var kBufferMaxLength = safeBuffer.kMaxLength
 var crypto = global.crypto || global.msCrypto
@@ -74769,7 +74771,7 @@ var compileSchema = __webpack_require__(599)
   , formats = __webpack_require__(604)
   , rules = __webpack_require__(605)
   , $dataMetaSchema = __webpack_require__(626)
-  , util = __webpack_require__(65);
+  , util = __webpack_require__(66);
 
 module.exports = Ajv;
 
@@ -75265,7 +75267,7 @@ function noop() {}
 
 
 var resolve = __webpack_require__(147)
-  , util = __webpack_require__(65)
+  , util = __webpack_require__(66)
   , errorClasses = __webpack_require__(149)
   , stableStringify = __webpack_require__(240);
 
@@ -77200,7 +77202,7 @@ Cache.prototype.clear = function Cache_clear() {
 "use strict";
 
 
-var util = __webpack_require__(65);
+var util = __webpack_require__(66);
 
 var DATE = /^(\d\d\d\d)-(\d\d)-(\d\d)$/;
 var DAYS = [0,31,28,31,30,31,30,31,31,30,31,30,31];
@@ -77357,7 +77359,7 @@ function regex(str) {
 
 
 var ruleModules = __webpack_require__(606)
-  , toHash = __webpack_require__(65).toHash;
+  , toHash = __webpack_require__(66).toHash;
 
 module.exports = function rules() {
   var RULES = [
@@ -80601,7 +80603,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 var Web3 = __webpack_require__(39);
 
-var AbiBinProvider = __webpack_require__(70);
+var AbiBinProvider = __webpack_require__(62);
 
 var Mosaic = __webpack_require__(180);
 
@@ -80684,7 +80686,7 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-var AbiBinProvider = __webpack_require__(70),
+var AbiBinProvider = __webpack_require__(62),
     Deployer = __webpack_require__(246),
     ContractName = 'TokenRules';
 /**
@@ -80798,7 +80800,7 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-var AbiBinProvider = __webpack_require__(70),
+var AbiBinProvider = __webpack_require__(62),
     Deployer = __webpack_require__(246);
 
 var MultiSigMasterCopyContractName = 'GnosisSafe',
@@ -81032,7 +81034,7 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-var AbiBinProvider = __webpack_require__(70);
+var AbiBinProvider = __webpack_require__(62);
 
 var UserWalletFactoryContractName = 'UserWalletFactory';
 
@@ -81274,6 +81276,198 @@ function () {
 }();
 
 module.exports = TxSender;
+
+/***/ }),
+/* 641 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var AbiBinProvider = __webpack_require__(62);
+
+var contractName = 'TokenRules';
+/**
+ * It is used to register an custom rule and fetch the registered rules.
+ */
+
+var TokenRules =
+/*#__PURE__*/
+function () {
+  /**
+   * Constructor of TokenRules.
+   *
+   * @param tokenRules Address of token rules contract of an economy.
+   * @param auxiliaryWeb3 Auxiliary chain web3.
+   */
+  function TokenRules(tokenRules, auxiliaryWeb3) {
+    _classCallCheck(this, TokenRules);
+
+    var oThis = this;
+    oThis.tokenRules = tokenRules;
+    oThis.auxiliaryWeb3 = auxiliaryWeb3;
+    oThis.abiBinProvider = new AbiBinProvider();
+  }
+  /**
+   * It is used to register a custom rule to the economy.
+   *
+   * @param ruleName Name of the rule.
+   * @param ruleAddress Contract address of the rule.
+   * @param ruleAbi Abi of the rule.
+   * @param txOptions Tx options.
+   *
+   * @return Promise object.
+   */
+
+
+  _createClass(TokenRules, [{
+    key: "registerRule",
+    value: function registerRule(ruleName, ruleAddress, ruleAbi, txOptions) {
+      var oThis = this;
+
+      var txObject = oThis._registerRule(ruleName, ruleAddress, ruleAbi, txOptions);
+
+      var txReceipt;
+      return txObject.send(txOptions).on('transactionHash', function (value) {
+        console.log('transaction hash :- ', value);
+      }).on('receipt', function (receipt) {
+        txReceipt = receipt;
+      }).on('error', function (error) {
+        console.log('ERROR !!! ', error);
+      });
+    }
+    /**
+     * Private method which is used to register a custom rule to the economy.
+     *
+     * @param ruleName Name of the rule.
+     * @param ruleAddress Contract address of the rule.
+     * @param ruleAbi Abi of the rule.
+     * @param txOptions Tx options.
+     * @private
+     */
+
+  }, {
+    key: "_registerRule",
+    value: function _registerRule(ruleName, ruleAddress, ruleAbi, txOptions) {
+      var oThis = this;
+      var jsonInterface = oThis.abiBinProvider.getABI(contractName);
+      var contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, oThis.tokenRules, txOptions);
+      return contract.methods.registerRule(ruleName, ruleAddress, ruleAbi);
+    }
+    /**
+     * It is used to fetch rule data by its name.
+     *
+     * @param ruleName Name of the rule.
+     * @param txOptions Tx options.
+     * @returns Rule data if present.
+     */
+
+  }, {
+    key: "getRuleByName",
+    value: function () {
+      var _getRuleByName = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee(ruleName, txOptions) {
+        var oThis, jsonInterface, contract, ruleNameHash, ruleIndex, rule;
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                oThis = this;
+                jsonInterface = oThis.abiBinProvider.getABI(contractName), contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, oThis.tokenRules, txOptions);
+                ruleNameHash = oThis.auxiliaryWeb3.utils.soliditySha3({
+                  t: 'string',
+                  v: ruleName
+                });
+                _context.next = 5;
+                return contract.methods.rulesByNameHash(ruleNameHash).call();
+
+              case 5:
+                ruleIndex = _context.sent;
+                _context.next = 8;
+                return contract.methods.rules(ruleIndex.index).call();
+
+              case 8:
+                rule = _context.sent;
+                return _context.abrupt("return", rule);
+
+              case 10:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      function getRuleByName(_x, _x2) {
+        return _getRuleByName.apply(this, arguments);
+      }
+
+      return getRuleByName;
+    }()
+    /**
+     * It is used to fetch rule data by its address.
+     *
+     * @param ruleAddress Address of the rule contract.
+     * @param txOptions Tx options.
+     * @returns Rule data if present.
+     */
+
+  }, {
+    key: "getRuleByAddress",
+    value: function () {
+      var _getRuleByAddress = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee2(ruleAddress, txOptions) {
+        var oThis, jsonInterface, contract, ruleIndex, rule;
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                oThis = this;
+                jsonInterface = oThis.abiBinProvider.getABI(contractName), contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, oThis.tokenRules, txOptions);
+                _context2.next = 4;
+                return contract.methods.rulesByAddress(ruleAddress).call();
+
+              case 4:
+                ruleIndex = _context2.sent;
+                _context2.next = 7;
+                return contract.methods.rules(ruleIndex.index).call();
+
+              case 7:
+                rule = _context2.sent;
+                return _context2.abrupt("return", rule);
+
+              case 9:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      function getRuleByAddress(_x3, _x4) {
+        return _getRuleByAddress.apply(this, arguments);
+      }
+
+      return getRuleByAddress;
+    }()
+  }]);
+
+  return TokenRules;
+}();
+
+module.exports = TokenRules;
 
 /***/ })
 /******/ ]);
