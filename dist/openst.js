@@ -8369,7 +8369,7 @@ if (__webpack_require__(13)) {
   var global = __webpack_require__(6);
   var fails = __webpack_require__(4);
   var $export = __webpack_require__(0);
-  var $typed = __webpack_require__(89);
+  var $typed = __webpack_require__(90);
   var $buffer = __webpack_require__(127);
   var ctx = __webpack_require__(33);
   var anInstance = __webpack_require__(59);
@@ -8393,11 +8393,11 @@ if (__webpack_require__(13)) {
   var uid = __webpack_require__(44);
   var wks = __webpack_require__(9);
   var createArrayMethod = __webpack_require__(31);
-  var createArrayIncludes = __webpack_require__(79);
+  var createArrayIncludes = __webpack_require__(80);
   var speciesConstructor = __webpack_require__(69);
   var ArrayIterators = __webpack_require__(123);
   var Iterators = __webpack_require__(56);
-  var $iterDetect = __webpack_require__(82);
+  var $iterDetect = __webpack_require__(83);
   var setSpecies = __webpack_require__(58);
   var arrayFill = __webpack_require__(122);
   var arrayCopyWithin = __webpack_require__(167);
@@ -9557,7 +9557,7 @@ var objectKeys = Object.keys || function (obj) {
 module.exports = Duplex;
 
 /*<replacement>*/
-var util = __webpack_require__(72);
+var util = __webpack_require__(73);
 util.inherits = __webpack_require__(1);
 /*</replacement>*/
 
@@ -11088,6 +11088,129 @@ module.exports = function (O, D) {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
+
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
+
+function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+var Mosaic = __webpack_require__(180);
+
+var AbiBinProvider = Mosaic.AbiBinProvider;
+var DEFAULT_ABI_FOLDER_PATH, DEFAULT_BIN_FOLDER_PATH;
+/**
+ * The class provides getter to get ABIs and BINs for different contracts.
+ * ABI and BIN files sit in contracts/abi, contracts/bin folder.
+ */
+
+var OpenSTAbiBinProvider =
+/*#__PURE__*/
+function (_AbiBinProvider) {
+  _inherits(OpenSTAbiBinProvider, _AbiBinProvider);
+
+  /**
+   * Constructor for OpenSTAbiBinProvider.
+   *
+   * @param abiFolderPath Folder path where abi is present.
+   * @param binFolderPath Folder path where bin is present.
+   * @param mosaicAbiFolderPath Folder path where mosaic abi is present.
+   * @param mosaicBinFolderPath Folder path where mosaic bin is present.
+   */
+  function OpenSTAbiBinProvider(abiFolderPath, binFolderPath, mosaicAbiFolderPath, mosaicBinFolderPath) {
+    var _this;
+
+    _classCallCheck(this, OpenSTAbiBinProvider);
+
+    abiFolderPath = abiFolderPath || DEFAULT_ABI_FOLDER_PATH;
+    binFolderPath = binFolderPath || DEFAULT_BIN_FOLDER_PATH;
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(OpenSTAbiBinProvider).call(this, abiFolderPath, binFolderPath));
+
+    var oThis = _assertThisInitialized(_assertThisInitialized(_this));
+
+    oThis.mosaicAbiBinProvider = new AbiBinProvider(mosaicAbiFolderPath, mosaicBinFolderPath);
+    return _this;
+  }
+  /**
+   * Getter to get ABI for a contract.
+   * @param contractName Name of the contract.
+   * @returns {String} ABI JSON string.
+   */
+
+
+  _createClass(OpenSTAbiBinProvider, [{
+    key: "getABI",
+    value: function getABI(contractName) {
+      var oThis = this;
+      var abi = null;
+
+      try {
+        abi = _get(_getPrototypeOf(OpenSTAbiBinProvider.prototype), "getABI", this).call(this, contractName);
+      } catch (e) {//Just catch the exception. Do nothing.
+      }
+
+      if (!abi) {
+        //We did not find abi in our location.
+        //Lets get it from mosaicAbiBinProvider.
+        return oThis.mosaicAbiBinProvider.getABI(contractName);
+      }
+
+      return abi;
+    }
+    /**
+     * Getter to get BIN for a contract.
+     * @param contractName Name of the contract.
+     * @returns {String} Binary string.
+     */
+
+  }, {
+    key: "getBIN",
+    value: function getBIN(contractName) {
+      var oThis = this;
+      var bin = null;
+
+      try {
+        bin = _get(_getPrototypeOf(OpenSTAbiBinProvider.prototype), "getBIN", this).call(this, contractName);
+      } catch (e) {//Just catch the exception. Do nothing.
+      }
+
+      if (!bin) {
+        //We did not find abi in our location.
+        //Lets get it from mosaicAbiBinProvider.
+        return oThis.mosaicAbiBinProvider.getBIN(contractName);
+      }
+
+      return bin;
+    }
+  }]);
+
+  return OpenSTAbiBinProvider;
+}(AbiBinProvider);
+
+module.exports = OpenSTAbiBinProvider;
+
+/***/ }),
+/* 71 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -11823,7 +11946,7 @@ Url.prototype.parseHost = function() {
 
 
 /***/ }),
-/* 71 */
+/* 72 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(190);
@@ -11836,7 +11959,7 @@ exports.PassThrough = __webpack_require__(454);
 
 
 /***/ }),
-/* 72 */
+/* 73 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(Buffer) {// Copyright Joyent, Inc. and other Node contributors.
@@ -11950,14 +12073,14 @@ function objectToString(o) {
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(3).Buffer))
 
 /***/ }),
-/* 73 */
+/* 74 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 exports.randomBytes = exports.rng = exports.pseudoRandomBytes = exports.prng = __webpack_require__(63)
-exports.createHash = exports.Hash = __webpack_require__(74)
+exports.createHash = exports.Hash = __webpack_require__(75)
 exports.createHmac = exports.Hmac = __webpack_require__(206)
 
 var algos = __webpack_require__(499)
@@ -12054,7 +12177,7 @@ exports.constants = {
 
 
 /***/ }),
-/* 74 */
+/* 75 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -12091,7 +12214,7 @@ module.exports = function createHash (alg) {
 
 
 /***/ }),
-/* 75 */
+/* 76 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(Buffer) {module.exports = function xor (a, b) {
@@ -12108,7 +12231,7 @@ module.exports = function createHash (alg) {
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(3).Buffer))
 
 /***/ }),
-/* 76 */
+/* 77 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -12207,7 +12330,7 @@ BlockHash.prototype._pad = function pad() {
 
 
 /***/ }),
-/* 77 */
+/* 78 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var asn1 = exports;
@@ -12215,14 +12338,14 @@ var asn1 = exports;
 asn1.bignum = __webpack_require__(8);
 
 asn1.define = __webpack_require__(546).define;
-asn1.base = __webpack_require__(78);
+asn1.base = __webpack_require__(79);
 asn1.constants = __webpack_require__(225);
 asn1.decoders = __webpack_require__(552);
 asn1.encoders = __webpack_require__(554);
 
 
 /***/ }),
-/* 78 */
+/* 79 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var base = exports;
@@ -12234,7 +12357,7 @@ base.Node = __webpack_require__(550);
 
 
 /***/ }),
-/* 79 */
+/* 80 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // false -> Array#indexOf
@@ -12263,14 +12386,14 @@ module.exports = function (IS_INCLUDES) {
 
 
 /***/ }),
-/* 80 */
+/* 81 */
 /***/ (function(module, exports) {
 
 exports.f = Object.getOwnPropertySymbols;
 
 
 /***/ }),
-/* 81 */
+/* 82 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var $export = __webpack_require__(0);
@@ -12306,7 +12429,7 @@ module.exports = exporter;
 
 
 /***/ }),
-/* 82 */
+/* 83 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var ITERATOR = __webpack_require__(9)('iterator');
@@ -12334,7 +12457,7 @@ module.exports = function (exec, skipClosing) {
 
 
 /***/ }),
-/* 83 */
+/* 84 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -12354,7 +12477,7 @@ module.exports = function () {
 
 
 /***/ }),
-/* 84 */
+/* 85 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -12382,7 +12505,7 @@ module.exports = function (R, S) {
 
 
 /***/ }),
-/* 85 */
+/* 86 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -12485,7 +12608,7 @@ module.exports = function (KEY, length, exec) {
 
 
 /***/ }),
-/* 86 */
+/* 87 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var ctx = __webpack_require__(33);
@@ -12516,7 +12639,7 @@ exports.RETURN = RETURN;
 
 
 /***/ }),
-/* 87 */
+/* 88 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var global = __webpack_require__(6);
@@ -12526,7 +12649,7 @@ module.exports = navigator && navigator.userAgent || '';
 
 
 /***/ }),
-/* 88 */
+/* 89 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -12536,11 +12659,11 @@ var $export = __webpack_require__(0);
 var redefine = __webpack_require__(19);
 var redefineAll = __webpack_require__(60);
 var meta = __webpack_require__(41);
-var forOf = __webpack_require__(86);
+var forOf = __webpack_require__(87);
 var anInstance = __webpack_require__(59);
 var isObject = __webpack_require__(7);
 var fails = __webpack_require__(4);
-var $iterDetect = __webpack_require__(82);
+var $iterDetect = __webpack_require__(83);
 var setToStringTag = __webpack_require__(55);
 var inheritIfRequired = __webpack_require__(110);
 
@@ -12618,7 +12741,7 @@ module.exports = function (NAME, wrapper, methods, common, IS_MAP, IS_WEAK) {
 
 
 /***/ }),
-/* 89 */
+/* 90 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var global = __webpack_require__(6);
@@ -12650,121 +12773,6 @@ module.exports = {
   VIEW: VIEW
 };
 
-
-/***/ }),
-/* 90 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
-
-function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-var Mosaic = __webpack_require__(180);
-
-var AbiBinProvider = Mosaic.AbiBinProvider;
-var DEFAULT_ABI_FOLDER_PATH, DEFAULT_BIN_FOLDER_PATH;
-/**
- * The class provides getter to get ABIs and BINs for different contracts.
- * ABI and BIN files sit in contracts/abi, contracts/bin folder.
- */
-
-var OpenSTAbiBinProvider =
-/*#__PURE__*/
-function (_AbiBinProvider) {
-  _inherits(OpenSTAbiBinProvider, _AbiBinProvider);
-
-  function OpenSTAbiBinProvider(abiFolderPath, binFolderPath, mosaicAbiFolderPath, mosaicBinFolderPath) {
-    var _this;
-
-    _classCallCheck(this, OpenSTAbiBinProvider);
-
-    abiFolderPath = abiFolderPath || DEFAULT_ABI_FOLDER_PATH;
-    binFolderPath = binFolderPath || DEFAULT_BIN_FOLDER_PATH;
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(OpenSTAbiBinProvider).call(this, abiFolderPath, binFolderPath));
-
-    var oThis = _assertThisInitialized(_assertThisInitialized(_this));
-
-    oThis.mosaicAbiBinProvider = new AbiBinProvider(mosaicAbiFolderPath, mosaicBinFolderPath);
-    return _this;
-  }
-  /**
-   * Getter to get ABI for a contract.
-   * @param contractName Name of the contract.
-   * @returns {String} ABI JSON string.
-   */
-
-
-  _createClass(OpenSTAbiBinProvider, [{
-    key: "getABI",
-    value: function getABI(contractName) {
-      var oThis = this;
-      var abi = null;
-
-      try {
-        abi = _get(_getPrototypeOf(OpenSTAbiBinProvider.prototype), "getABI", this).call(this, contractName);
-      } catch (e) {//Just catch the exception. Do nothing.
-      }
-
-      if (!abi) {
-        //We did not find abi in our location.
-        //Lets get it from mosaicAbiBinProvider.
-        return oThis.mosaicAbiBinProvider.getABI(contractName);
-      }
-
-      return abi;
-    }
-    /**
-     * Getter to get BIN for a contract.
-     * @param contractName Name of the contract.
-     * @returns {String} Binary string.
-     */
-
-  }, {
-    key: "getBIN",
-    value: function getBIN(contractName) {
-      var oThis = this;
-      var bin = null;
-
-      try {
-        bin = _get(_getPrototypeOf(OpenSTAbiBinProvider.prototype), "getBIN", this).call(this, contractName);
-      } catch (e) {//Just catch the exception. Do nothing.
-      }
-
-      if (!bin) {
-        //We did not find abi in our location.
-        //Lets get it from mosaicAbiBinProvider.
-        return oThis.mosaicAbiBinProvider.getBIN(contractName);
-      }
-
-      return bin;
-    }
-  }]);
-
-  return OpenSTAbiBinProvider;
-}(AbiBinProvider);
-
-module.exports = OpenSTAbiBinProvider;
 
 /***/ }),
 /* 91 */
@@ -13590,7 +13598,7 @@ var at = function at(bytes, index) {
 
 var random = function random(bytes) {
   var rnd = void 0;
-  if (typeof window !== "undefined" && window.crypto && window.crypto.getRandomValues) rnd = window.crypto.getRandomValues(new Uint8Array(bytes));else if (true) rnd = __webpack_require__(73).randomBytes(bytes);else {}
+  if (typeof window !== "undefined" && window.crypto && window.crypto.getRandomValues) rnd = window.crypto.getRandomValues(new Uint8Array(bytes));else if (true) rnd = __webpack_require__(74).randomBytes(bytes);else {}
   var hex = "0x";
   for (var i = 0; i < bytes; ++i) {
     hex += ("00" + rnd[i].toString(16)).slice(-2);
@@ -14207,7 +14215,7 @@ addToUnscopables('entries');
 "use strict";
 
 
-var regexpFlags = __webpack_require__(83);
+var regexpFlags = __webpack_require__(84);
 
 var nativeExec = RegExp.prototype.exec;
 // This always refers to the native implementation, because the
@@ -14379,7 +14387,7 @@ module.exports = {
 var global = __webpack_require__(6);
 var DESCRIPTORS = __webpack_require__(13);
 var LIBRARY = __webpack_require__(45);
-var $typed = __webpack_require__(89);
+var $typed = __webpack_require__(90);
 var hide = __webpack_require__(24);
 var redefineAll = __webpack_require__(60);
 var fails = __webpack_require__(4);
@@ -15005,7 +15013,7 @@ module.exports = {
 var response = __webpack_require__(189)
 var extend = __webpack_require__(194)
 var statusCodes = __webpack_require__(456)
-var url = __webpack_require__(70)
+var url = __webpack_require__(71)
 
 var http = exports
 
@@ -15614,7 +15622,7 @@ var Duplex;
 Writable.WritableState = WritableState;
 
 /*<replacement>*/
-var util = __webpack_require__(72);
+var util = __webpack_require__(73);
 util.inherits = __webpack_require__(1);
 /*</replacement>*/
 
@@ -16915,7 +16923,7 @@ var at = function at(bytes, index) {
 
 var random = function random(bytes) {
   var rnd = void 0;
-  if (typeof window !== "undefined" && window.crypto && window.crypto.getRandomValues) rnd = window.crypto.getRandomValues(new Uint8Array(bytes));else if (true) rnd = __webpack_require__(73).randomBytes(bytes);else {}
+  if (typeof window !== "undefined" && window.crypto && window.crypto.getRandomValues) rnd = window.crypto.getRandomValues(new Uint8Array(bytes));else if (true) rnd = __webpack_require__(74).randomBytes(bytes);else {}
   var hex = "0x";
   for (var i = 0; i < bytes; ++i) {
     hex += ("00" + rnd[i].toString(16)).slice(-2);
@@ -17280,7 +17288,7 @@ var EE = __webpack_require__(130).EventEmitter;
 var inherits = __webpack_require__(1);
 
 inherits(Stream, EE);
-Stream.Readable = __webpack_require__(71);
+Stream.Readable = __webpack_require__(72);
 Stream.Writable = __webpack_require__(490);
 Stream.Duplex = __webpack_require__(491);
 Stream.Transform = __webpack_require__(492);
@@ -17692,7 +17700,7 @@ function getr(priv) {
 var hash = exports;
 
 hash.utils = __webpack_require__(32);
-hash.common = __webpack_require__(76);
+hash.common = __webpack_require__(77);
 hash.sha = __webpack_require__(531);
 hash.ripemd = __webpack_require__(535);
 hash.hmac = __webpack_require__(536);
@@ -18408,7 +18416,7 @@ module.exports = function (name) {
 
 var has = __webpack_require__(23);
 var toIObject = __webpack_require__(25);
-var arrayIndexOf = __webpack_require__(79)(false);
+var arrayIndexOf = __webpack_require__(80)(false);
 var IE_PROTO = __webpack_require__(104)('IE_PROTO');
 
 module.exports = function (object, names) {
@@ -18477,7 +18485,7 @@ module.exports.f = function getOwnPropertyNames(it) {
 
 // 19.1.2.1 Object.assign(target, source, ...)
 var getKeys = __webpack_require__(46);
-var gOPS = __webpack_require__(80);
+var gOPS = __webpack_require__(81);
 var pIE = __webpack_require__(67);
 var toObject = __webpack_require__(20);
 var IObject = __webpack_require__(66);
@@ -18580,7 +18588,7 @@ module.exports = function (fn, args, that) {
 /***/ (function(module, exports, __webpack_require__) {
 
 var $parseInt = __webpack_require__(6).parseInt;
-var $trim = __webpack_require__(81).trim;
+var $trim = __webpack_require__(82).trim;
 var ws = __webpack_require__(109);
 var hex = /^[-+]?0[xX]/;
 
@@ -18595,7 +18603,7 @@ module.exports = $parseInt(ws + '08') !== 8 || $parseInt(ws + '0x16') !== 22 ? f
 /***/ (function(module, exports, __webpack_require__) {
 
 var $parseFloat = __webpack_require__(6).parseFloat;
-var $trim = __webpack_require__(81).trim;
+var $trim = __webpack_require__(82).trim;
 
 module.exports = 1 / $parseFloat(__webpack_require__(109) + '-0') !== -Infinity ? function parseFloat(str) {
   var string = $trim(String(str), 3);
@@ -18774,7 +18782,7 @@ __webpack_require__(0)({
 // 21.2.5.3 get RegExp.prototype.flags()
 if (__webpack_require__(13) && /./g.flags != 'g') __webpack_require__(12).f(RegExp.prototype, 'flags', {
   configurable: true,
-  get: __webpack_require__(83)
+  get: __webpack_require__(84)
 });
 
 
@@ -18792,13 +18800,13 @@ var $export = __webpack_require__(0);
 var isObject = __webpack_require__(7);
 var aFunction = __webpack_require__(34);
 var anInstance = __webpack_require__(59);
-var forOf = __webpack_require__(86);
+var forOf = __webpack_require__(87);
 var speciesConstructor = __webpack_require__(69);
 var task = __webpack_require__(126).set;
 var microtask = __webpack_require__(361)();
 var newPromiseCapabilityModule = __webpack_require__(172);
 var perform = __webpack_require__(362);
-var userAgent = __webpack_require__(87);
+var userAgent = __webpack_require__(88);
 var promiseResolve = __webpack_require__(173);
 var PROMISE = 'Promise';
 var TypeError = global.TypeError;
@@ -19025,7 +19033,7 @@ $export($export.S + $export.F * (LIBRARY || !USE_NATIVE), PROMISE, {
     return promiseResolve(LIBRARY && this === Wrapper ? $Promise : this, x);
   }
 });
-$export($export.S + $export.F * !(USE_NATIVE && __webpack_require__(82)(function (iter) {
+$export($export.S + $export.F * !(USE_NATIVE && __webpack_require__(83)(function (iter) {
   $Promise.all(iter)['catch'](empty);
 })), PROMISE, {
   // 25.4.4.1 Promise.all(iterable)
@@ -19125,7 +19133,7 @@ var create = __webpack_require__(48);
 var redefineAll = __webpack_require__(60);
 var ctx = __webpack_require__(33);
 var anInstance = __webpack_require__(59);
-var forOf = __webpack_require__(86);
+var forOf = __webpack_require__(87);
 var $iterDefine = __webpack_require__(115);
 var step = __webpack_require__(168);
 var setSpecies = __webpack_require__(58);
@@ -19276,7 +19284,7 @@ var getWeak = __webpack_require__(41).getWeak;
 var anObject = __webpack_require__(5);
 var isObject = __webpack_require__(7);
 var anInstance = __webpack_require__(59);
-var forOf = __webpack_require__(86);
+var forOf = __webpack_require__(87);
 var createArrayMethod = __webpack_require__(31);
 var $has = __webpack_require__(23);
 var validate = __webpack_require__(61);
@@ -19379,7 +19387,7 @@ module.exports = function (it) {
 
 // all object keys, includes non-enumerable and symbols
 var gOPN = __webpack_require__(49);
-var gOPS = __webpack_require__(80);
+var gOPS = __webpack_require__(81);
 var anObject = __webpack_require__(5);
 var Reflect = __webpack_require__(6).Reflect;
 module.exports = Reflect && Reflect.ownKeys || function ownKeys(it) {
@@ -24410,7 +24418,7 @@ xhr = null // Help gc
 
 /* WEBPACK VAR INJECTION */(function(process, Buffer, global) {var capability = __webpack_require__(188)
 var inherits = __webpack_require__(1)
-var stream = __webpack_require__(71)
+var stream = __webpack_require__(72)
 
 var rStates = exports.readyStates = {
 	UNSENT: 0,
@@ -24706,7 +24714,7 @@ function _isUint8Array(obj) {
 /*</replacement>*/
 
 /*<replacement>*/
-var util = __webpack_require__(72);
+var util = __webpack_require__(73);
 util.inherits = __webpack_require__(1);
 /*</replacement>*/
 
@@ -25823,7 +25831,7 @@ module.exports = Transform;
 var Duplex = __webpack_require__(53);
 
 /*<replacement>*/
-var util = __webpack_require__(72);
+var util = __webpack_require__(73);
 util.inherits = __webpack_require__(1);
 /*</replacement>*/
 
@@ -25998,7 +26006,7 @@ function extend() {
 /***/ (function(module, exports, __webpack_require__) {
 
 var http = __webpack_require__(129)
-var url = __webpack_require__(70)
+var url = __webpack_require__(71)
 
 var https = module.exports
 
@@ -27507,7 +27515,7 @@ var Hash = __webpack_require__(234);
 var RLP = __webpack_require__(233);
 var Nat = __webpack_require__(232);
 var Bytes = __webpack_require__(135);
-var cryp = (typeof global === 'undefined') ? __webpack_require__(73) : __webpack_require__(73);
+var cryp = (typeof global === 'undefined') ? __webpack_require__(74) : __webpack_require__(74);
 var scryptsy = __webpack_require__(565);
 var uuid = __webpack_require__(567);
 var utils = __webpack_require__(17);
@@ -28772,7 +28780,7 @@ module.exports = pbkdf2
 /* 212 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var xor = __webpack_require__(75)
+var xor = __webpack_require__(76)
 var Buffer = __webpack_require__(2).Buffer
 var incr32 = __webpack_require__(213)
 
@@ -28840,7 +28848,7 @@ var Buffer = __webpack_require__(2).Buffer
 var Transform = __webpack_require__(42)
 var inherits = __webpack_require__(1)
 var GHASH = __webpack_require__(515)
-var xor = __webpack_require__(75)
+var xor = __webpack_require__(76)
 var incr32 = __webpack_require__(213)
 
 function xorTest (a, b) {
@@ -29419,7 +29427,7 @@ exports.g1_256 = g1_256;
 
 
 var utils = __webpack_require__(32);
-var common = __webpack_require__(76);
+var common = __webpack_require__(77);
 var shaCommon = __webpack_require__(221);
 var assert = __webpack_require__(26);
 
@@ -29531,7 +29539,7 @@ SHA256.prototype._digest = function digest(enc) {
 
 
 var utils = __webpack_require__(32);
-var common = __webpack_require__(76);
+var common = __webpack_require__(77);
 var assert = __webpack_require__(26);
 
 var rotr64_hi = utils.rotr64_hi;
@@ -29865,7 +29873,7 @@ function g1_512_lo(xh, xl) {
 /***/ (function(module, exports, __webpack_require__) {
 
 var inherits = __webpack_require__(1);
-var Reporter = __webpack_require__(78).Reporter;
+var Reporter = __webpack_require__(79).Reporter;
 var Buffer = __webpack_require__(3).Buffer;
 
 function DecoderBuffer(base, options) {
@@ -30013,7 +30021,7 @@ constants.der = __webpack_require__(551);
 
 var inherits = __webpack_require__(1);
 
-var asn1 = __webpack_require__(77);
+var asn1 = __webpack_require__(78);
 var base = asn1.base;
 var bignum = asn1.bignum;
 
@@ -30344,7 +30352,7 @@ function derDecodeLen(buf, primitive, fail) {
 var inherits = __webpack_require__(1);
 var Buffer = __webpack_require__(3).Buffer;
 
-var asn1 = __webpack_require__(77);
+var asn1 = __webpack_require__(78);
 var base = asn1.base;
 
 // Import DER constants
@@ -30648,7 +30656,7 @@ module.exports = {"1.3.132.0.10":"secp256k1","1.3.132.0.33":"p224","1.2.840.1004
 /* 229 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var createHash = __webpack_require__(74)
+var createHash = __webpack_require__(75)
 var Buffer = __webpack_require__(2).Buffer
 
 module.exports = function (seed, len) {
@@ -32999,95 +33007,118 @@ module.exports = function generate__limitProperties(it, $keyword, $ruleType) {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
- // TODO: class format
 
 /**
- * DeployContract constructor.
- *
- * @param contractName Contract name.
- * @param txObject Contract tx object.
- * @param web3 Web3 object.
- * @param txOptions Tx options.
- * @constructor
+ * It is used for deploying a contract.
  */
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
-var DeployContract = function DeployContract(contractName, txObject, web3, txOptions) {
-  var oThis = this;
-  oThis.contractName = contractName;
-  oThis.txObject = txObject;
-  oThis.txOptions = txOptions;
-  oThis.web3 = web3;
-}; // TODO Gulshan: Documentation
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var DeployContract =
+/*#__PURE__*/
+function () {
+  /**
+   * DeployContract constructor.
+   *
+   * @param contractName Contract name.
+   * @param txObject Transaction object.
+   * @param web3 Web3 object.
+   * @param txOptions Tx options.
+   * @constructor
+   */
+  function DeployContract(contractName, txObject, web3, txOptions) {
+    _classCallCheck(this, DeployContract);
+
+    var oThis = this;
+    oThis.contractName = contractName;
+    oThis.txObject = txObject;
+    oThis.txOptions = txOptions;
+    oThis.web3 = web3;
+  }
+  /**
+   * It deploys the contract.
+   *
+   * @returns Promise object.
+   */
 
 
-DeployContract.prototype = {
-  deploy: function () {
-    var _deploy = _asyncToGenerator(
-    /*#__PURE__*/
-    regeneratorRuntime.mark(function _callee() {
-      var oThis, receipt, transactionHash, instance, contractAddress, code;
-      return regeneratorRuntime.wrap(function _callee$(_context) {
-        while (1) {
-          switch (_context.prev = _context.next) {
-            case 0:
-              oThis = this;
-              receipt = null, transactionHash = null;
-              console.log('Deploying contract: ' + oThis.contractName);
-              _context.next = 5;
-              return oThis.txObject.send(oThis.txOptions).on('receipt', function (value) {
-                receipt = value;
-              }).on('transactionHash', function (value) {
-                console.log('transaction hash: ' + value);
-                transactionHash = value;
-              }).on('error', function (error) {
-                return Promise.reject(error);
-              });
+  _createClass(DeployContract, [{
+    key: "deploy",
+    value: function () {
+      var _deploy = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee() {
+        var oThis, receipt, transactionHash, instance, contractAddress, code;
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                oThis = this;
+                receipt = null, transactionHash = null;
+                console.log('Deploying contract: ' + oThis.contractName);
+                _context.next = 5;
+                return oThis.txObject.send(oThis.txOptions).on('receipt', function (value) {
+                  receipt = value;
+                }).on('transactionHash', function (value) {
+                  console.log('transaction hash for ' + oThis.contractName + ' : ' + value);
+                  transactionHash = value;
+                }).on('error', function (error) {
+                  return Promise.reject(error);
+                });
 
-            case 5:
-              instance = _context.sent;
-              contractAddress = null;
-              contractAddress = instance.options.address; // checking if the contract was deployed at all.
+              case 5:
+                instance = _context.sent;
+                contractAddress = null;
+                contractAddress = instance.options.address; // checking if the contract was deployed at all.
 
-              _context.next = 10;
-              return oThis.web3.eth.getCode(contractAddress);
+                _context.next = 10;
+                return oThis.web3.eth.getCode(contractAddress);
 
-            case 10:
-              code = _context.sent;
+              case 10:
+                code = _context.sent;
 
-              if (!(code.length <= 2)) {
-                _context.next = 13;
-                break;
-              }
+                if (!(code.length <= 2)) {
+                  _context.next = 13;
+                  break;
+                }
 
-              return _context.abrupt("return", Promise.reject('Contract deployment failed. oThis.web3.eth.getCode returned empty code.'));
+                return _context.abrupt("return", Promise.reject('Contract deployment failed. oThis.web3.eth.getCode returned empty code.'));
 
-            case 13:
-              console.log('Address  :', contractAddress);
-              console.log('Gas used :', receipt.gasUsed, '\n');
-              return _context.abrupt("return", Promise.resolve({
-                receipt: receipt,
-                instance: instance
-              }));
+              case 13:
+                console.log('Address  :', contractAddress);
+                console.log('Gas used :', receipt.gasUsed, '\n');
+                return _context.abrupt("return", Promise.resolve({
+                  receipt: receipt,
+                  instance: instance
+                }));
 
-            case 16:
-            case "end":
-              return _context.stop();
+              case 16:
+              case "end":
+                return _context.stop();
+            }
           }
-        }
-      }, _callee, this);
-    }));
+        }, _callee, this);
+      }));
 
-    function deploy() {
-      return _deploy.apply(this, arguments);
-    }
+      function deploy() {
+        return _deploy.apply(this, arguments);
+      }
 
-    return deploy;
-  }()
-};
+      return deploy;
+    }()
+  }]);
+
+  return DeployContract;
+}();
+
 module.exports = DeployContract;
 
 /***/ }),
@@ -33435,7 +33466,7 @@ if (!USE_NATIVE) {
   $DP.f = $defineProperty;
   __webpack_require__(49).f = gOPNExt.f = $getOwnPropertyNames;
   __webpack_require__(67).f = $propertyIsEnumerable;
-  __webpack_require__(80).f = $getOwnPropertySymbols;
+  __webpack_require__(81).f = $getOwnPropertySymbols;
 
   if (DESCRIPTORS && !__webpack_require__(45)) {
     redefine(ObjectProto, 'propertyIsEnumerable', $propertyIsEnumerable, true);
@@ -33526,7 +33557,7 @@ setToStringTag(global.JSON, 'JSON', true);
 
 // all enumerable object keys, includes symbols
 var getKeys = __webpack_require__(46);
-var gOPS = __webpack_require__(80);
+var gOPS = __webpack_require__(81);
 var pIE = __webpack_require__(67);
 module.exports = function (it) {
   var result = getKeys(it);
@@ -33842,7 +33873,7 @@ var fails = __webpack_require__(4);
 var gOPN = __webpack_require__(49).f;
 var gOPD = __webpack_require__(29).f;
 var dP = __webpack_require__(12).f;
-var $trim = __webpack_require__(81).trim;
+var $trim = __webpack_require__(82).trim;
 var NUMBER = 'Number';
 var $Number = global[NUMBER];
 var Base = $Number;
@@ -34520,7 +34551,7 @@ $export($export.S, 'String', {
 "use strict";
 
 // 21.1.3.25 String.prototype.trim()
-__webpack_require__(81)('trim', function ($trim) {
+__webpack_require__(82)('trim', function ($trim) {
   return function trim() {
     return $trim(this, 3);
   };
@@ -34981,7 +35012,7 @@ var toLength = __webpack_require__(11);
 var createProperty = __webpack_require__(120);
 var getIterFn = __webpack_require__(121);
 
-$export($export.S + $export.F * !__webpack_require__(82)(function (iter) { Array.from(iter); }), 'Array', {
+$export($export.S + $export.F * !__webpack_require__(83)(function (iter) { Array.from(iter); }), 'Array', {
   // 22.1.2.1 Array.from(arrayLike, mapfn = undefined, thisArg = undefined)
   from: function from(arrayLike /* , mapfn = undefined, thisArg = undefined */) {
     var O = toObject(arrayLike);
@@ -35281,7 +35312,7 @@ $export($export.P + $export.F * !__webpack_require__(27)([].reduceRight, true), 
 "use strict";
 
 var $export = __webpack_require__(0);
-var $indexOf = __webpack_require__(79)(false);
+var $indexOf = __webpack_require__(80)(false);
 var $native = [].indexOf;
 var NEGATIVE_ZERO = !!$native && 1 / [1].indexOf(1, -0) < 0;
 
@@ -35407,7 +35438,7 @@ var inheritIfRequired = __webpack_require__(110);
 var dP = __webpack_require__(12).f;
 var gOPN = __webpack_require__(49).f;
 var isRegExp = __webpack_require__(117);
-var $flags = __webpack_require__(83);
+var $flags = __webpack_require__(84);
 var $RegExp = global.RegExp;
 var Base = $RegExp;
 var proto = $RegExp.prototype;
@@ -35455,7 +35486,7 @@ __webpack_require__(58)('RegExp');
 
 __webpack_require__(170);
 var anObject = __webpack_require__(5);
-var $flags = __webpack_require__(83);
+var $flags = __webpack_require__(84);
 var DESCRIPTORS = __webpack_require__(13);
 var TO_STRING = 'toString';
 var $toString = /./[TO_STRING];
@@ -35489,10 +35520,10 @@ if (__webpack_require__(4)(function () { return $toString.call({ source: 'a', fl
 var anObject = __webpack_require__(5);
 var toLength = __webpack_require__(11);
 var advanceStringIndex = __webpack_require__(125);
-var regExpExec = __webpack_require__(84);
+var regExpExec = __webpack_require__(85);
 
 // @@match logic
-__webpack_require__(85)('match', 1, function (defined, MATCH, $match, maybeCallNative) {
+__webpack_require__(86)('match', 1, function (defined, MATCH, $match, maybeCallNative) {
   return [
     // `String.prototype.match` method
     // https://tc39.github.io/ecma262/#sec-string.prototype.match
@@ -35538,7 +35569,7 @@ var toObject = __webpack_require__(20);
 var toLength = __webpack_require__(11);
 var toInteger = __webpack_require__(28);
 var advanceStringIndex = __webpack_require__(125);
-var regExpExec = __webpack_require__(84);
+var regExpExec = __webpack_require__(85);
 var max = Math.max;
 var min = Math.min;
 var floor = Math.floor;
@@ -35550,7 +35581,7 @@ var maybeToString = function (it) {
 };
 
 // @@replace logic
-__webpack_require__(85)('replace', 2, function (defined, REPLACE, $replace, maybeCallNative) {
+__webpack_require__(86)('replace', 2, function (defined, REPLACE, $replace, maybeCallNative) {
   return [
     // `String.prototype.replace` method
     // https://tc39.github.io/ecma262/#sec-string.prototype.replace
@@ -35660,10 +35691,10 @@ __webpack_require__(85)('replace', 2, function (defined, REPLACE, $replace, mayb
 
 var anObject = __webpack_require__(5);
 var sameValue = __webpack_require__(156);
-var regExpExec = __webpack_require__(84);
+var regExpExec = __webpack_require__(85);
 
 // @@search logic
-__webpack_require__(85)('search', 1, function (defined, SEARCH, $search, maybeCallNative) {
+__webpack_require__(86)('search', 1, function (defined, SEARCH, $search, maybeCallNative) {
   return [
     // `String.prototype.search` method
     // https://tc39.github.io/ecma262/#sec-string.prototype.search
@@ -35701,7 +35732,7 @@ var anObject = __webpack_require__(5);
 var speciesConstructor = __webpack_require__(69);
 var advanceStringIndex = __webpack_require__(125);
 var toLength = __webpack_require__(11);
-var callRegExpExec = __webpack_require__(84);
+var callRegExpExec = __webpack_require__(85);
 var regexpExec = __webpack_require__(124);
 var fails = __webpack_require__(4);
 var $min = Math.min;
@@ -35715,7 +35746,7 @@ var MAX_UINT32 = 0xffffffff;
 var SUPPORTS_Y = !fails(function () { RegExp(MAX_UINT32, 'y'); });
 
 // @@split logic
-__webpack_require__(85)('split', 2, function (defined, SPLIT, $split, maybeCallNative) {
+__webpack_require__(86)('split', 2, function (defined, SPLIT, $split, maybeCallNative) {
   var internalSplit;
   if (
     'abbc'[$SPLIT](/(b)*/)[1] == 'c' ||
@@ -35929,7 +35960,7 @@ var validate = __webpack_require__(61);
 var MAP = 'Map';
 
 // 23.1 Map Objects
-module.exports = __webpack_require__(88)(MAP, function (get) {
+module.exports = __webpack_require__(89)(MAP, function (get) {
   return function Map() { return get(this, arguments.length > 0 ? arguments[0] : undefined); };
 }, {
   // 23.1.3.6 Map.prototype.get(key)
@@ -35955,7 +35986,7 @@ var validate = __webpack_require__(61);
 var SET = 'Set';
 
 // 23.2 Set Objects
-module.exports = __webpack_require__(88)(SET, function (get) {
+module.exports = __webpack_require__(89)(SET, function (get) {
   return function Set() { return get(this, arguments.length > 0 ? arguments[0] : undefined); };
 }, {
   // 23.2.3.1 Set.prototype.add(value)
@@ -36008,7 +36039,7 @@ var methods = {
 };
 
 // 23.3 WeakMap Objects
-var $WeakMap = module.exports = __webpack_require__(88)(WEAK_MAP, wrapper, methods, weak, true, true);
+var $WeakMap = module.exports = __webpack_require__(89)(WEAK_MAP, wrapper, methods, weak, true, true);
 
 // IE11 WeakMap frozen keys fix
 if (fails(function () { return new $WeakMap().set((Object.freeze || Object)(tmp), 7).get(tmp) != 7; })) {
@@ -36042,7 +36073,7 @@ var validate = __webpack_require__(61);
 var WEAK_SET = 'WeakSet';
 
 // 23.4 WeakSet Objects
-__webpack_require__(88)(WEAK_SET, function (get) {
+__webpack_require__(89)(WEAK_SET, function (get) {
   return function WeakSet() { return get(this, arguments.length > 0 ? arguments[0] : undefined); };
 }, {
   // 23.4.3.1 WeakSet.prototype.add(value)
@@ -36059,7 +36090,7 @@ __webpack_require__(88)(WEAK_SET, function (get) {
 "use strict";
 
 var $export = __webpack_require__(0);
-var $typed = __webpack_require__(89);
+var $typed = __webpack_require__(90);
 var buffer = __webpack_require__(127);
 var anObject = __webpack_require__(5);
 var toAbsoluteIndex = __webpack_require__(47);
@@ -36110,7 +36141,7 @@ __webpack_require__(58)(ARRAY_BUFFER);
 /***/ (function(module, exports, __webpack_require__) {
 
 var $export = __webpack_require__(0);
-$export($export.G + $export.W + $export.F * !__webpack_require__(89).ABV, {
+$export($export.G + $export.W + $export.F * !__webpack_require__(90).ABV, {
   DataView: __webpack_require__(127).DataView
 });
 
@@ -36566,7 +36597,7 @@ module.exports = __webpack_require__(14).Array.includes;
 
 // https://github.com/tc39/Array.prototype.includes
 var $export = __webpack_require__(0);
-var $includes = __webpack_require__(79)(true);
+var $includes = __webpack_require__(80)(true);
 
 $export($export.P, 'Array', {
   includes: function includes(el /* , fromIndex = 0 */) {
@@ -36594,7 +36625,7 @@ module.exports = __webpack_require__(14).String.padStart;
 // https://github.com/tc39/proposal-string-pad-start-end
 var $export = __webpack_require__(0);
 var $pad = __webpack_require__(178);
-var userAgent = __webpack_require__(87);
+var userAgent = __webpack_require__(88);
 
 // https://github.com/zloirock/core-js/issues/280
 $export($export.P + $export.F * /Version\/10\.\d+(\.\d+)? Safari\//.test(userAgent), 'String', {
@@ -36621,7 +36652,7 @@ module.exports = __webpack_require__(14).String.padEnd;
 // https://github.com/tc39/proposal-string-pad-start-end
 var $export = __webpack_require__(0);
 var $pad = __webpack_require__(178);
-var userAgent = __webpack_require__(87);
+var userAgent = __webpack_require__(88);
 
 // https://github.com/zloirock/core-js/issues/280
 $export($export.P + $export.F * /Version\/10\.\d+(\.\d+)? Safari\//.test(userAgent), 'String', {
@@ -36783,7 +36814,7 @@ module.exports = __webpack_require__(14);
 // ie9- setTimeout & setInterval additional parameters fix
 var global = __webpack_require__(6);
 var $export = __webpack_require__(0);
-var userAgent = __webpack_require__(87);
+var userAgent = __webpack_require__(88);
 var slice = [].slice;
 var MSIE = /MSIE .\./.test(userAgent); // <- dirty ie9- check
 var wrap = function (set) {
@@ -37625,10 +37656,11 @@ for (var collections = getKeys(DOMIterables), i = 0; i < collections.length; i++
 "use strict";
 
 
-const AbiBinProvider = __webpack_require__(90);
+const AbiBinProvider = __webpack_require__(70);
 const Contracts = __webpack_require__(636);
 const TokenRules = __webpack_require__(637);
 const User = __webpack_require__(638);
+const UserHelper = __webpack_require__(639);
 
 module.exports = {
   Setup: {
@@ -37637,6 +37669,9 @@ module.exports = {
   },
   AbiBinProvider: AbiBinProvider,
   Contracts: Contracts,
+  Helpers: {
+    User: UserHelper
+  }
 };
 
 
@@ -50748,7 +50783,7 @@ if (typeof window !== 'undefined' && typeof window.WebSocket !== 'undefined') {
     _btoa = function(str) {
       return Buffer(str).toString('base64');
     };
-    var url = __webpack_require__(70);
+    var url = __webpack_require__(71);
     if (url.URL) {
         // Use the new Node 6+ API for parsing URLs that supports username/password
         var newURL = url.URL;
@@ -50758,7 +50793,7 @@ if (typeof window !== 'undefined' && typeof window.WebSocket !== 'undefined') {
     }
     else {
         // Web3 supports Node.js 5, so fall back to the legacy URL API if necessary
-        parseURL = __webpack_require__(70).parse;
+        parseURL = __webpack_require__(71).parse;
     }
 }
 // Default connection ws://localhost:8546
@@ -51554,7 +51589,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var http = __webpack_require__(129);
 var https = __webpack_require__(195);
 var os = __webpack_require__(457);
-var url = __webpack_require__(70);
+var url = __webpack_require__(71);
 var progress_event_1 = __webpack_require__(458);
 var errors_1 = __webpack_require__(459);
 var xml_http_request_event_target_1 = __webpack_require__(133);
@@ -51987,7 +52022,7 @@ XMLHttpRequest.prototype.nodejsBaseUrl = null;
 /* WEBPACK VAR INJECTION */(function(Buffer, global, process) {var capability = __webpack_require__(188)
 var inherits = __webpack_require__(1)
 var response = __webpack_require__(189)
-var stream = __webpack_require__(71)
+var stream = __webpack_require__(72)
 var toArrayBuffer = __webpack_require__(455)
 
 var IncomingMessage = response.IncomingMessage
@@ -52785,7 +52820,7 @@ module.exports = PassThrough;
 var Transform = __webpack_require__(193);
 
 /*<replacement>*/
-var util = __webpack_require__(72);
+var util = __webpack_require__(73);
 util.inherits = __webpack_require__(1);
 /*</replacement>*/
 
@@ -62120,14 +62155,14 @@ module.exports = __webpack_require__(53);
 /* 492 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(71).Transform
+module.exports = __webpack_require__(72).Transform
 
 
 /***/ }),
 /* 493 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(71).PassThrough
+module.exports = __webpack_require__(72).PassThrough
 
 
 /***/ }),
@@ -63585,7 +63620,7 @@ exports.decrypt = function (self, block) {
 /* 510 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var xor = __webpack_require__(75)
+var xor = __webpack_require__(76)
 
 exports.encrypt = function (self, block) {
   var data = xor(block, self._prev)
@@ -63609,7 +63644,7 @@ exports.decrypt = function (self, block) {
 /***/ (function(module, exports, __webpack_require__) {
 
 var Buffer = __webpack_require__(2).Buffer
-var xor = __webpack_require__(75)
+var xor = __webpack_require__(76)
 
 function encryptStart (self, data, decrypt) {
   var len = data.length
@@ -63726,7 +63761,7 @@ exports.encrypt = function (self, chunk, decrypt) {
 /* 514 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(Buffer) {var xor = __webpack_require__(75)
+/* WEBPACK VAR INJECTION */(function(Buffer) {var xor = __webpack_require__(76)
 
 function getBlock (self) {
   self._prev = self._cipher.encryptBlock(self._prev)
@@ -64236,7 +64271,7 @@ function formatReturnValue(bn, enc) {
 /* 522 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(Buffer) {var createHash = __webpack_require__(74)
+/* WEBPACK VAR INJECTION */(function(Buffer) {var createHash = __webpack_require__(75)
 var stream = __webpack_require__(137)
 var inherits = __webpack_require__(1)
 var sign = __webpack_require__(523)
@@ -66802,7 +66837,7 @@ exports.sha512 = __webpack_require__(223);
 
 
 var utils = __webpack_require__(32);
-var common = __webpack_require__(76);
+var common = __webpack_require__(77);
 var shaCommon = __webpack_require__(221);
 
 var rotl32 = utils.rotl32;
@@ -66962,7 +66997,7 @@ SHA384.prototype._digest = function digest(enc) {
 
 
 var utils = __webpack_require__(32);
-var common = __webpack_require__(76);
+var common = __webpack_require__(77);
 
 var rotl32 = utils.rotl32;
 var sum32 = utils.sum32;
@@ -68892,7 +68927,7 @@ module.exports = Signature;
 // Fedor, you are amazing.
 
 
-var asn1 = __webpack_require__(77)
+var asn1 = __webpack_require__(78)
 
 exports.certificate = __webpack_require__(556)
 
@@ -69016,7 +69051,7 @@ exports.signature = asn1.define('signature', function () {
 /* 546 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var asn1 = __webpack_require__(77);
+var asn1 = __webpack_require__(78);
 var inherits = __webpack_require__(1);
 
 var api = exports;
@@ -69369,9 +69404,9 @@ ReporterError.prototype.rethrow = function rethrow(msg) {
 /* 550 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Reporter = __webpack_require__(78).Reporter;
-var EncoderBuffer = __webpack_require__(78).EncoderBuffer;
-var DecoderBuffer = __webpack_require__(78).DecoderBuffer;
+var Reporter = __webpack_require__(79).Reporter;
+var EncoderBuffer = __webpack_require__(79).EncoderBuffer;
+var DecoderBuffer = __webpack_require__(79).DecoderBuffer;
 var assert = __webpack_require__(26);
 
 // Supported tags
@@ -70165,7 +70200,7 @@ PEMEncoder.prototype.encode = function encode(data, options) {
 
 
 
-var asn = __webpack_require__(77)
+var asn = __webpack_require__(78)
 
 var Time = asn.define('Time', function () {
   this.choice({
@@ -70537,7 +70572,7 @@ exports.publicDecrypt = function publicDecrypt (key, buf) {
 
 var parseKeys = __webpack_require__(99)
 var randomBytes = __webpack_require__(63)
-var createHash = __webpack_require__(74)
+var createHash = __webpack_require__(75)
 var mgf = __webpack_require__(229)
 var xor = __webpack_require__(230)
 var BN = __webpack_require__(8)
@@ -70634,7 +70669,7 @@ var mgf = __webpack_require__(229)
 var xor = __webpack_require__(230)
 var BN = __webpack_require__(8)
 var crt = __webpack_require__(144)
-var createHash = __webpack_require__(74)
+var createHash = __webpack_require__(75)
 var withPublic = __webpack_require__(231)
 var Buffer = __webpack_require__(2).Buffer
 
@@ -74501,7 +74536,7 @@ module.exports = GatewayHelper;
 
 const BN = __webpack_require__(8);
 const Web3Utils = __webpack_require__(17);
-const Crypto = __webpack_require__(73);
+const Crypto = __webpack_require__(74);
 const Contracts = __webpack_require__(237);
 
 class StakeHelper {
@@ -80566,7 +80601,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 var Web3 = __webpack_require__(39);
 
-var AbiBinProvider = __webpack_require__(90);
+var AbiBinProvider = __webpack_require__(70);
 
 var Mosaic = __webpack_require__(180);
 
@@ -80649,7 +80684,7 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-var AbiBinProvider = __webpack_require__(90),
+var AbiBinProvider = __webpack_require__(70),
     Deployer = __webpack_require__(246),
     ContractName = 'TokenRules';
 /**
@@ -80763,7 +80798,7 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-var AbiBinProvider = __webpack_require__(90),
+var AbiBinProvider = __webpack_require__(70),
     Deployer = __webpack_require__(246);
 
 var MultiSigMasterCopyContractName = 'GnosisSafe',
@@ -80979,6 +81014,266 @@ function () {
 }();
 
 module.exports = User;
+
+/***/ }),
+/* 639 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var AbiBinProvider = __webpack_require__(70);
+
+var UserWalletFactoryContractName = 'UserWalletFactory';
+
+var TxSender = __webpack_require__(640);
+/**
+ * This is used to create wallet of an user and configure it.
+ */
+
+
+var User =
+/*#__PURE__*/
+function () {
+  /**
+   * Constructor of User.
+   *
+   * @param gnosisSafeMasterCopy The address of a master copy of gnosis safe contract.
+   * @param tokenHolderMasterCopy The address of a master copy of token holder contract.
+   * @param eip20Token The address of an EIP20Token of an economy.
+   * @param tokenRules The address of the token rules.
+   * @param userWalletFactoryAddress Address of UserWalletFactory contract.
+   * @param auxiliaryWeb3 Auxiliary chain web3 object.
+   */
+  function User(gnosisSafeMasterCopy, tokenHolderMasterCopy, eip20Token, tokenRules, userWalletFactoryAddress, auxiliaryWeb3) {
+    _classCallCheck(this, User);
+
+    var oThis = this;
+    oThis.gnosisSafeMasterCopy = gnosisSafeMasterCopy;
+    oThis.tokenHolderMasterCopy = tokenHolderMasterCopy;
+    oThis.eip20Token = eip20Token;
+    oThis.tokenRules = tokenRules;
+    oThis.userWalletFactoryAddress = userWalletFactoryAddress;
+    oThis.auxiliaryWeb3 = auxiliaryWeb3;
+    oThis.abiBinProvider = new AbiBinProvider();
+  }
+  /**
+   * Generate the executable data for setup method of GnosisSafe contract.
+   *
+   * @param owners List of owners of the multisig contract for a user.
+   * @param threshold Number of required confirmations for a Safe transaction.
+   * @param to Contract address for optional delegate call.
+   * @param data Data payload for optional delegate call.
+   * @returns {String}
+   */
+
+
+  _createClass(User, [{
+    key: "getGnosisSafeData",
+    value: function getGnosisSafeData(owners, threshold, to, data) {
+      var oThis = this;
+      return oThis.auxiliaryWeb3.eth.abi.encodeFunctionCall({
+        name: 'setup',
+        type: 'function',
+        inputs: [{
+          type: 'address[]',
+          name: '_owners'
+        }, {
+          type: 'uint256',
+          name: '_threshold'
+        }, {
+          type: 'address',
+          name: 'to'
+        }, {
+          type: 'bytes',
+          name: 'data'
+        }]
+      }, [owners, threshold, to, data]);
+    }
+    /**
+     * It is used for creation and configuration of gnosis safe and token holder proxy contract for user.
+     *
+     * @param owners List of owners of the multisig.
+     * @param threshold Number of required confirmations for a Safe transaction.
+     * @param to Contract address for optional delegate call.
+     * @param data Data payload for optional delegate call.
+     * @param sessionKeys Session key addresses to authorize.
+     * @param sessionKeysSpendingLimits Session key's spending limits.
+     * @param sessionKeysExpirationHeights Session key's expiration heights.
+     * @param txOptions Tx options.
+     * @returns Promise object.
+     */
+
+  }, {
+    key: "createUserWallet",
+    value: function () {
+      var _createUserWallet2 = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee(owners, threshold, to, data, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights, txOptions) {
+        var oThis, txObject, txReceipt, transactionHash;
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                oThis = this;
+                txObject = oThis._createUserWallet(owners, threshold, to, data, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights, txOptions);
+                _context.next = 4;
+                return new TxSender(txObject, oThis.auxiliaryWeb3, txOptions).execute();
+
+              case 4:
+                txReceipt = _context.sent;
+                return _context.abrupt("return", txReceipt);
+
+              case 6:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      function createUserWallet(_x, _x2, _x3, _x4, _x5, _x6, _x7, _x8) {
+        return _createUserWallet2.apply(this, arguments);
+      }
+
+      return createUserWallet;
+    }()
+    /**
+     * Private method used for creation and configuration of gnosis safe and tokenholder contract for an user.
+     *
+     * @param owners List of owners of the multisig.
+     * @param threshold Number of required confirmations for a Safe transaction.
+     * @param to Contract address for optional delegate call.
+     * @param data Data payload for optional delegate call.
+     * @param sessionKeys Session key addresses to authorize.
+     * @param sessionKeysSpendingLimits Session key's spending limits.
+     * @param sessionKeysExpirationHeights Session key's expiration heights.
+     * @param initiator
+     * @param recovery
+     * @param delay
+     * @param txOptions Tx options.
+     * @private
+     */
+
+  }, {
+    key: "_createUserWallet",
+    value: function _createUserWallet(owners, threshold, to, data, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights, initiator, recovery, delay, txOptions) {
+      var oThis = this;
+      var gnosisSafeData = oThis.getGnosisSafeData(owners, threshold, to, data);
+      var jsonInterface = oThis.abiBinProvider.getABI(UserWalletFactoryContractName),
+          contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, oThis.userWalletFactoryAddress, txOptions);
+      return contract.methods.createUserWallet(oThis.gnosisSafeMasterCopy, gnosisSafeData, oThis.tokenHolderMasterCopy, oThis.eip20Token, oThis.tokenRules, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights);
+    }
+  }]);
+
+  return User;
+}();
+
+module.exports = User;
+
+/***/ }),
+/* 640 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+/**
+ * It is used for sending a transaction.
+ */
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var TxSender =
+/*#__PURE__*/
+function () {
+  /**
+   * Constructor of TxSender.
+   *
+   * @param txObject Transaction object.
+   * @param web3 Web3 object.
+   * @param txOptions Tx options.
+   * @constructor
+   */
+  function TxSender(txObject, web3, txOptions) {
+    _classCallCheck(this, TxSender);
+
+    var oThis = this;
+    oThis.txObject = txObject;
+    oThis.txOptions = txOptions;
+    oThis.web3 = web3;
+  }
+  /**
+   * It executes a transaction.
+   *
+   * @returns Transaction receipt.
+   */
+
+
+  _createClass(TxSender, [{
+    key: "execute",
+    value: function () {
+      var _execute = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee() {
+        var oThis, receipt, transactionHash;
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                oThis = this;
+                receipt = null, transactionHash = null;
+                _context.next = 4;
+                return oThis.txObject.send(oThis.txOptions).on('receipt', function (value) {
+                  receipt = value;
+                }).on('transactionHash', function (value) {
+                  console.log('transaction hash: ' + value);
+                  transactionHash = value;
+                }).on('error', function (error) {
+                  return Promise.reject(error);
+                });
+
+              case 4:
+                console.log('Gas used : ', receipt.gasUsed);
+                return _context.abrupt("return", receipt);
+
+              case 6:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      function execute() {
+        return _execute.apply(this, arguments);
+      }
+
+      return execute;
+    }()
+  }]);
+
+  return TxSender;
+}();
+
+module.exports = TxSender;
 
 /***/ })
 /******/ ]);
