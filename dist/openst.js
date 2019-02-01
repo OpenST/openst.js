@@ -81158,16 +81158,13 @@ function () {
      * @param sessionKeys Session key addresses to authorize.
      * @param sessionKeysSpendingLimits Session key's spending limits.
      * @param sessionKeysExpirationHeights Session key's expiration heights.
-     * @param initiator
-     * @param recovery
-     * @param delay
      * @param txOptions Tx options.
      * @private
      */
 
   }, {
     key: "_createUserWallet",
-    value: function _createUserWallet(owners, threshold, to, data, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights, initiator, recovery, delay, txOptions) {
+    value: function _createUserWallet(owners, threshold, to, data, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights, txOptions) {
       var oThis = this;
       var gnosisSafeData = oThis.getGnosisSafeData(owners, threshold, to, data);
       var jsonInterface = oThis.abiBinProvider.getABI(UserWalletFactoryContractName),
