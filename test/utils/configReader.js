@@ -16,7 +16,9 @@ ConfigReader.prototype = {
   gethRpcEndPoint: devEnvConfig.gethRpcEndPoint,
   passphrase: 'testtest',
   gasPrice: '0x3B9ACA00',
-  gas: 8000000
+  gas: 7500000,
+  ZERO_BYTES: '0x0000000000000000000000000000000000000000000000000000000000000000',
+  NULL_ADDRESS: '0x0000000000000000000000000000000000000000'
 };
 
 module.exports = new ConfigReader();
