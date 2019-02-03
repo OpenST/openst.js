@@ -80756,23 +80756,22 @@ function () {
      *
      * @param _organization Organization which holds all the keys needed to administer the economy.
      * @param _token EIP20 token contract address deployed for an economy.
-     * @param txOptions Tx options.
      * @private
      */
 
   }, {
     key: "_deployRawTx",
-    value: function _deployRawTx(_organization, _token, txOptions) {
+    value: function _deployRawTx(_organization, _token) {
       var oThis = this;
       var abiBinProvider = oThis.abiBinProvider;
       var abi = abiBinProvider.getABI(ContractName);
       var bin = abiBinProvider.getBIN(ContractName);
       var args = [_organization, _token];
-      var contract = new oThis.auxiliaryWeb3.eth.Contract(abi, null, txOptions);
+      var contract = new oThis.auxiliaryWeb3.eth.Contract(abi, null);
       return contract.deploy({
         data: bin,
         arguments: args
-      }, txOptions);
+      });
     }
   }]);
 
@@ -80948,65 +80947,62 @@ function () {
     /**
      * Private method which Deploys gnosis MultiSig master copy contract.
      *
-     * @param txOptions Tx options.
      * @returns {txObject} - Transaction object.
      * @private
      */
 
   }, {
     key: "_deployMultiSigMasterCopyRawTx",
-    value: function _deployMultiSigMasterCopyRawTx(txOptions) {
+    value: function _deployMultiSigMasterCopyRawTx() {
       var oThis = this;
       var abiBinProvider = oThis.abiBinProvider;
       var jsonInterface = abiBinProvider.getABI(MultiSigMasterCopyContractName);
       var bin = abiBinProvider.getBIN(MultiSigMasterCopyContractName);
-      var contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, null, txOptions);
+      var contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, null);
       return contract.deploy({
         data: bin,
         arguments: []
-      }, txOptions);
+      });
     }
     /**
      * Private method which returns Tx object to deploy TokenHolder master copy contract.
      *
-     * @param txOptions Tx options
      * @returns {txObject} - Transaction object.
      * @private
      */
 
   }, {
     key: "_deployTokenHolderMasterCopyRawTx",
-    value: function _deployTokenHolderMasterCopyRawTx(txOptions) {
+    value: function _deployTokenHolderMasterCopyRawTx() {
       var oThis = this;
       var abiBinProvider = oThis.abiBinProvider;
       var jsonInterface = abiBinProvider.getABI(THMasterCopyContractName);
       var bin = abiBinProvider.getBIN(THMasterCopyContractName);
-      var contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, null, txOptions);
+      var contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, null);
       return contract.deploy({
         data: bin,
         arguments: []
-      }, txOptions);
+      });
     }
     /**
      * Private method which deploys UserWalletFactory contract.
      *
-     * @param txOptions Tx options.
      * @returns {txObject} Transaction object.
      * @private
      */
 
   }, {
     key: "_deployUserWalletFactoryRawTx",
-    value: function _deployUserWalletFactoryRawTx(txOptions) {
+    value: function _deployUserWalletFactoryRawTx() {
       var oThis = this;
       var abiBinProvider = oThis.abiBinProvider;
       var jsonInterface = abiBinProvider.getABI(UserWalletFactoryContractName);
       var bin = abiBinProvider.getBIN(UserWalletFactoryContractName);
-      var contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, null, txOptions);
+      var contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, null);
       return contract.deploy({
         data: bin,
         arguments: []
-      }, txOptions);
+      });
     }
   }]);
 
@@ -81158,17 +81154,16 @@ function () {
      * @param sessionKeys Session key addresses to authorize.
      * @param sessionKeysSpendingLimits Session key's spending limits.
      * @param sessionKeysExpirationHeights Session key's expiration heights.
-     * @param txOptions Tx options.
      * @private
      */
 
   }, {
     key: "_createUserWalletRawTx",
-    value: function _createUserWalletRawTx(owners, threshold, to, data, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights, txOptions) {
+    value: function _createUserWalletRawTx(owners, threshold, to, data, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights) {
       var oThis = this;
       var gnosisSafeData = oThis.getGnosisSafeData(owners, threshold, to, data);
       var jsonInterface = oThis.abiBinProvider.getABI(UserWalletFactoryContractName),
-          contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, oThis.userWalletFactoryAddress, txOptions);
+          contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, oThis.userWalletFactoryAddress);
       return contract.methods.createUserWallet(oThis.gnosisSafeMasterCopy, gnosisSafeData, oThis.tokenHolderMasterCopy, oThis.eip20Token, oThis.tokenRules, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights);
     }
   }]);
