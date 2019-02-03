@@ -80731,7 +80731,7 @@ function () {
             switch (_context.prev = _context.next) {
               case 0:
                 oThis = this;
-                txObject = oThis._deployRawTx(_organization, _token, txOptions);
+                txObject = oThis._deployRawTx(organization, token, txOptions);
                 _context.next = 4;
                 return new Deployer(ContractName, txObject, oThis.auxiliaryWeb3, txOptions).deploy();
 
@@ -80769,7 +80769,7 @@ function () {
       var abiBinProvider = oThis.abiBinProvider;
       var abi = abiBinProvider.getABI(ContractName);
       var bin = abiBinProvider.getBIN(ContractName);
-      var args = [_organization, _token];
+      var args = [organization, token];
       var contract = new oThis.auxiliaryWeb3.eth.Contract(abi, null, txOptions);
       return contract.deploy({
         data: bin,
