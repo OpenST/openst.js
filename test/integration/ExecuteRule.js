@@ -1,10 +1,11 @@
 const chai = require('chai'),
   Web3 = require('web3'),
-  Package = require('../../index');
+  Package = require('../../index'),
+  Mosaic = require('@openstfoundation/mosaic-tbd');
 
 const TokenRulesSetup = Package.Setup.TokenRules,
   UserSetup = Package.Setup.User,
-  Mosaic = require('@openstfoundation/mosaic-tbd'),
+  RulesSetup = Package.Setup.Rules,
   config = require('../utils/configReader'),
   Web3WalletHelper = require('../utils/Web3WalletHelper'),
   Contracts = Package.Contracts,
