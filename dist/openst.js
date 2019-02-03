@@ -5504,7 +5504,7 @@ module.exports = function (it) {
   };
 })(typeof module === 'undefined' || module, this);
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(51)(module)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(52)(module)))
 
 /***/ }),
 /* 9 */
@@ -8372,10 +8372,10 @@ if (__webpack_require__(13)) {
   var $typed = __webpack_require__(90);
   var $buffer = __webpack_require__(127);
   var ctx = __webpack_require__(33);
-  var anInstance = __webpack_require__(59);
+  var anInstance = __webpack_require__(60);
   var propertyDesc = __webpack_require__(43);
   var hide = __webpack_require__(24);
-  var redefineAll = __webpack_require__(60);
+  var redefineAll = __webpack_require__(61);
   var toInteger = __webpack_require__(28);
   var toLength = __webpack_require__(11);
   var toIndex = __webpack_require__(177);
@@ -8396,9 +8396,9 @@ if (__webpack_require__(13)) {
   var createArrayIncludes = __webpack_require__(80);
   var speciesConstructor = __webpack_require__(70);
   var ArrayIterators = __webpack_require__(123);
-  var Iterators = __webpack_require__(56);
+  var Iterators = __webpack_require__(57);
   var $iterDetect = __webpack_require__(83);
-  var setSpecies = __webpack_require__(58);
+  var setSpecies = __webpack_require__(59);
   var arrayFill = __webpack_require__(122);
   var arrayCopyWithin = __webpack_require__(168);
   var $DP = __webpack_require__(12);
@@ -9017,7 +9017,7 @@ module.exports = AbiBinProvider;
 
 
 var version = __webpack_require__(429).version;
-var core = __webpack_require__(52);
+var core = __webpack_require__(53);
 var Eth = __webpack_require__(468);
 var Net = __webpack_require__(94);
 var Personal = __webpack_require__(202);
@@ -9388,6 +9388,129 @@ module.exports = Object.getPrototypeOf || function (O) {
 
 /***/ }),
 /* 51 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
+
+function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+var Mosaic = __webpack_require__(181);
+
+var AbiBinProvider = Mosaic.AbiBinProvider;
+var DEFAULT_ABI_FOLDER_PATH, DEFAULT_BIN_FOLDER_PATH;
+/**
+ * The class provides getter to get ABIs and BINs for different contracts.
+ * ABI and BIN files sit in contracts/abi, contracts/bin folder.
+ */
+
+var OpenSTAbiBinProvider =
+/*#__PURE__*/
+function (_AbiBinProvider) {
+  _inherits(OpenSTAbiBinProvider, _AbiBinProvider);
+
+  /**
+   * Constructor for OpenSTAbiBinProvider.
+   *
+   * @param abiFolderPath Folder path where abi is present.
+   * @param binFolderPath Folder path where bin is present.
+   * @param mosaicAbiFolderPath Folder path where mosaic abi is present.
+   * @param mosaicBinFolderPath Folder path where mosaic bin is present.
+   */
+  function OpenSTAbiBinProvider(abiFolderPath, binFolderPath, mosaicAbiFolderPath, mosaicBinFolderPath) {
+    var _this;
+
+    _classCallCheck(this, OpenSTAbiBinProvider);
+
+    abiFolderPath = abiFolderPath || DEFAULT_ABI_FOLDER_PATH;
+    binFolderPath = binFolderPath || DEFAULT_BIN_FOLDER_PATH;
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(OpenSTAbiBinProvider).call(this, abiFolderPath, binFolderPath));
+
+    var oThis = _assertThisInitialized(_assertThisInitialized(_this));
+
+    oThis.mosaicAbiBinProvider = new AbiBinProvider(mosaicAbiFolderPath, mosaicBinFolderPath);
+    return _this;
+  }
+  /**
+   * Getter to get ABI for a contract.
+   * @param contractName Name of the contract.
+   * @returns {String} ABI JSON string.
+   */
+
+
+  _createClass(OpenSTAbiBinProvider, [{
+    key: "getABI",
+    value: function getABI(contractName) {
+      var oThis = this;
+      var abi = null;
+
+      try {
+        abi = _get(_getPrototypeOf(OpenSTAbiBinProvider.prototype), "getABI", this).call(this, contractName);
+      } catch (e) {//Just catch the exception. Do nothing.
+      }
+
+      if (!abi) {
+        //We did not find abi in our location.
+        //Lets get it from mosaicAbiBinProvider.
+        return oThis.mosaicAbiBinProvider.getABI(contractName);
+      }
+
+      return abi;
+    }
+    /**
+     * Getter to get BIN for a contract.
+     * @param contractName Name of the contract.
+     * @returns {String} Binary string.
+     */
+
+  }, {
+    key: "getBIN",
+    value: function getBIN(contractName) {
+      var oThis = this;
+      var bin = null;
+
+      try {
+        bin = _get(_getPrototypeOf(OpenSTAbiBinProvider.prototype), "getBIN", this).call(this, contractName);
+      } catch (e) {//Just catch the exception. Do nothing.
+      }
+
+      if (!bin) {
+        //We did not find abi in our location.
+        //Lets get it from mosaicAbiBinProvider.
+        return oThis.mosaicAbiBinProvider.getBIN(contractName);
+      }
+
+      return bin;
+    }
+  }]);
+
+  return OpenSTAbiBinProvider;
+}(AbiBinProvider);
+
+module.exports = OpenSTAbiBinProvider;
+
+/***/ }),
+/* 52 */
 /***/ (function(module, exports) {
 
 module.exports = function(module) {
@@ -9415,7 +9538,7 @@ module.exports = function(module) {
 
 
 /***/ }),
-/* 52 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9508,7 +9631,7 @@ module.exports = {
 
 
 /***/ }),
-/* 53 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9645,7 +9768,7 @@ Duplex.prototype._destroy = function (err, cb) {
 };
 
 /***/ }),
-/* 54 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10259,7 +10382,7 @@ module.exports = Method;
 
 
 /***/ }),
-/* 55 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var def = __webpack_require__(12).f;
@@ -10272,14 +10395,14 @@ module.exports = function (it, tag, stat) {
 
 
 /***/ }),
-/* 56 */
+/* 57 */
 /***/ (function(module, exports) {
 
 module.exports = {};
 
 
 /***/ }),
-/* 57 */
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // 22.1.3.31 Array.prototype[@@unscopables]
@@ -10292,7 +10415,7 @@ module.exports = function (key) {
 
 
 /***/ }),
-/* 58 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10312,7 +10435,7 @@ module.exports = function (KEY) {
 
 
 /***/ }),
-/* 59 */
+/* 60 */
 /***/ (function(module, exports) {
 
 module.exports = function (it, Constructor, name, forbiddenField) {
@@ -10323,7 +10446,7 @@ module.exports = function (it, Constructor, name, forbiddenField) {
 
 
 /***/ }),
-/* 60 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var redefine = __webpack_require__(19);
@@ -10334,7 +10457,7 @@ module.exports = function (target, src, safe) {
 
 
 /***/ }),
-/* 61 */
+/* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var isObject = __webpack_require__(7);
@@ -10343,129 +10466,6 @@ module.exports = function (it, TYPE) {
   return it;
 };
 
-
-/***/ }),
-/* 62 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
-
-function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-var Mosaic = __webpack_require__(181);
-
-var AbiBinProvider = Mosaic.AbiBinProvider;
-var DEFAULT_ABI_FOLDER_PATH, DEFAULT_BIN_FOLDER_PATH;
-/**
- * The class provides getter to get ABIs and BINs for different contracts.
- * ABI and BIN files sit in contracts/abi, contracts/bin folder.
- */
-
-var OpenSTAbiBinProvider =
-/*#__PURE__*/
-function (_AbiBinProvider) {
-  _inherits(OpenSTAbiBinProvider, _AbiBinProvider);
-
-  /**
-   * Constructor for OpenSTAbiBinProvider.
-   *
-   * @param abiFolderPath Folder path where abi is present.
-   * @param binFolderPath Folder path where bin is present.
-   * @param mosaicAbiFolderPath Folder path where mosaic abi is present.
-   * @param mosaicBinFolderPath Folder path where mosaic bin is present.
-   */
-  function OpenSTAbiBinProvider(abiFolderPath, binFolderPath, mosaicAbiFolderPath, mosaicBinFolderPath) {
-    var _this;
-
-    _classCallCheck(this, OpenSTAbiBinProvider);
-
-    abiFolderPath = abiFolderPath || DEFAULT_ABI_FOLDER_PATH;
-    binFolderPath = binFolderPath || DEFAULT_BIN_FOLDER_PATH;
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(OpenSTAbiBinProvider).call(this, abiFolderPath, binFolderPath));
-
-    var oThis = _assertThisInitialized(_assertThisInitialized(_this));
-
-    oThis.mosaicAbiBinProvider = new AbiBinProvider(mosaicAbiFolderPath, mosaicBinFolderPath);
-    return _this;
-  }
-  /**
-   * Getter to get ABI for a contract.
-   * @param contractName Name of the contract.
-   * @returns {String} ABI JSON string.
-   */
-
-
-  _createClass(OpenSTAbiBinProvider, [{
-    key: "getABI",
-    value: function getABI(contractName) {
-      var oThis = this;
-      var abi = null;
-
-      try {
-        abi = _get(_getPrototypeOf(OpenSTAbiBinProvider.prototype), "getABI", this).call(this, contractName);
-      } catch (e) {//Just catch the exception. Do nothing.
-      }
-
-      if (!abi) {
-        //We did not find abi in our location.
-        //Lets get it from mosaicAbiBinProvider.
-        return oThis.mosaicAbiBinProvider.getABI(contractName);
-      }
-
-      return abi;
-    }
-    /**
-     * Getter to get BIN for a contract.
-     * @param contractName Name of the contract.
-     * @returns {String} Binary string.
-     */
-
-  }, {
-    key: "getBIN",
-    value: function getBIN(contractName) {
-      var oThis = this;
-      var bin = null;
-
-      try {
-        bin = _get(_getPrototypeOf(OpenSTAbiBinProvider.prototype), "getBIN", this).call(this, contractName);
-      } catch (e) {//Just catch the exception. Do nothing.
-      }
-
-      if (!bin) {
-        //We did not find abi in our location.
-        //Lets get it from mosaicAbiBinProvider.
-        return oThis.mosaicAbiBinProvider.getBIN(contractName);
-      }
-
-      return bin;
-    }
-  }]);
-
-  return OpenSTAbiBinProvider;
-}(AbiBinProvider);
-
-module.exports = OpenSTAbiBinProvider;
 
 /***/ }),
 /* 63 */
@@ -11953,7 +11953,7 @@ exports = module.exports = __webpack_require__(191);
 exports.Stream = exports;
 exports.Readable = exports;
 exports.Writable = __webpack_require__(131);
-exports.Duplex = __webpack_require__(53);
+exports.Duplex = __webpack_require__(54);
 exports.Transform = __webpack_require__(194);
 exports.PassThrough = __webpack_require__(454);
 
@@ -12657,14 +12657,14 @@ module.exports = navigator && navigator.userAgent || '';
 var global = __webpack_require__(6);
 var $export = __webpack_require__(0);
 var redefine = __webpack_require__(19);
-var redefineAll = __webpack_require__(60);
+var redefineAll = __webpack_require__(61);
 var meta = __webpack_require__(41);
 var forOf = __webpack_require__(87);
-var anInstance = __webpack_require__(59);
+var anInstance = __webpack_require__(60);
 var isObject = __webpack_require__(7);
 var fails = __webpack_require__(4);
 var $iterDetect = __webpack_require__(83);
-var setToStringTag = __webpack_require__(55);
+var setToStringTag = __webpack_require__(56);
 var inheritIfRequired = __webpack_require__(110);
 
 module.exports = function (NAME, wrapper, methods, common, IS_MAP, IS_WEAK) {
@@ -13019,8 +13019,8 @@ module.exports = {
 
 
 
-var core = __webpack_require__(52);
-var Method = __webpack_require__(54);
+var core = __webpack_require__(53);
+var Method = __webpack_require__(55);
 var utils = __webpack_require__(17);
 
 
@@ -13990,9 +13990,9 @@ var LIBRARY = __webpack_require__(45);
 var $export = __webpack_require__(0);
 var redefine = __webpack_require__(19);
 var hide = __webpack_require__(24);
-var Iterators = __webpack_require__(56);
+var Iterators = __webpack_require__(57);
 var $iterCreate = __webpack_require__(165);
-var setToStringTag = __webpack_require__(55);
+var setToStringTag = __webpack_require__(56);
 var getPrototypeOf = __webpack_require__(50);
 var ITERATOR = __webpack_require__(9)('iterator');
 var BUGGY = !([].keys && 'next' in [].keys()); // Safari has buggy iterators w/o `next`
@@ -14107,7 +14107,7 @@ module.exports = function (KEY) {
 /***/ (function(module, exports, __webpack_require__) {
 
 // check on default Array iterator
-var Iterators = __webpack_require__(56);
+var Iterators = __webpack_require__(57);
 var ITERATOR = __webpack_require__(9)('iterator');
 var ArrayProto = Array.prototype;
 
@@ -14137,7 +14137,7 @@ module.exports = function (object, index, value) {
 
 var classof = __webpack_require__(69);
 var ITERATOR = __webpack_require__(9)('iterator');
-var Iterators = __webpack_require__(56);
+var Iterators = __webpack_require__(57);
 module.exports = __webpack_require__(14).getIteratorMethod = function (it) {
   if (it != undefined) return it[ITERATOR]
     || it['@@iterator']
@@ -14173,9 +14173,9 @@ module.exports = function fill(value /* , start = 0, end = @length */) {
 
 "use strict";
 
-var addToUnscopables = __webpack_require__(57);
+var addToUnscopables = __webpack_require__(58);
 var step = __webpack_require__(169);
-var Iterators = __webpack_require__(56);
+var Iterators = __webpack_require__(57);
 var toIObject = __webpack_require__(25);
 
 // 22.1.3.4 Array.prototype.entries()
@@ -14389,16 +14389,16 @@ var DESCRIPTORS = __webpack_require__(13);
 var LIBRARY = __webpack_require__(45);
 var $typed = __webpack_require__(90);
 var hide = __webpack_require__(24);
-var redefineAll = __webpack_require__(60);
+var redefineAll = __webpack_require__(61);
 var fails = __webpack_require__(4);
-var anInstance = __webpack_require__(59);
+var anInstance = __webpack_require__(60);
 var toInteger = __webpack_require__(28);
 var toLength = __webpack_require__(11);
 var toIndex = __webpack_require__(177);
 var gOPN = __webpack_require__(49).f;
 var dP = __webpack_require__(12).f;
 var arrayFill = __webpack_require__(122);
-var setToStringTag = __webpack_require__(55);
+var setToStringTag = __webpack_require__(56);
 var ARRAY_BUFFER = 'ArrayBuffer';
 var DATA_VIEW = 'DataView';
 var PROTOTYPE = 'prototype';
@@ -15656,7 +15656,7 @@ util.inherits(Writable, Stream);
 function nop() {}
 
 function WritableState(options, stream) {
-  Duplex = Duplex || __webpack_require__(53);
+  Duplex = Duplex || __webpack_require__(54);
 
   options = options || {};
 
@@ -15806,7 +15806,7 @@ if (typeof Symbol === 'function' && Symbol.hasInstance && typeof Function.protot
 }
 
 function Writable(options) {
-  Duplex = Duplex || __webpack_require__(53);
+  Duplex = Duplex || __webpack_require__(54);
 
   // Writable ctor is applied to Duplexes, too.
   // `realHasInstance` is necessary because using plain `instanceof`
@@ -18772,7 +18772,7 @@ module.exports = Math.log1p || function log1p(x) {
 
 var create = __webpack_require__(48);
 var descriptor = __webpack_require__(43);
-var setToStringTag = __webpack_require__(55);
+var setToStringTag = __webpack_require__(56);
 var IteratorPrototype = {};
 
 // 25.1.2.1.1 %IteratorPrototype%[@@iterator]()
@@ -18918,7 +18918,7 @@ var classof = __webpack_require__(69);
 var $export = __webpack_require__(0);
 var isObject = __webpack_require__(7);
 var aFunction = __webpack_require__(34);
-var anInstance = __webpack_require__(59);
+var anInstance = __webpack_require__(60);
 var forOf = __webpack_require__(87);
 var speciesConstructor = __webpack_require__(70);
 var task = __webpack_require__(126).set;
@@ -19101,7 +19101,7 @@ if (!USE_NATIVE) {
     this._h = 0;              // <- rejection state, 0 - default, 1 - handled, 2 - unhandled
     this._n = false;          // <- notify
   };
-  Internal.prototype = __webpack_require__(60)($Promise.prototype, {
+  Internal.prototype = __webpack_require__(61)($Promise.prototype, {
     // 25.4.5.3 Promise.prototype.then(onFulfilled, onRejected)
     then: function then(onFulfilled, onRejected) {
       var reaction = newPromiseCapability(speciesConstructor(this, $Promise));
@@ -19132,8 +19132,8 @@ if (!USE_NATIVE) {
 }
 
 $export($export.G + $export.W + $export.F * !USE_NATIVE, { Promise: $Promise });
-__webpack_require__(55)($Promise, PROMISE);
-__webpack_require__(58)(PROMISE);
+__webpack_require__(56)($Promise, PROMISE);
+__webpack_require__(59)(PROMISE);
 Wrapper = __webpack_require__(14)[PROMISE];
 
 // statics
@@ -19249,16 +19249,16 @@ module.exports = function (C, x) {
 
 var dP = __webpack_require__(12).f;
 var create = __webpack_require__(48);
-var redefineAll = __webpack_require__(60);
+var redefineAll = __webpack_require__(61);
 var ctx = __webpack_require__(33);
-var anInstance = __webpack_require__(59);
+var anInstance = __webpack_require__(60);
 var forOf = __webpack_require__(87);
 var $iterDefine = __webpack_require__(115);
 var step = __webpack_require__(169);
-var setSpecies = __webpack_require__(58);
+var setSpecies = __webpack_require__(59);
 var DESCRIPTORS = __webpack_require__(13);
 var fastKey = __webpack_require__(41).fastKey;
-var validate = __webpack_require__(61);
+var validate = __webpack_require__(62);
 var SIZE = DESCRIPTORS ? '_s' : 'size';
 
 var getEntry = function (that, key) {
@@ -19398,15 +19398,15 @@ module.exports = {
 
 "use strict";
 
-var redefineAll = __webpack_require__(60);
+var redefineAll = __webpack_require__(61);
 var getWeak = __webpack_require__(41).getWeak;
 var anObject = __webpack_require__(5);
 var isObject = __webpack_require__(7);
-var anInstance = __webpack_require__(59);
+var anInstance = __webpack_require__(60);
 var forOf = __webpack_require__(87);
 var createArrayMethod = __webpack_require__(31);
 var $has = __webpack_require__(23);
-var validate = __webpack_require__(61);
+var validate = __webpack_require__(62);
 var arrayFind = createArrayMethod(5);
 var arrayFindIndex = createArrayMethod(6);
 var id = 0;
@@ -23553,7 +23553,7 @@ module.exports = {
   };
 })(typeof module === 'undefined' || module, this);
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(51)(module)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(52)(module)))
 
 /***/ }),
 /* 186 */
@@ -24449,7 +24449,7 @@ module.exports = Jsonrpc;
 
 }(this));
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(51)(module), __webpack_require__(10)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(52)(module), __webpack_require__(10)))
 
 /***/ }),
 /* 189 */
@@ -24868,7 +24868,7 @@ function prependListener(emitter, event, fn) {
 }
 
 function ReadableState(options, stream) {
-  Duplex = Duplex || __webpack_require__(53);
+  Duplex = Duplex || __webpack_require__(54);
 
   options = options || {};
 
@@ -24945,7 +24945,7 @@ function ReadableState(options, stream) {
 }
 
 function Readable(options) {
-  Duplex = Duplex || __webpack_require__(53);
+  Duplex = Duplex || __webpack_require__(54);
 
   if (!(this instanceof Readable)) return new Readable(options);
 
@@ -25947,7 +25947,7 @@ module.exports = {
 
 module.exports = Transform;
 
-var Duplex = __webpack_require__(53);
+var Duplex = __webpack_require__(54);
 
 /*<replacement>*/
 var util = __webpack_require__(73);
@@ -26472,8 +26472,8 @@ module.exports = __webpack_require__(465)().Promise
 
 
 var _ = __webpack_require__(15);
-var core = __webpack_require__(52);
-var Method = __webpack_require__(54);
+var core = __webpack_require__(53);
+var Method = __webpack_require__(55);
 var utils = __webpack_require__(17);
 var Subscription = __webpack_require__(93).subscription;
 var formatters = __webpack_require__(18).formatters;
@@ -27468,8 +27468,8 @@ exports.normalize = normalize
 
 
 
-var core = __webpack_require__(52);
-var Method = __webpack_require__(54);
+var core = __webpack_require__(53);
+var Method = __webpack_require__(55);
 var utils = __webpack_require__(17);
 var Net = __webpack_require__(94);
 
@@ -27626,8 +27626,8 @@ module.exports = Personal;
 
 
 var _ = __webpack_require__(15);
-var core = __webpack_require__(52);
-var Method = __webpack_require__(54);
+var core = __webpack_require__(53);
+var Method = __webpack_require__(55);
 var Promise = __webpack_require__(198);
 var Account = __webpack_require__(488);
 var Hash = __webpack_require__(235);
@@ -33325,7 +33325,7 @@ var redefine = __webpack_require__(19);
 var META = __webpack_require__(41).KEY;
 var $fails = __webpack_require__(4);
 var shared = __webpack_require__(102);
-var setToStringTag = __webpack_require__(55);
+var setToStringTag = __webpack_require__(56);
 var uid = __webpack_require__(44);
 var wks = __webpack_require__(9);
 var wksExt = __webpack_require__(103);
@@ -35365,7 +35365,7 @@ var $export = __webpack_require__(0);
 
 $export($export.P, 'Array', { copyWithin: __webpack_require__(168) });
 
-__webpack_require__(57)('copyWithin');
+__webpack_require__(58)('copyWithin');
 
 
 /***/ }),
@@ -35377,7 +35377,7 @@ var $export = __webpack_require__(0);
 
 $export($export.P, 'Array', { fill: __webpack_require__(122) });
 
-__webpack_require__(57)('fill');
+__webpack_require__(58)('fill');
 
 
 /***/ }),
@@ -35398,7 +35398,7 @@ $export($export.P + $export.F * forced, 'Array', {
     return $find(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
   }
 });
-__webpack_require__(57)(KEY);
+__webpack_require__(58)(KEY);
 
 
 /***/ }),
@@ -35419,14 +35419,14 @@ $export($export.P + $export.F * forced, 'Array', {
     return $find(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
   }
 });
-__webpack_require__(57)(KEY);
+__webpack_require__(58)(KEY);
 
 
 /***/ }),
 /* 354 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(58)('Array');
+__webpack_require__(59)('Array');
 
 
 /***/ }),
@@ -35475,7 +35475,7 @@ if (__webpack_require__(13) && (!CORRECT_NEW || __webpack_require__(4)(function 
   __webpack_require__(19)(global, 'RegExp', $RegExp);
 }
 
-__webpack_require__(58)('RegExp');
+__webpack_require__(59)('RegExp');
 
 
 /***/ }),
@@ -35956,7 +35956,7 @@ module.exports = function (exec) {
 "use strict";
 
 var strong = __webpack_require__(175);
-var validate = __webpack_require__(61);
+var validate = __webpack_require__(62);
 var MAP = 'Map';
 
 // 23.1 Map Objects
@@ -35982,7 +35982,7 @@ module.exports = __webpack_require__(89)(MAP, function (get) {
 "use strict";
 
 var strong = __webpack_require__(175);
-var validate = __webpack_require__(61);
+var validate = __webpack_require__(62);
 var SET = 'Set';
 
 // 23.2 Set Objects
@@ -36009,7 +36009,7 @@ var assign = __webpack_require__(156);
 var weak = __webpack_require__(176);
 var isObject = __webpack_require__(7);
 var fails = __webpack_require__(4);
-var validate = __webpack_require__(61);
+var validate = __webpack_require__(62);
 var WEAK_MAP = 'WeakMap';
 var getWeak = meta.getWeak;
 var isExtensible = Object.isExtensible;
@@ -36069,7 +36069,7 @@ if (fails(function () { return new $WeakMap().set((Object.freeze || Object)(tmp)
 "use strict";
 
 var weak = __webpack_require__(176);
-var validate = __webpack_require__(61);
+var validate = __webpack_require__(62);
 var WEAK_SET = 'WeakSet';
 
 // 23.4 WeakSet Objects
@@ -36133,7 +36133,7 @@ $export($export.P + $export.U + $export.F * __webpack_require__(4)(function () {
   }
 });
 
-__webpack_require__(58)(ARRAY_BUFFER);
+__webpack_require__(59)(ARRAY_BUFFER);
 
 
 /***/ }),
@@ -36605,7 +36605,7 @@ $export($export.P, 'Array', {
   }
 });
 
-__webpack_require__(57)('includes');
+__webpack_require__(58)('includes');
 
 
 /***/ }),
@@ -36854,7 +36854,7 @@ var getKeys = __webpack_require__(46);
 var redefine = __webpack_require__(19);
 var global = __webpack_require__(6);
 var hide = __webpack_require__(24);
-var Iterators = __webpack_require__(56);
+var Iterators = __webpack_require__(57);
 var wks = __webpack_require__(9);
 var ITERATOR = wks('iterator');
 var TO_STRING_TAG = wks('toStringTag');
@@ -37656,12 +37656,13 @@ for (var collections = getKeys(DOMIterables), i = 0; i < collections.length; i++
 "use strict";
 
 
-const AbiBinProvider = __webpack_require__(62);
+const AbiBinProvider = __webpack_require__(51);
 const Contracts = __webpack_require__(636);
 const TokenRules = __webpack_require__(637);
 const User = __webpack_require__(638);
-const Rules = __webpack_require__(639);
-const UserHelper = __webpack_require__(640);
+const UserHelper = __webpack_require__(639);
+const TokenRulesHelper = __webpack_require__(641);
+const Rules = __webpack_require__(642);
 
 module.exports = {
   Setup: {
@@ -37672,7 +37673,8 @@ module.exports = {
   AbiBinProvider: AbiBinProvider,
   Contracts: Contracts,
   Helpers: {
-    User: UserHelper
+    User: UserHelper,
+    TokenRules: TokenRulesHelper
   }
 };
 
@@ -41385,7 +41387,7 @@ module.exports = {
   };
 })(typeof module === 'undefined' || module, this);
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(51)(module)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(52)(module)))
 
 /***/ }),
 /* 418 */
@@ -45067,7 +45069,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   };
 })(typeof module === 'undefined' || module, this);
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(51)(module)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(52)(module)))
 
 /***/ }),
 /* 421 */
@@ -45344,7 +45346,7 @@ module.exports = function isHexPrefixed(str) {
 
 }(this));
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(51)(module), __webpack_require__(10)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(52)(module), __webpack_require__(10)))
 
 /***/ }),
 /* 424 */
@@ -50555,7 +50557,7 @@ module.exports = {
   };
 })(typeof module === 'undefined' || module, this);
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(51)(module)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(52)(module)))
 
 /***/ }),
 /* 434 */
@@ -56493,7 +56495,7 @@ oboe.drop = function() {
 
 
 var formatters = __webpack_require__(18).formatters;
-var Method = __webpack_require__(54);
+var Method = __webpack_require__(55);
 var utils = __webpack_require__(17);
 
 
@@ -56992,10 +56994,10 @@ module.exports = Subscription;
 
 
 var _ = __webpack_require__(15);
-var core = __webpack_require__(52);
+var core = __webpack_require__(53);
 var helpers = __webpack_require__(18);
 var Subscriptions = __webpack_require__(93).subscriptions;
-var Method = __webpack_require__(54);
+var Method = __webpack_require__(55);
 var utils = __webpack_require__(17);
 var Net = __webpack_require__(94);
 
@@ -62150,7 +62152,7 @@ module.exports = __webpack_require__(131);
 /* 491 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(53);
+module.exports = __webpack_require__(54);
 
 
 /***/ }),
@@ -71423,9 +71425,9 @@ module.exports = getNetworkType;
 
 
 
-var core = __webpack_require__(52);
+var core = __webpack_require__(53);
 var Subscriptions = __webpack_require__(93).subscriptions;
-var Method = __webpack_require__(54);
+var Method = __webpack_require__(55);
 // var formatters = require('web3-core-helpers').formatters;
 var Net = __webpack_require__(94);
 
@@ -80603,7 +80605,7 @@ function _assertThisInitialized(self) { if (self === void 0) { throw new Referen
 
 var Web3 = __webpack_require__(39);
 
-var AbiBinProvider = __webpack_require__(62);
+var AbiBinProvider = __webpack_require__(51);
 
 var Mosaic = __webpack_require__(181);
 
@@ -80645,8 +80647,8 @@ function (_Contracts) {
 
 
   _createClass(OpenSTContracts, [{
-    key: "getTokenRules",
-    value: function getTokenRules(contractAddress, txOptions) {
+    key: "TokenRules",
+    value: function TokenRules(contractAddress, txOptions) {
       var oThis = this;
       oThis.auxiliaryWeb3 = Contracts._getWeb3(oThis.auxiliaryWeb3);
       var jsonInterface = oThis.abibinProvider.getABI('TokenRules');
@@ -80654,18 +80656,18 @@ function (_Contracts) {
       return contractInstance;
     }
     /**
-     * Returns PriceRule instance
-     * @param contractAddress PriceRule contract address.
+     * Returns PricerRule instance
+     * @param contractAddress PricerRule contract address.
      * @param txOptions Tx options.
      * @returns {auxiliaryWeb3.eth.Contract}
      */
 
   }, {
-    key: "getPriceRule",
-    value: function getPriceRule(contractAddress, txOptions) {
+    key: "PricerRule",
+    value: function PricerRule(contractAddress, txOptions) {
       var oThis = this;
       oThis.auxiliaryWeb3 = Contracts._getWeb3(oThis.auxiliaryWeb3);
-      var jsonInterface = oThis.abibinProvider.getABI('PriceRule');
+      var jsonInterface = oThis.abibinProvider.getABI('PricerRule');
       var contractInstance = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, contractAddress, txOptions);
       return contractInstance;
     }
@@ -80713,7 +80715,7 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-var AbiBinProvider = __webpack_require__(62),
+var AbiBinProvider = __webpack_require__(51),
     Deployer = __webpack_require__(150),
     ContractName = 'TokenRules';
 /**
@@ -80827,7 +80829,7 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-var AbiBinProvider = __webpack_require__(62),
+var AbiBinProvider = __webpack_require__(51),
     Deployer = __webpack_require__(150);
 
 var MultiSigMasterCopyContractName = 'GnosisSafe',
@@ -81061,140 +81063,11 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-var AbiBinProvider = __webpack_require__(62),
-    Deployer = __webpack_require__(150),
-    PriceRuleContractName = 'PricerRule';
-/**
- * Helper method which performs deployment of multiple Rules contract.
- */
-
-
-var Rules =
-/*#__PURE__*/
-function () {
-  /**
-   * Constructor for Rules setup.
-   *
-   * @param auxiliaryWeb3 Auxiliary chain web3 object.
-   * @param organization Organization address.
-   * @param eip20Token The economy token address.
-   * @param tokenRules The economy token rules address.
-   */
-  function Rules(auxiliaryWeb3, organization, eip20Token, tokenRules) {
-    _classCallCheck(this, Rules);
-
-    var oThis = this;
-    oThis.auxiliaryWeb3 = auxiliaryWeb3;
-    oThis.organization = organization;
-    oThis.eip20Token = eip20Token;
-    oThis.tokenRules = tokenRules;
-    oThis.abiBinProvider = new AbiBinProvider();
-  }
-  /**
-   * Performs deployment of PriceRule contract.
-   *
-   * @param baseCurrencyCode The economy base currency code.
-   * @param conversionRate The conversion rate from the economy base currency
-   *                        to the token. e.g. CR of "OST => Unsplash"
-   * @param conversionRateDecimals The conversion rate's decimals from the
-   *                                economy base currency to the token.
-   * @param requiredPriceOracleDecimals Required decimals for price oracles.
-   * @param txOptions Tx options.
-   * @returns {Object} - Transaction receipt.
-   */
-
-
-  _createClass(Rules, [{
-    key: "deployPriceRule",
-    value: function () {
-      var _deployPriceRule = _asyncToGenerator(
-      /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee(baseCurrencyCode, conversionRate, conversionRateDecimals, requiredPriceOracleDecimals, txOptions) {
-        var oThis, txObject, txReceipt;
-        return regeneratorRuntime.wrap(function _callee$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-                oThis = this;
-                txObject = oThis._deployRawTx(baseCurrencyCode, conversionRate, conversionRateDecimals, requiredPriceOracleDecimals, txOptions);
-                _context.next = 4;
-                return new Deployer(PriceRuleContractName, txObject, oThis.auxiliaryWeb3, txOptions).deploy();
-
-              case 4:
-                txReceipt = _context.sent;
-                return _context.abrupt("return", txReceipt);
-
-              case 6:
-              case "end":
-                return _context.stop();
-            }
-          }
-        }, _callee, this);
-      }));
-
-      function deployPriceRule(_x, _x2, _x3, _x4, _x5) {
-        return _deployPriceRule.apply(this, arguments);
-      }
-
-      return deployPriceRule;
-    }()
-    /**
-     * Returns Tx object of PriceRule contract.
-     *
-     * @param baseCurrencyCode The economy base currency code.
-     * @param conversionRate The conversion rate from the economy base currency
-     *                        to the token.
-     * @param conversionRateDecimals The conversion rate's decimals from the
-     *                                economy base currency to the token.
-     * @param requiredPriceOracleDecimals Required decimals for price oracles.
-     * @param txOptions Tx options.
-     * @returns {Object} - Transaction receipt.
-     * @private
-     */
-
-  }, {
-    key: "_deployPriceRuleRawTx",
-    value: function _deployPriceRuleRawTx(baseCurrencyCode, conversionRate, conversionRateDecimals, requiredPriceOracleDecimals, txOptions) {
-      var oThis = this;
-      var abiBinProvider = oThis.abiBinProvider;
-      var abi = abiBinProvider.getABI(PriceRuleContractName);
-      var bin = abiBinProvider.getBIN(PriceRuleContractName);
-      var args = [oThis.organization, oThis.eip20Token, baseCurrencyCode, conversionRate, conversionRateDecimals, requiredPriceOracleDecimals, oThis.tokenRules];
-      var contract = new oThis.auxiliaryWeb3.eth.Contract(abi, null, txOptions);
-      return contract.deploy({
-        data: bin,
-        arguments: args
-      }, txOptions);
-    }
-  }]);
-
-  return Rules;
-}();
-
-module.exports = Rules;
-
-/***/ }),
-/* 640 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
-
-function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var AbiBinProvider = __webpack_require__(62);
+var AbiBinProvider = __webpack_require__(51);
 
 var UserWalletFactoryContractName = 'UserWalletFactory';
 
-var TxSender = __webpack_require__(641);
+var TxSender = __webpack_require__(640);
 /**
  * This is used to create wallet of an user and configure it.
  */
@@ -81337,7 +81210,7 @@ function () {
 module.exports = User;
 
 /***/ }),
-/* 641 */
+/* 640 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -81429,6 +81302,327 @@ function () {
 }();
 
 module.exports = TxSender;
+
+/***/ }),
+/* 641 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var AbiBinProvider = __webpack_require__(51);
+
+var contractName = 'TokenRules';
+/**
+ * It is used to register an custom rule and fetch the registered rules.
+ */
+
+var TokenRules =
+/*#__PURE__*/
+function () {
+  /**
+   * Constructor of TokenRules.
+   *
+   * @param tokenRules Address of token rules contract of an economy.
+   * @param auxiliaryWeb3 Auxiliary chain web3.
+   */
+  function TokenRules(tokenRules, auxiliaryWeb3) {
+    _classCallCheck(this, TokenRules);
+
+    var oThis = this;
+    oThis.tokenRules = tokenRules;
+    oThis.auxiliaryWeb3 = auxiliaryWeb3;
+    oThis.abiBinProvider = new AbiBinProvider();
+  }
+  /**
+   * It is used to register a custom rule to the economy.
+   *
+   * @param ruleName Name of the rule.
+   * @param ruleAddress Contract address of the rule.
+   * @param ruleAbi Abi of the rule.
+   * @param txOptions Tx options.
+   *
+   * @return Promise object.
+   */
+
+
+  _createClass(TokenRules, [{
+    key: "registerRule",
+    value: function registerRule(ruleName, ruleAddress, ruleAbi, txOptions) {
+      var oThis = this;
+
+      var txObject = oThis._registerRule(ruleName, ruleAddress, ruleAbi, txOptions);
+
+      var txReceipt;
+      return txObject.send(txOptions).on('transactionHash', function (value) {
+        console.log('transaction hash :- ', value);
+      }).on('receipt', function (receipt) {
+        txReceipt = receipt;
+      }).on('error', function (error) {
+        console.log('ERROR !!! ', error);
+      });
+    }
+    /**
+     * Private method which is used to register a custom rule to the economy.
+     *
+     * @param ruleName Name of the rule.
+     * @param ruleAddress Contract address of the rule.
+     * @param ruleAbi Abi of the rule.
+     * @param txOptions Tx options.
+     * @private
+     */
+
+  }, {
+    key: "_registerRule",
+    value: function _registerRule(ruleName, ruleAddress, ruleAbi, txOptions) {
+      var oThis = this;
+      var jsonInterface = oThis.abiBinProvider.getABI(contractName);
+      var contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, oThis.tokenRules, txOptions);
+      return contract.methods.registerRule(ruleName, ruleAddress, ruleAbi);
+    }
+    /**
+     * It is used to fetch rule data by its name.
+     *
+     * @param ruleName Name of the rule.
+     * @param txOptions Tx options.
+     * @returns Rule data if present.
+     */
+
+  }, {
+    key: "getRuleByName",
+    value: function () {
+      var _getRuleByName = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee(ruleName, txOptions) {
+        var oThis, jsonInterface, contract, ruleNameHash, ruleIndex, rule;
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                oThis = this;
+                jsonInterface = oThis.abiBinProvider.getABI(contractName), contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, oThis.tokenRules, txOptions);
+                ruleNameHash = oThis.auxiliaryWeb3.utils.soliditySha3({
+                  t: 'string',
+                  v: ruleName
+                });
+                _context.next = 5;
+                return contract.methods.rulesByNameHash(ruleNameHash).call();
+
+              case 5:
+                ruleIndex = _context.sent;
+                _context.next = 8;
+                return contract.methods.rules(ruleIndex.index).call();
+
+              case 8:
+                rule = _context.sent;
+                return _context.abrupt("return", rule);
+
+              case 10:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      function getRuleByName(_x, _x2) {
+        return _getRuleByName.apply(this, arguments);
+      }
+
+      return getRuleByName;
+    }()
+    /**
+     * It is used to fetch rule data by its address.
+     *
+     * @param ruleAddress Address of the rule contract.
+     * @param txOptions Tx options.
+     * @returns Rule data if present.
+     */
+
+  }, {
+    key: "getRuleByAddress",
+    value: function () {
+      var _getRuleByAddress = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee2(ruleAddress, txOptions) {
+        var oThis, jsonInterface, contract, ruleIndex, rule;
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                oThis = this;
+                jsonInterface = oThis.abiBinProvider.getABI(contractName), contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, oThis.tokenRules, txOptions);
+                _context2.next = 4;
+                return contract.methods.rulesByAddress(ruleAddress).call();
+
+              case 4:
+                ruleIndex = _context2.sent;
+                _context2.next = 7;
+                return contract.methods.rules(ruleIndex.index).call();
+
+              case 7:
+                rule = _context2.sent;
+                return _context2.abrupt("return", rule);
+
+              case 9:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      function getRuleByAddress(_x3, _x4) {
+        return _getRuleByAddress.apply(this, arguments);
+      }
+
+      return getRuleByAddress;
+    }()
+  }]);
+
+  return TokenRules;
+}();
+
+module.exports = TokenRules;
+
+/***/ }),
+/* 642 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var AbiBinProvider = __webpack_require__(51),
+    Deployer = __webpack_require__(150),
+    PricerRuleContractName = 'PricerRule';
+/**
+ * Helper method which performs deployment of multiple Rules contract.
+ */
+
+
+var Rules =
+/*#__PURE__*/
+function () {
+  /**
+   * Constructor for Rules setup.
+   *
+   * @param auxiliaryWeb3 Auxiliary chain web3 object.
+   * @param organization Organization address.
+   * @param eip20Token The economy token address.
+   * @param tokenRules The economy token rules address.
+   */
+  function Rules(auxiliaryWeb3, organization, eip20Token, tokenRules) {
+    _classCallCheck(this, Rules);
+
+    var oThis = this;
+    oThis.auxiliaryWeb3 = auxiliaryWeb3;
+    oThis.organization = organization;
+    oThis.eip20Token = eip20Token;
+    oThis.tokenRules = tokenRules;
+    oThis.abiBinProvider = new AbiBinProvider();
+  }
+  /**
+   * Performs deployment of PricerRule contract.
+   *
+   * @param baseCurrencyCode The economy base currency code.
+   * @param conversionRate The conversion rate from the economy base currency
+   *                        to the token. e.g. CR of "OST => Unsplash"
+   * @param conversionRateDecimals The conversion rate's decimals from the
+   *                                economy base currency to the token.
+   * @param requiredPriceOracleDecimals Required decimals for price oracles.
+   * @param txOptions Tx options.
+   * @returns {Object} - Transaction receipt.
+   */
+
+
+  _createClass(Rules, [{
+    key: "deployPricerRule",
+    value: function () {
+      var _deployPricerRule = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee(baseCurrencyCode, conversionRate, conversionRateDecimals, requiredPriceOracleDecimals, txOptions) {
+        var oThis, txObject, txReceipt;
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                oThis = this;
+                txObject = oThis._deployPricerRuleRawTx(baseCurrencyCode, conversionRate, conversionRateDecimals, requiredPriceOracleDecimals, txOptions);
+                _context.next = 4;
+                return new Deployer(PricerRuleContractName, txObject, oThis.auxiliaryWeb3, txOptions).deploy();
+
+              case 4:
+                txReceipt = _context.sent;
+                return _context.abrupt("return", txReceipt);
+
+              case 6:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      function deployPricerRule(_x, _x2, _x3, _x4, _x5) {
+        return _deployPricerRule.apply(this, arguments);
+      }
+
+      return deployPricerRule;
+    }()
+    /**
+     * Returns Tx object of PricerRule contract.
+     *
+     * @param baseCurrencyCode The economy base currency code.
+     * @param conversionRate The conversion rate from the economy base currency
+     *                        to the token.
+     * @param conversionRateDecimals The conversion rate's decimals from the
+     *                                economy base currency to the token.
+     * @param requiredPriceOracleDecimals Required decimals for price oracles.
+     * @param txOptions Tx options.
+     * @returns {Object} - Transaction receipt.
+     * @private
+     */
+
+  }, {
+    key: "_deployPricerRuleRawTx",
+    value: function _deployPricerRuleRawTx(baseCurrencyCode, conversionRate, conversionRateDecimals, requiredPriceOracleDecimals, txOptions) {
+      var oThis = this;
+      var abiBinProvider = oThis.abiBinProvider;
+      var abi = abiBinProvider.getABI(PricerRuleContractName);
+      var bin = abiBinProvider.getBIN(PricerRuleContractName);
+      var args = [oThis.organization, oThis.eip20Token, baseCurrencyCode, conversionRate, conversionRateDecimals, requiredPriceOracleDecimals, oThis.tokenRules];
+      var contract = new oThis.auxiliaryWeb3.eth.Contract(abi, null, txOptions);
+      return contract.deploy({
+        data: bin,
+        arguments: args
+      }, txOptions);
+    }
+  }]);
+
+  return Rules;
+}();
+
+module.exports = Rules;
 
 /***/ })
 /******/ ]);

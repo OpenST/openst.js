@@ -6,17 +6,24 @@ const chai = require('chai'),
 const TokenRulesSetup = Package.Setup.TokenRules,
   UserSetup = Package.Setup.User,
   RulesSetup = Package.Setup.Rules,
+  MockContractsDeployer = require('./../utils/MockContractsDeployer'),
   config = require('../utils/configReader'),
   Web3WalletHelper = require('../utils/Web3WalletHelper'),
   Contracts = Package.Contracts,
   User = Package.Helpers.User,
-  MockContractsDeployer = require('./../utils/MockContractsDeployer');
+  TokenRules = Package.Helpers.TokenRules,
+  AbiBinProvider = Package.AbiBinProvider;
 
 const auxiliaryWeb3 = new Web3(config.gethRpcEndPoint),
   ContractsInstance = new Contracts(auxiliaryWeb3),
   web3WalletHelper = new Web3WalletHelper(auxiliaryWeb3),
   assert = chai.assert,
-  OrganizationHelper = Mosaic.ChainSetup.OrganizationHelper;
+  OrganizationHelper = Mosaic.ChainSetup.OrganizationHelper,
+  abiBinProvider = new AbiBinProvider(),
+  bytesBaseCurrencyCode = auxiliaryWeb3.utils.stringToHex(config.baseCurrencyCode.toString()),
+  conversionRate = 2,
+  conversionRateDecimals = 18,
+  requiredPriceOracleDecimals = 18;
 
 let txOptions = {
   from: config.deployerAddress,
@@ -29,6 +36,7 @@ let wallets,
   thMasterCopyAddress,
   gnosisSafeMasterCopyAddress,
   tokenRulesAddress,
+  pricerRuleAddress,
   worker,
   organization,
   beneficiary,
@@ -48,6 +56,7 @@ describe('ExecuteRule', async function() {
   });
 
   it('Should deploy Organization contract', async function() {
+    //this.timeout(60000);
     let orgHelper = new OrganizationHelper(auxiliaryWeb3, null);
     const orgConfig = {
       deployer: config.deployerAddress,
@@ -63,6 +72,7 @@ describe('ExecuteRule', async function() {
   });
 
   it('Deploys EIP20Token contract', async function() {
+    //this.timeout(60000);
     const deployerInstance = new MockContractsDeployer(config.deployerAddress, auxiliaryWeb3);
 
     await deployerInstance.deployMockToken();
@@ -72,26 +82,26 @@ describe('ExecuteRule', async function() {
   });
 
   it('Should deploy TokenRules contract', async function() {
-    this.timeout(3 * 60000);
+    this.timeout(60000);
 
     const tokenRules = new TokenRulesSetup(auxiliaryWeb3);
 
-    const response = await tokenRules.deploy(organization, mockToken, txOptions, auxiliaryWeb3);
+    const response = await tokenRules.deploy(organization, mockToken, txOptions);
     tokenRulesAddress = response.receipt.contractAddress;
 
-    let contractInstance = ContractsInstance.getTokenRules(response.receipt.contractAddress, txOptions);
+    let tokenRulesInstance = ContractsInstance.TokenRules(tokenRulesAddress, txOptions);
 
     // Verifying stored organization and token address.
-    assert.strictEqual(mockToken, await contractInstance.methods.token().call(), 'Token address is incorrect');
+    assert.strictEqual(mockToken, await tokenRulesInstance.methods.token().call(), 'Token address is incorrect');
     assert.strictEqual(
       organization,
-      await contractInstance.methods.organization().call(),
+      await tokenRulesInstance.methods.organization().call(),
       'Organization address is incorrect'
     );
   });
 
   it('Should deploy Gnosis MultiSig MasterCopy contract', async function() {
-    this.timeout(60000);
+    // this.timeout(60000);
 
     const userSetup = new UserSetup(auxiliaryWeb3);
     const multiSigTxResponse = await userSetup.deployMultiSigMasterCopy(txOptions);
@@ -100,7 +110,7 @@ describe('ExecuteRule', async function() {
   });
 
   it('Should deploy TokenHolder MasterCopy contract', async function() {
-    this.timeout(60000);
+    //this.timeout(60000);
 
     const userSetup = new UserSetup(auxiliaryWeb3);
     const tokenHolderTxResponse = await userSetup.deployTokenHolderMasterCopy(txOptions);
@@ -109,7 +119,7 @@ describe('ExecuteRule', async function() {
   });
 
   it('Should deploy UserWalletFactory contract', async function() {
-    this.timeout(60000);
+    //this.timeout(60000);
 
     const userSetup = new UserSetup(auxiliaryWeb3);
     const userWalletFactoryResponse = await userSetup.deployUserWalletFactory(txOptions);
@@ -117,8 +127,64 @@ describe('ExecuteRule', async function() {
     assert.strictEqual(userWalletFactoryResponse.receipt.status, true);
   });
 
+  it('Should deploy PricerRule contract', async function() {
+    // this.timeout(60000);
+
+    const rulesSetup = new RulesSetup(auxiliaryWeb3, organization, mockToken, tokenRulesAddress);
+    const pricerRulesDeployResponse = await rulesSetup.deployPricerRule(
+      bytesBaseCurrencyCode,
+      conversionRate,
+      conversionRateDecimals,
+      requiredPriceOracleDecimals,
+      txOptions
+    );
+    assert.strictEqual(pricerRulesDeployResponse.receipt.status, true);
+    pricerRuleAddress = pricerRulesDeployResponse.receipt.contractAddress;
+    const priceRuleInstance = ContractsInstance.PricerRule(pricerRuleAddress, txOptions);
+    // Sanity check
+    assert.strictEqual(
+      await priceRuleInstance.methods.tokenRules().call(),
+      tokenRulesAddress,
+      'TokenRules address is incorrect!'
+    );
+  });
+
+  it('Should register PricerRule rule', async function() {
+    //this.timeout(3 * 60000);
+
+    // Only worker can registerRule.
+    const txOptions = {
+      from: worker,
+      gasPrice: config.gasPrice,
+      gas: config.gas
+    };
+
+    const tokenRulesInstance = new TokenRules(tokenRulesAddress, auxiliaryWeb3),
+      pricerRuleName = 'PricerRule',
+      pricerRuleAbi = abiBinProvider.getABI('PricerRule'),
+      response = await tokenRulesInstance.registerRule(
+        pricerRuleName,
+        pricerRuleAddress,
+        pricerRuleAbi.toString(),
+        txOptions
+      );
+
+    assert.strictEqual(response.events.RuleRegistered['returnValues']._ruleName, pricerRuleName);
+    assert.strictEqual(response.events.RuleRegistered['returnValues']._ruleAddress, pricerRuleAddress);
+
+    // Verify the rule data using rule name.
+    const ruleByNameData = await tokenRulesInstance.getRuleByName(pricerRuleName, txOptions);
+    assert.strictEqual(ruleByNameData.ruleName, pricerRuleName, 'Incorrect rule name was registered');
+    assert.strictEqual(ruleByNameData.ruleAddress, pricerRuleAddress, pricerRuleAddress, 'Incorrect rule address');
+
+    // Verify the rule data using rule address.
+    const ruleByAddressData = await tokenRulesInstance.getRuleByAddress(pricerRuleAddress, txOptions);
+    assert.strictEqual(ruleByAddressData.ruleName, pricerRuleName, 'Incorrect rule name was registered');
+    assert.strictEqual(ruleByAddressData.ruleAddress, pricerRuleAddress, pricerRuleAddress, 'Incorrect rule address');
+  });
+
   it('Should create a user wallet', async function() {
-    this.timeout(3 * 60000);
+    //this.timeout(3 * 60000);
 
     const userInstance = new User(
       gnosisSafeMasterCopyAddress,
