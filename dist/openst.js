@@ -81122,7 +81122,7 @@ function () {
             switch (_context.prev = _context.next) {
               case 0:
                 oThis = this;
-                txObject = oThis._createUserWallet(owners, threshold, to, data, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights, txOptions);
+                txObject = oThis._createUserWalletRawTx(owners, threshold, to, data, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights, txOptions);
                 _context.next = 4;
                 return new TxSender(txObject, oThis.auxiliaryWeb3, txOptions).execute();
 
