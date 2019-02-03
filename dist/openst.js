@@ -81151,7 +81151,7 @@ function () {
       var _createUserWallet2 = _asyncToGenerator(
       /*#__PURE__*/
       regeneratorRuntime.mark(function _callee(owners, threshold, to, data, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights, txOptions) {
-        var oThis, txObject, txReceipt, transactionHash;
+        var oThis, txObject, txReceipt;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
