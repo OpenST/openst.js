@@ -13,6 +13,7 @@ const TokenRulesSetup = Package.Setup.TokenRules,
   MockContractsDeployer = require('./../utils/MockContractsDeployer');
 
 const auxiliaryWeb3 = new Web3(config.gethRpcEndPoint),
+  ContractsInstance = new Contracts(auxiliaryWeb3),
   web3WalletHelper = new Web3WalletHelper(auxiliaryWeb3),
   assert = chai.assert,
   OrganizationHelper = Mosaic.ChainSetup.OrganizationHelper;
@@ -78,7 +79,7 @@ describe('ExecuteRule', async function() {
     const response = await tokenRules.deploy(organization, mockToken, txOptions, auxiliaryWeb3);
     tokenRulesAddress = response.receipt.contractAddress;
 
-    let contractInstance = Contracts.getTokenRules(auxiliaryWeb3, response.receipt.contractAddress, txOptions);
+    let contractInstance = ContractsInstance.getTokenRules(response.receipt.contractAddress, txOptions);
 
     // Verifying stored organization and token address.
     assert.strictEqual(mockToken, await contractInstance.methods.token().call(), 'Token address is incorrect');

@@ -80593,13 +80593,13 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 
 var Web3 = __webpack_require__(39);
 
@@ -80608,7 +80608,6 @@ var AbiBinProvider = __webpack_require__(62);
 var Mosaic = __webpack_require__(181);
 
 var Contracts = Mosaic.Contracts;
-var abibinProvider = new AbiBinProvider();
 /**
  * The class exposes instance of different contracts. Dappy can use the
  * instances to call contract methods. This gives Dappy flexibility in calling
@@ -80620,26 +80619,54 @@ var OpenSTContracts =
 function (_Contracts) {
   _inherits(OpenSTContracts, _Contracts);
 
-  function OpenSTContracts() {
+  /**
+   * Constructor OpenSTContracts.
+   * @param auxiliaryWeb3 Auxiliary web3 object.
+   */
+  function OpenSTContracts(auxiliaryWeb3) {
+    var _this;
+
     _classCallCheck(this, OpenSTContracts);
 
-    return _possibleConstructorReturn(this, _getPrototypeOf(OpenSTContracts).apply(this, arguments));
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(OpenSTContracts).call(this, null, auxiliaryWeb3));
+
+    var oThis = _assertThisInitialized(_assertThisInitialized(_this));
+
+    oThis.auxiliaryWeb3 = auxiliaryWeb3;
+    oThis.abibinProvider = new AbiBinProvider();
+    return _this;
   }
+  /**
+   * Returns TokenRules instance.
+   * @param contractAddress TokenRules contract address.
+   * @param txOptions Tx options
+   * @returns {auxiliaryWeb3.eth.Contract}
+   */
 
-  _createClass(OpenSTContracts, null, [{
+
+  _createClass(OpenSTContracts, [{
     key: "getTokenRules",
-
+    value: function getTokenRules(contractAddress, txOptions) {
+      var oThis = this;
+      oThis.auxiliaryWeb3 = Contracts._getWeb3(oThis.auxiliaryWeb3);
+      var jsonInterface = oThis.abibinProvider.getABI('TokenRules');
+      var contractInstance = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, contractAddress, txOptions);
+      return contractInstance;
+    }
     /**
-     * Returns TokenRules contract instance.
-     * @param auxiliaryWeb3 Auxiliary web3 object.
-     * @param address TokenRules contract address.
+     * Returns PriceRule instance
+     * @param contractAddress PriceRule contract address.
      * @param txOptions Tx options.
-     * @returns {Object} Contract instance.
+     * @returns {auxiliaryWeb3.eth.Contract}
      */
-    value: function getTokenRules(auxiliaryWeb3, address, txOptions) {
-      auxiliaryWeb3 = Contracts._getWeb3(auxiliaryWeb3);
-      var jsonInterface = abibinProvider.getABI('TokenRules');
-      var contractInstance = new auxiliaryWeb3.eth.Contract(jsonInterface, address, txOptions);
+
+  }, {
+    key: "getPriceRule",
+    value: function getPriceRule(contractAddress, txOptions) {
+      var oThis = this;
+      oThis.auxiliaryWeb3 = Contracts._getWeb3(oThis.auxiliaryWeb3);
+      var jsonInterface = oThis.abibinProvider.getABI('PriceRule');
+      var contractInstance = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, contractAddress, txOptions);
       return contractInstance;
     }
     /**
@@ -80649,7 +80676,7 @@ function (_Contracts) {
      * @private
      */
 
-  }, {
+  }], [{
     key: "_getWeb3",
     value: function _getWeb3(web3) {
       if (web3 instanceof Web3) {
@@ -81068,7 +81095,7 @@ function () {
    *
    * @param baseCurrencyCode The economy base currency code.
    * @param conversionRate The conversion rate from the economy base currency
-   *                        to the token.
+   *                        to the token. e.g. CR of "OST => Unsplash"
    * @param conversionRateDecimals The conversion rate's decimals from the
    *                                economy base currency to the token.
    * @param requiredPriceOracleDecimals Required decimals for price oracles.
