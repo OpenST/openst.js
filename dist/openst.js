@@ -81117,7 +81117,7 @@ function () {
   }, {
     key: "createUserWallet",
     value: function () {
-      var _createUserWallet2 = _asyncToGenerator(
+      var _createUserWallet = _asyncToGenerator(
       /*#__PURE__*/
       regeneratorRuntime.mark(function _callee(owners, threshold, to, data, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights, txOptions) {
         var oThis, txObject, txReceipt, transactionHash;
@@ -81143,7 +81143,7 @@ function () {
       }));
 
       function createUserWallet(_x, _x2, _x3, _x4, _x5, _x6, _x7, _x8) {
-        return _createUserWallet2.apply(this, arguments);
+        return _createUserWallet.apply(this, arguments);
       }
 
       return createUserWallet;
@@ -81163,8 +81163,8 @@ function () {
      */
 
   }, {
-    key: "_createUserWallet",
-    value: function _createUserWallet(owners, threshold, to, data, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights, txOptions) {
+    key: "_createUserWalletRawTx",
+    value: function _createUserWalletRawTx(owners, threshold, to, data, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights, txOptions) {
       var oThis = this;
       var gnosisSafeData = oThis.getGnosisSafeData(owners, threshold, to, data);
       var jsonInterface = oThis.abiBinProvider.getABI(UserWalletFactoryContractName),
