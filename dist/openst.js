@@ -80729,7 +80729,7 @@ function () {
             switch (_context.prev = _context.next) {
               case 0:
                 oThis = this;
-                txObject = oThis._deployRawTx(_organization, _token, txOptions);
+                txObject = oThis._deployRawTx(_organization, _token);
                 _context.next = 4;
                 return new Deployer(ContractName, txObject, oThis.auxiliaryWeb3, txOptions).deploy();
 
@@ -80840,7 +80840,7 @@ function () {
             switch (_context.prev = _context.next) {
               case 0:
                 oThis = this;
-                txObject = oThis._deployMultiSigMasterCopyRawTx(txOptions);
+                txObject = oThis._deployMultiSigMasterCopyRawTx();
                 _context.next = 4;
                 return new Deployer(MultiSigMasterCopyContractName, txObject, oThis.auxiliaryWeb3, txOptions).deploy();
 
@@ -80881,7 +80881,7 @@ function () {
             switch (_context2.prev = _context2.next) {
               case 0:
                 oThis = this;
-                txObject = oThis._deployTokenHolderMasterCopyRawTx(txOptions);
+                txObject = oThis._deployTokenHolderMasterCopyRawTx();
                 _context2.next = 4;
                 return new Deployer(THMasterCopyContractName, txObject, oThis.auxiliaryWeb3, txOptions).deploy();
 
@@ -80922,7 +80922,7 @@ function () {
             switch (_context3.prev = _context3.next) {
               case 0:
                 oThis = this;
-                txObject = oThis._deployUserWalletFactoryRawTx(txOptions);
+                txObject = oThis._deployUserWalletFactoryRawTx();
                 _context3.next = 4;
                 return new Deployer(UserWalletFactoryContractName, txObject, oThis.auxiliaryWeb3, txOptions).deploy();
 
@@ -81122,7 +81122,7 @@ function () {
             switch (_context.prev = _context.next) {
               case 0:
                 oThis = this;
-                txObject = oThis._createUserWalletRawTx(owners, threshold, to, data, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights, txOptions);
+                txObject = oThis._createUserWalletRawTx(owners, threshold, to, data, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights);
                 _context.next = 4;
                 return new TxSender(txObject, oThis.auxiliaryWeb3, txOptions).execute();
 
