@@ -80871,7 +80871,7 @@ function () {
             switch (_context.prev = _context.next) {
               case 0:
                 oThis = this;
-                txObject = oThis._deployMultiSigMasterCopyRawTx(txOptions);
+                txObject = oThis._deployMultiSigMasterCopyRawTx();
                 _context.next = 4;
                 return new Deployer(MultiSigMasterCopyContractName, txObject, oThis.auxiliaryWeb3, txOptions).deploy();
 
@@ -80912,7 +80912,7 @@ function () {
             switch (_context2.prev = _context2.next) {
               case 0:
                 oThis = this;
-                txObject = oThis._deployTokenHolderMasterCopyRawTx(txOptions);
+                txObject = oThis._deployTokenHolderMasterCopyRawTx();
                 _context2.next = 4;
                 return new Deployer(THMasterCopyContractName, txObject, oThis.auxiliaryWeb3, txOptions).deploy();
 
@@ -80953,7 +80953,7 @@ function () {
             switch (_context3.prev = _context3.next) {
               case 0:
                 oThis = this;
-                txObject = oThis._deployUserWalletFactoryRawTx(txOptions);
+                txObject = oThis._deployUserWalletFactoryRawTx();
                 _context3.next = 4;
                 return new Deployer(UserWalletFactoryContractName, txObject, oThis.auxiliaryWeb3, txOptions).deploy();
 
@@ -81142,7 +81142,7 @@ function () {
   }, {
     key: "createUserWallet",
     value: function () {
-      var _createUserWallet2 = _asyncToGenerator(
+      var _createUserWallet = _asyncToGenerator(
       /*#__PURE__*/
       regeneratorRuntime.mark(function _callee(owners, threshold, to, data, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights, txOptions) {
         var oThis, txObject, txReceipt;
@@ -81151,7 +81151,7 @@ function () {
             switch (_context.prev = _context.next) {
               case 0:
                 oThis = this;
-                txObject = oThis._createUserWallet(owners, threshold, to, data, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights, txOptions);
+                txObject = oThis._createUserWalletRawTx(owners, threshold, to, data, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights);
                 _context.next = 4;
                 return new TxSender(txObject, oThis.auxiliaryWeb3, txOptions).execute();
 
@@ -81168,7 +81168,7 @@ function () {
       }));
 
       function createUserWallet(_x, _x2, _x3, _x4, _x5, _x6, _x7, _x8) {
-        return _createUserWallet2.apply(this, arguments);
+        return _createUserWallet.apply(this, arguments);
       }
 
       return createUserWallet;
@@ -81187,8 +81187,8 @@ function () {
      */
 
   }, {
-    key: "_createUserWallet",
-    value: function _createUserWallet(owners, threshold, to, data, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights) {
+    key: "_createUserWalletRawTx",
+    value: function _createUserWalletRawTx(owners, threshold, to, data, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights) {
       var oThis = this;
       var gnosisSafeData = oThis.getGnosisSafeData(owners, threshold, to, data);
       var jsonInterface = oThis.abiBinProvider.getABI(UserWalletFactoryContractName),
