@@ -80817,6 +80817,7 @@ function (_Contracts) {
 
   /**
    * Constructor OpenSTContracts.
+   *
    * @param auxiliaryWeb3 Auxiliary web3 object.
    */
   function OpenSTContracts(auxiliaryWeb3) {
@@ -80834,6 +80835,7 @@ function (_Contracts) {
   }
   /**
    * Returns TokenRules instance.
+   *
    * @param contractAddress TokenRules contract address.
    * @param txOptions Tx options
    * @returns {auxiliaryWeb3.eth.Contract}
@@ -80851,6 +80853,7 @@ function (_Contracts) {
     }
     /**
      * Returns PricerRule instance
+     *
      * @param contractAddress PricerRule contract address.
      * @param txOptions Tx options.
      * @returns {auxiliaryWeb3.eth.Contract}
@@ -80867,6 +80870,7 @@ function (_Contracts) {
     }
     /**
      * Returns web3 instance. If web3 is string constructs web3 object from string.
+     * 
      * @param web3 Web3 object.
      * @returns {Web3} Web3 object.
      * @private
@@ -81881,7 +81885,7 @@ function () {
    * PricerRule constructor.
    *
    * @param auxiliaryWeb3 Auxiliary chain web3 object.
-   * @param contractAddress PriceRule contract address.
+   * @param contractAddress PricerRule contract address.
    */
   function PricerRule(auxiliaryWeb3, contractAddress) {
     _classCallCheck(this, PricerRule);
@@ -82075,7 +82079,7 @@ function () {
     key: "_addPriceOracleRawTx",
     value: function _addPriceOracleRawTx(priceOracleAddress) {
       var oThis = this;
-      return oThis._priceRuleContractInstance().methods.addPriceOracle(priceOracleAddress);
+      return oThis._pricerRuleContractInstance().methods.addPriceOracle(priceOracleAddress);
     }
     /**
      * Removes the price oracle for the specified pay currency code.
@@ -82090,7 +82094,7 @@ function () {
     value: function _removePriceOracleRawTx(payCurrencyCode) {
       var oThis = this;
       var bytesPayCurrencyCode = oThis.auxiliaryWeb3.utils.stringToHex(payCurrencyCode.toString());
-      return oThis._priceRuleContractInstance().methods.removePriceOracle(bytesPayCurrencyCode);
+      return oThis._pricerRuleContractInstance().methods.removePriceOracle(bytesPayCurrencyCode);
     }
     /**
      * Sets an acceptance margin for the base currency price per pay
@@ -82106,7 +82110,7 @@ function () {
     value: function _setAcceptanceMarginRawTx(payCurrencyCode, acceptanceMargin) {
       var oThis = this;
       var bytesPayCurrencyCode = oThis.auxiliaryWeb3.utils.stringToHex(payCurrencyCode.toString());
-      return oThis._priceRuleContractInstance().methods.setAcceptedMargin(bytesPayCurrencyCode, acceptanceMargin);
+      return oThis._pricerRuleContractInstance().methods.setAcceptedMargin(bytesPayCurrencyCode, acceptanceMargin);
     }
     /**
      * Removes an acceptance margin of the base currency price in the
@@ -82122,7 +82126,7 @@ function () {
     value: function _removeAcceptanceMarginRawTx(payCurrencyCode) {
       var oThis = this;
       var bytesPayCurrencyCode = oThis.auxiliaryWeb3.utils.stringToHex(payCurrencyCode.toString());
-      return oThis._priceRuleContractInstance().methods.removeAcceptedMargin(bytesPayCurrencyCode);
+      return oThis._pricerRuleContractInstance().methods.removeAcceptedMargin(bytesPayCurrencyCode);
     }
     /**
      * Returns PricerRule contract instance.
@@ -82132,8 +82136,8 @@ function () {
      */
 
   }, {
-    key: "_priceRuleContractInstance",
-    value: function _priceRuleContractInstance() {
+    key: "_pricerRuleContractInstance",
+    value: function _pricerRuleContractInstance() {
       var oThis = this;
       var jsonInterface = oThis.abiBinProvider.getABI(PricerRuleContractName),
           contractInstance = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, oThis.pricerRuleAddress);

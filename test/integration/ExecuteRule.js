@@ -150,10 +150,10 @@ describe('ExecuteRule', async function() {
     );
     assert.strictEqual(pricerRulesDeployResponse.receipt.status, true);
     pricerRuleAddress = pricerRulesDeployResponse.receipt.contractAddress;
-    const priceRuleInstance = ContractsInstance.PricerRule(pricerRuleAddress, txOptions);
+    const pricerRuleInstance = ContractsInstance.PricerRule(pricerRuleAddress, txOptions);
     // Sanity check
     assert.strictEqual(
-      await priceRuleInstance.methods.tokenRules().call(),
+      await pricerRuleInstance.methods.tokenRules().call(),
       tokenRulesAddress,
       'TokenRules address is incorrect!'
     );
