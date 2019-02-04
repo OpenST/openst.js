@@ -1,3 +1,23 @@
+// Copyright 2019 OpenST Ltd.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// ----------------------------------------------------------------------------
+//
+// http://www.simpletoken.org/
+//
+// ----------------------------------------------------------------------------
+
 const chai = require('chai'),
   Web3 = require('web3'),
   Package = require('../../index'),
@@ -56,7 +76,6 @@ describe('ExecuteRule', async function() {
   });
 
   it('Should deploy Organization contract', async function() {
-    //this.timeout(60000);
     let orgHelper = new OrganizationHelper(auxiliaryWeb3, null);
     const orgConfig = {
       deployer: config.deployerAddress,
@@ -72,7 +91,6 @@ describe('ExecuteRule', async function() {
   });
 
   it('Deploys EIP20Token contract', async function() {
-    //this.timeout(60000);
     const deployerInstance = new MockContractsDeployer(config.deployerAddress, auxiliaryWeb3);
 
     await deployerInstance.deployMockToken();
@@ -82,8 +100,6 @@ describe('ExecuteRule', async function() {
   });
 
   it('Should deploy TokenRules contract', async function() {
-    this.timeout(60000);
-
     const tokenRules = new TokenRulesSetup(auxiliaryWeb3);
 
     const response = await tokenRules.deploy(organization, mockToken, txOptions);
@@ -101,8 +117,6 @@ describe('ExecuteRule', async function() {
   });
 
   it('Should deploy Gnosis MultiSig MasterCopy contract', async function() {
-    // this.timeout(60000);
-
     const userSetup = new UserSetup(auxiliaryWeb3);
     const multiSigTxResponse = await userSetup.deployMultiSigMasterCopy(txOptions);
     gnosisSafeMasterCopyAddress = multiSigTxResponse.receipt.contractAddress;
@@ -110,8 +124,6 @@ describe('ExecuteRule', async function() {
   });
 
   it('Should deploy TokenHolder MasterCopy contract', async function() {
-    //this.timeout(60000);
-
     const userSetup = new UserSetup(auxiliaryWeb3);
     const tokenHolderTxResponse = await userSetup.deployTokenHolderMasterCopy(txOptions);
     thMasterCopyAddress = tokenHolderTxResponse.receipt.contractAddress;
@@ -119,8 +131,6 @@ describe('ExecuteRule', async function() {
   });
 
   it('Should deploy UserWalletFactory contract', async function() {
-    //this.timeout(60000);
-
     const userSetup = new UserSetup(auxiliaryWeb3);
     const userWalletFactoryResponse = await userSetup.deployUserWalletFactory(txOptions);
     userWalletFactoryAddress = userWalletFactoryResponse.receipt.contractAddress;
@@ -184,8 +194,6 @@ describe('ExecuteRule', async function() {
   });
 
   it('Should create a user wallet', async function() {
-    //this.timeout(3 * 60000);
-
     const userInstance = new User(
       gnosisSafeMasterCopyAddress,
       thMasterCopyAddress,
