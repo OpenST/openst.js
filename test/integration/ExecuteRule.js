@@ -1,3 +1,23 @@
+// Copyright 2019 OpenST Ltd.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// ----------------------------------------------------------------------------
+//
+// http://www.simpletoken.org/
+//
+// ----------------------------------------------------------------------------
+
 const chai = require('chai'),
   Web3 = require('web3'),
   Package = require('../../index');
@@ -178,13 +198,13 @@ describe('ExecuteRule', async function() {
     assert.strictEqual(response.events.RuleRegistered['returnValues']._ruleAddress, mockRuleAddress);
 
     // Verify the rule data using rule name.
-    const ruleByNameData = await rules.getRuleByName(mockRule, txOptions);
+    const ruleByNameData = await rules.getRuleByName(mockRule);
     assert.strictEqual(ruleByNameData.ruleName, mockRule, 'Incorrect rule name was registered');
     assert.strictEqual(ruleByNameData.ruleAddress, mockRuleAddress, mockRuleAddress, 'Incorrect rule address');
 
     // Verify the rule data using rule address.
-    const ruleByAddressData = await rules.getRuleByAddress(mockRuleAddress, txOptions);
-    assert.strictEqual(ruleByNameData.ruleName, mockRule, 'Incorrect rule name was registered');
-    assert.strictEqual(ruleByNameData.ruleAddress, mockRuleAddress, mockRuleAddress, 'Incorrect rule address');
+    const ruleByAddressData = await rules.getRuleByAddress(mockRuleAddress);
+    assert.strictEqual(ruleByAddressData.ruleName, mockRule, 'Incorrect rule name was registered');
+    assert.strictEqual(ruleByAddressData.ruleAddress, mockRuleAddress, 'Incorrect rule address');
   });
 });
