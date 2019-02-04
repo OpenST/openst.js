@@ -80901,8 +80901,8 @@ function () {
   /**
    * Performs deployment of TokenRules contract.
    *
-   * @param _organization Organization which holds all the keys needed to administer the economy.
-   * @param _token EIP20 token contract address deployed for an economy.
+   * @param organization Organization which holds all the keys needed to administer the economy.
+   * @param token EIP20 token contract address deployed for an economy.
    * @param txOptions Tx options.
    * @returns {Object} - Transaction receipt.
    */
@@ -80913,14 +80913,14 @@ function () {
     value: function () {
       var _deploy = _asyncToGenerator(
       /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee(_organization, _token, txOptions) {
+      regeneratorRuntime.mark(function _callee(organization, token, txOptions) {
         var oThis, txObject, txReceipt;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
                 oThis = this;
-                txObject = oThis._deployRawTx(_organization, _token);
+                txObject = oThis._deployRawTx(organization, token);
                 _context.next = 4;
                 return new Deployer(ContractName, txObject, oThis.auxiliaryWeb3, txOptions).deploy();
 
@@ -80945,19 +80945,19 @@ function () {
     /**
      * Performs deployment of TokenRules contract.
      *
-     * @param _organization Organization which holds all the keys needed to administer the economy.
-     * @param _token EIP20 token contract address deployed for an economy.
+     * @param organization Organization which holds all the keys needed to administer the economy.
+     * @param token EIP20 token contract address deployed for an economy.
      * @private
      */
 
   }, {
     key: "_deployRawTx",
-    value: function _deployRawTx(_organization, _token) {
+    value: function _deployRawTx(organization, token) {
       var oThis = this;
       var abiBinProvider = oThis.abiBinProvider;
       var abi = abiBinProvider.getABI(ContractName);
       var bin = abiBinProvider.getBIN(ContractName);
-      var args = [_organization, _token];
+      var args = [organization, token];
       var contract = new oThis.auxiliaryWeb3.eth.Contract(abi, null);
       return contract.deploy({
         data: bin,
