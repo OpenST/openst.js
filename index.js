@@ -7,6 +7,7 @@ const User = require('./lib/setup/User');
 const UserHelper = require('./lib/helper/User');
 const TokenRulesHelper = require('./lib/helper/TokenRules');
 const Rules = require('./lib/setup/Rules');
+const PricerRule = require('./lib/helper/rules/PricerRule');
 
 module.exports = {
   Setup: {
@@ -18,6 +19,9 @@ module.exports = {
   Contracts: Contracts,
   Helpers: {
     User: UserHelper,
-    TokenRules: TokenRulesHelper
+    TokenRules: TokenRulesHelper,
+    Rules: {
+      PricerRule: PricerRule
+    }
   }
 };
