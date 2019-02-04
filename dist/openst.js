@@ -81693,6 +81693,25 @@ module.exports = TokenRules;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
+// Copyright 2019 OpenST Ltd.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// ----------------------------------------------------------------------------
+//
+// http://www.simpletoken.org/
+//
+// ----------------------------------------------------------------------------
 
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
@@ -81820,6 +81839,25 @@ module.exports = Rules;
 /* 643 */
 /***/ (function(module, exports, __webpack_require__) {
 
+// Copyright 2019 OpenST Ltd.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// ----------------------------------------------------------------------------
+//
+// http://www.simpletoken.org/
+//
+// ----------------------------------------------------------------------------
 'user strict';
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
@@ -81839,6 +81877,12 @@ var AbiBinProvider = __webpack_require__(42),
 var PricerRule =
 /*#__PURE__*/
 function () {
+  /**
+   * PricerRule constructor.
+   *
+   * @param auxiliaryWeb3 Auxiliary chain web3 object.
+   * @param contractAddress PriceRule contract address.
+   */
   function PricerRule(auxiliaryWeb3, contractAddress) {
     _classCallCheck(this, PricerRule);
 
@@ -81846,7 +81890,14 @@ function () {
     oThis.auxiliaryWeb3 = auxiliaryWeb3;
     oThis.pricerRuleAddress = contractAddress;
     oThis.abiBinProvider = new AbiBinProvider();
-  } // TODO Worker
+  }
+  /**
+   * Adds a new price oracle. From should be worker only.
+   *
+   * @param priceOracleAddress PriceOracle contract address.
+   * @param txOptions Tx options.
+   * @returns {Promise<*>}
+   */
 
 
   _createClass(PricerRule, [{
@@ -81855,20 +81906,21 @@ function () {
       var _addPriceOracle = _asyncToGenerator(
       /*#__PURE__*/
       regeneratorRuntime.mark(function _callee(priceOracleAddress, txOptions) {
-        var txObject, txReceipt;
+        var oThis, txObject, txReceipt;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
+                oThis = this;
                 txObject = oThis._addPriceOracleRawTx(priceOracleAddress);
-                _context.next = 3;
+                _context.next = 4;
                 return new TxSender(txObject, oThis.auxiliaryWeb3, txOptions).execute();
 
-              case 3:
+              case 4:
                 txReceipt = _context.sent;
                 return _context.abrupt("return", txReceipt);
 
-              case 5:
+              case 6:
               case "end":
                 return _context.stop();
             }
@@ -81881,7 +81933,14 @@ function () {
       }
 
       return addPriceOracle;
-    }() // TODO Worker
+    }()
+    /**
+     * Removes price oracle contract address for pay CurrencyCode. From should be worker only.
+     *
+     * @param payCurrencyCode QuoteCurrency code. e.g. ETH, BTC.
+     * @param txOptions Tx options.
+     * @returns {Promise<*>}
+     */
 
   }, {
     key: "removePriceOracle",
@@ -81889,20 +81948,21 @@ function () {
       var _removePriceOracle = _asyncToGenerator(
       /*#__PURE__*/
       regeneratorRuntime.mark(function _callee2(payCurrencyCode, txOptions) {
-        var txObject, txReceipt;
+        var oThis, txObject, txReceipt;
         return regeneratorRuntime.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
+                oThis = this;
                 txObject = oThis._removePriceOracleRawTx(payCurrencyCode);
-                _context2.next = 3;
+                _context2.next = 4;
                 return new TxSender(txObject, oThis.auxiliaryWeb3, txOptions).execute();
 
-              case 3:
+              case 4:
                 txReceipt = _context2.sent;
                 return _context2.abrupt("return", txReceipt);
 
-              case 5:
+              case 6:
               case "end":
                 return _context2.stop();
             }
@@ -81915,7 +81975,16 @@ function () {
       }
 
       return removePriceOracle;
-    }() // TODO Worker
+    }()
+    /**
+     * Sets an acceptance margin for the base currency price per pay
+     *         currency. From should be worker only.
+     *
+     * @param payCurrencyCode QuoteCurrency code. e.g. ETH, BTC.
+     * @param acceptanceMargin Acceptance margin for the base currency price per pay currency.
+     * @param txOptions Tx options.
+     * @returns {Promise<*>}
+     */
 
   }, {
     key: "setAcceptanceMargin",
@@ -81923,20 +81992,21 @@ function () {
       var _setAcceptanceMargin = _asyncToGenerator(
       /*#__PURE__*/
       regeneratorRuntime.mark(function _callee3(payCurrencyCode, acceptanceMargin, txOptions) {
-        var txObject, txReceipt;
+        var oThis, txObject, txReceipt;
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
+                oThis = this;
                 txObject = oThis._setAcceptanceMarginRawTx(payCurrencyCode, acceptanceMargin);
-                _context3.next = 3;
+                _context3.next = 4;
                 return new TxSender(txObject, oThis.auxiliaryWeb3, txOptions).execute();
 
-              case 3:
+              case 4:
                 txReceipt = _context3.sent;
                 return _context3.abrupt("return", txReceipt);
 
-              case 5:
+              case 6:
               case "end":
                 return _context3.stop();
             }
@@ -81950,26 +82020,117 @@ function () {
 
       return setAcceptanceMargin;
     }()
+    /**
+     * Removes an acceptance margin of the base currency price in the
+     *         specified pay currency. From should be worker only.
+     *
+     * @param payCurrencyCode QuoteCurrency code. e.g. ETH, BTC.
+     * @param txOptions Tx options.
+     * @returns {Promise<*>}
+     */
+
+  }, {
+    key: "removeAcceptanceMargin",
+    value: function () {
+      var _removeAcceptanceMargin = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee4(payCurrencyCode, txOptions) {
+        var oThis, txObject, txReceipt;
+        return regeneratorRuntime.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                oThis = this;
+                txObject = oThis._removeAcceptanceMarginRawTx(payCurrencyCode);
+                _context4.next = 4;
+                return new TxSender(txObject, oThis.auxiliaryWeb3, txOptions).execute();
+
+              case 4:
+                txReceipt = _context4.sent;
+                return _context4.abrupt("return", txReceipt);
+
+              case 6:
+              case "end":
+                return _context4.stop();
+            }
+          }
+        }, _callee4, this);
+      }));
+
+      function removeAcceptanceMargin(_x8, _x9) {
+        return _removeAcceptanceMargin.apply(this, arguments);
+      }
+
+      return removeAcceptanceMargin;
+    }()
+    /**
+     * Adds a new price oracle.
+     *
+     * @param priceOracleAddress PriceOracle contract address.
+     * @returns {Promise<*>} Promise object.
+     * @private
+     */
+
   }, {
     key: "_addPriceOracleRawTx",
     value: function _addPriceOracleRawTx(priceOracleAddress) {
       var oThis = this;
-      return _priceRuleContractInstance().methods.addPriceOracle(priceOracleAddress);
+      return oThis._priceRuleContractInstance().methods.addPriceOracle(priceOracleAddress);
     }
+    /**
+     * Removes the price oracle for the specified pay currency code.
+     *
+     * @param payCurrencyCode QuoteCurrency code. e.g. ETH, BTC.
+     * @returns {Promise<*>} Promise object.
+     * @private
+     */
+
   }, {
     key: "_removePriceOracleRawTx",
     value: function _removePriceOracleRawTx(payCurrencyCode) {
       var oThis = this;
       var bytesPayCurrencyCode = oThis.auxiliaryWeb3.utils.stringToHex(payCurrencyCode.toString());
-      return _priceRuleContractInstance().methods.removePriceOracle(bytesPayCurrencyCode);
+      return oThis._priceRuleContractInstance().methods.removePriceOracle(bytesPayCurrencyCode);
     }
+    /**
+     * Sets an acceptance margin for the base currency price per pay
+     *      currency. From should be worker only.
+     * @param payCurrencyCode QuoteCurrency code. e.g. ETH, BTC.
+     * @param acceptanceMargin Acceptance margin for the base currency price per pay currency.
+     * @returns {*}
+     * @private
+     */
+
   }, {
-    key: "_setAcceptedMarginRawTx",
-    value: function _setAcceptedMarginRawTx(payCurrencyCode, acceptanceMargin) {
+    key: "_setAcceptanceMarginRawTx",
+    value: function _setAcceptanceMarginRawTx(payCurrencyCode, acceptanceMargin) {
       var oThis = this;
       var bytesPayCurrencyCode = oThis.auxiliaryWeb3.utils.stringToHex(payCurrencyCode.toString());
-      return _priceRuleContractInstance().methods.setAcceptedMargin(bytesPayCurrencyCode, acceptanceMargin);
+      return oThis._priceRuleContractInstance().methods.setAcceptedMargin(bytesPayCurrencyCode, acceptanceMargin);
     }
+    /**
+     * Removes an acceptance margin of the base currency price in the
+     *         specified pay currency. From should be worker only.
+     *
+     * @param payCurrencyCode QuoteCurrency code. e.g. ETH, BTC.
+     * @returns {Promise<*>}
+     * @private
+     */
+
+  }, {
+    key: "_removeAcceptanceMarginRawTx",
+    value: function _removeAcceptanceMarginRawTx(payCurrencyCode) {
+      var oThis = this;
+      var bytesPayCurrencyCode = oThis.auxiliaryWeb3.utils.stringToHex(payCurrencyCode.toString());
+      return oThis._priceRuleContractInstance().methods.removeAcceptedMargin(bytesPayCurrencyCode);
+    }
+    /**
+     * Returns PricerRule contract instance.
+     *
+     * @returns {oThis.auxiliaryWeb3.eth.Contract}
+     * @private
+     */
+
   }, {
     key: "_priceRuleContractInstance",
     value: function _priceRuleContractInstance() {
