@@ -1,15 +1,37 @@
+// Copyright 2019 OpenST Ltd.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// ----------------------------------------------------------------------------
+//
+// http://www.simpletoken.org/
+//
+// ----------------------------------------------------------------------------
+
 const chai = require('chai'),
   Web3 = require('web3'),
   Package = require('../../index');
 
 const TokenRulesSetup = Package.Setup.TokenRules,
   UserSetup = Package.Setup.User,
+  MockContractsDeployer = require('./../utils/MockContractsDeployer'),
   Mosaic = require('@openstfoundation/mosaic-tbd'),
   config = require('../utils/configReader'),
   Web3WalletHelper = require('../utils/Web3WalletHelper'),
   Contracts = Package.Contracts,
   User = Package.Helpers.User,
-  MockContractsDeployer = require('./../utils/MockContractsDeployer');
+  AbiBinProvider = Package.AbiBinProvider,
+  TokenRules = Package.Helpers.TokenRules;
 
 const auxiliaryWeb3 = new Web3(config.gethRpcEndPoint),
   web3WalletHelper = new Web3WalletHelper(auxiliaryWeb3),
@@ -152,5 +174,37 @@ describe('ExecuteRule', async function() {
 
     gnosisSafeProxy = userWalletEvent._gnosisSafeProxy;
     tokenHolderProxy = userWalletEvent._tokenHolderProxy;
+  });
+
+  it('Should register a rule', async function() {
+    this.timeout(3 * 60000);
+
+    // Only worker can registerRule.
+    const txOptions = {
+      from: worker,
+      gasPrice: config.gasPrice,
+      gas: config.gas
+    };
+
+    const rules = new TokenRules(tokenRulesAddress, auxiliaryWeb3),
+      mockRule = 'TestRule',
+      mockRuleAddress = tokenRulesAddress,
+      abiBinProvider = new AbiBinProvider(),
+      // TODO: update pricer abi here.
+      rulesAbi = abiBinProvider.getABI('TokenRules'),
+      response = await rules.registerRule(mockRule, mockRuleAddress, rulesAbi.toString(), txOptions);
+
+    assert.strictEqual(response.events.RuleRegistered['returnValues']._ruleName, mockRule);
+    assert.strictEqual(response.events.RuleRegistered['returnValues']._ruleAddress, mockRuleAddress);
+
+    // Verify the rule data using rule name.
+    const ruleByNameData = await rules.getRuleByName(mockRule);
+    assert.strictEqual(ruleByNameData.ruleName, mockRule, 'Incorrect rule name was registered');
+    assert.strictEqual(ruleByNameData.ruleAddress, mockRuleAddress, mockRuleAddress, 'Incorrect rule address');
+
+    // Verify the rule data using rule address.
+    const ruleByAddressData = await rules.getRuleByAddress(mockRuleAddress);
+    assert.strictEqual(ruleByAddressData.ruleName, mockRule, 'Incorrect rule name was registered');
+    assert.strictEqual(ruleByAddressData.ruleAddress, mockRuleAddress, 'Incorrect rule address');
   });
 });
