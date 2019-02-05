@@ -1,6 +1,6 @@
 {
   "name": "@openstfoundation/openst.js",
-  "version": "0.9.4",
+  "version": "0.10.0",
   "description": "OpenST is a framework for building token economies.",
   "keywords": [
     "OpenST",
@@ -22,6 +22,7 @@
     "url": "https://github.com/OpenSTFoundation/openst.js/issues"
   },
   "scripts": {
+    "test": "mocha --recursive --timeout 120000 test --exit",
     "pre-commit": "lint-staged",
     "webpack-build": "webpack --mode=production",
     "web-pre-build": "node webPreBuild.js",

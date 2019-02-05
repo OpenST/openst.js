@@ -28,6 +28,6 @@ install:
 before_script:
   - node tools/initDevEnv.js ~
 script:
-  - mocha --timeout 120000 test/* --exit
+  - npm run test
 after_script:
   - kill $(ps aux | grep 'openst-setup/origin-geth' | awk '{print $2}')
