@@ -60,7 +60,8 @@ let wallets,
   tokenHolderProxy,
   gnosisSafeProxy,
   ephemeralKey,
-  deployerInstance;
+  deployerInstance,
+  tokenRules;
 
 describe('ExecuteRule', async function() {
   before(async function() {
@@ -98,7 +99,7 @@ describe('ExecuteRule', async function() {
   it('Should deploy TokenRules contract', async function() {
     this.timeout(3 * 60000);
 
-    const tokenRules = new TokenRulesSetup(auxiliaryWeb3);
+    tokenRules = new TokenRulesSetup(auxiliaryWeb3);
 
     const response = await tokenRules.deploy(organization, mockToken, txOptions, auxiliaryWeb3);
     tokenRulesAddress = response.receipt.contractAddress;
@@ -232,12 +233,13 @@ describe('ExecuteRule', async function() {
     const directTransferExecutable = tokenHolder.getDirectTransferExecutableData(transferTo, transferAmount),
       nonce = 0;
 
-    let transaction = {};
-    (transaction.from = tokenHolderProxy),
-      (transaction.to = tokenRulesAddress),
-      (transaction.data = directTransferExecutable),
-      (transaction.nonce = nonce),
-      (transaction.callPrefix = tokenHolder.getTokenHolderExecuteRuleCallPrefix());
+    let transaction = {
+      from: tokenHolderProxy,
+      to: tokenRulesAddress,
+      data: directTransferExecutable,
+      nonce: nonce,
+      callPrefix: tokenHolder.getTokenHolderExecuteRuleCallPrefix()
+    };
 
     const eip1077TransactionHash = ephemeralKey.getEIP1077TransactionHash(transaction);
 
