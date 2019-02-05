@@ -20,7 +20,9 @@
 
 const chai = require('chai'),
   Web3 = require('web3'),
-  Package = require('../../index');
+  Package = require('../../index'),
+  TokenHolder = require('./../../lib/helper/TokenHolder'),
+  EthUtils = require('ethereumjs-util');
 
 const TokenRulesSetup = Package.Setup.TokenRules,
   UserSetup = Package.Setup.User,
@@ -56,7 +58,9 @@ let wallets,
   mockToken,
   owner = config.deployerAddress,
   tokenHolderProxy,
-  gnosisSafeProxy;
+  gnosisSafeProxy,
+  ephemeralKey,
+  deployerInstance;
 
 describe('ExecuteRule', async function() {
   before(async function() {
@@ -83,7 +87,7 @@ describe('ExecuteRule', async function() {
   });
 
   it('Deploys EIP20Token contract', async function() {
-    const deployerInstance = new MockContractsDeployer(config.deployerAddress, auxiliaryWeb3);
+    deployerInstance = new MockContractsDeployer(config.deployerAddress, auxiliaryWeb3);
 
     await deployerInstance.deployMockToken();
 
@@ -149,9 +153,10 @@ describe('ExecuteRule', async function() {
       auxiliaryWeb3
     );
 
+    ephemeralKey = wallets[5];
     const owners = [wallets[3].address],
       threshold = 1,
-      sessionKeys = [wallets[5].address],
+      sessionKeys = [ephemeralKey.address],
       sessionKeysSpendingLimits = [1000000],
       sessionKeysExpirationHeights = [100000000000];
 
@@ -206,5 +211,65 @@ describe('ExecuteRule', async function() {
     const ruleByAddressData = await rules.getRuleByAddress(mockRuleAddress);
     assert.strictEqual(ruleByAddressData.ruleName, mockRule, 'Incorrect rule name was registered');
     assert.strictEqual(ruleByAddressData.ruleAddress, mockRuleAddress, 'Incorrect rule address');
+  });
+
+  it('Should perform direct transfer of tokens', async function() {
+    const tokenHolder = new TokenHolder(auxiliaryWeb3, tokenRulesAddress, tokenHolderProxy),
+      mockTokenAbi = deployerInstance.abiBinProvider.getABI('MockToken'),
+      contract = new auxiliaryWeb3.eth.Contract(mockTokenAbi, mockToken, txOptions);
+
+    // Funding TH proxy with tokens.
+    const amount = '1111',
+      txObject = contract.methods.transfer(tokenHolderProxy, amount),
+      receiver = wallets[6];
+    await txObject.send(txOptions);
+
+    const initialTHProxyBalance = await contract.methods.balanceOf(tokenHolderProxy).call(),
+      transferTo = [receiver.address],
+      receiverInitialBalance = await contract.methods.balanceOf(receiver.address).call(),
+      transferAmount = [20];
+
+    const directTransferExecutable = tokenHolder.getDirectTransferExecutableData(transferTo, transferAmount),
+      nonce = 0;
+
+    let transaction = {};
+    (transaction.from = tokenHolderProxy),
+      (transaction.to = tokenRulesAddress),
+      (transaction.data = directTransferExecutable),
+      (transaction.nonce = nonce),
+      (transaction.callPrefix = tokenHolder.getTokenHolderExecuteRuleCallPrefix());
+
+    const eip1077TransactionHash = ephemeralKey.getEIP1077TransactionHash(transaction);
+
+    const exTxSignature = EthUtils.ecsign(
+      EthUtils.toBuffer(eip1077TransactionHash),
+      EthUtils.toBuffer(ephemeralKey.privateKey)
+    );
+
+    await tokenHolder.executeRule(
+      directTransferExecutable,
+      nonce,
+      EthUtils.bufferToHex(exTxSignature.r),
+      EthUtils.bufferToHex(exTxSignature.s),
+      exTxSignature.v,
+      txOptions
+    );
+
+    const finalTHProxyBalance = await contract.methods.balanceOf(tokenHolderProxy).call(),
+      finalReceiverBalance = await contract.methods.balanceOf(receiver.address).call(),
+      expectedReceiverBalance = parseInt(receiverInitialBalance) + transferAmount[0];
+
+    assert.strictEqual(
+      initialTHProxyBalance - transferAmount[0],
+      parseInt(finalTHProxyBalance),
+      `TokenHolder proxy balance is ${finalTHProxyBalance} and expected balance is ${initialTHProxyBalance -
+        transferAmount[0]}`
+    );
+
+    assert.strictEqual(
+      parseInt(finalReceiverBalance),
+      expectedReceiverBalance,
+      `Receiver account token balance is ${finalReceiverBalance} and expected balance is ${expectedReceiverBalance}`
+    );
   });
 });

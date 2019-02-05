@@ -27,6 +27,9 @@ const User = require('./lib/setup/User');
 const UserHelper = require('./lib/helper/User');
 const TokenRulesHelper = require('./lib/helper/TokenRules');
 
+const SignEIP1077Extension = require('./utils/SignEIP1077Extension');
+SignEIP1077Extension();
+
 module.exports = {
   Setup: {
     TokenRules: TokenRules,
