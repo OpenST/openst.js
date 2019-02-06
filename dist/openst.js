@@ -81721,6 +81721,24 @@ function () {
       return registerRule;
     }()
     /**
+     * It is used to get the executable data for directTransfers method of TokenRules.
+     *
+     * @param transferTo List of addresses to transfer.
+     * @param transfersAmount List of amounts to transfer.
+     *
+     * @returns Executable data of directTransfers method.
+     */
+
+  }, {
+    key: "getDirectTransferExecutableData",
+    value: function getDirectTransferExecutableData(transferTo, transfersAmount) {
+      var oThis = this;
+      var jsonInterface = oThis.abiBinProvider.getABI(contractName),
+          contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, oThis.tokenRules),
+          directTransferExecutable = contract.methods.directTransfers(transferTo, transfersAmount).encodeABI();
+      return directTransferExecutable;
+    }
+    /**
      * Private method which is used to register a custom rule in the economy.
      *
      * @param ruleName Name of the rule.
@@ -81887,8 +81905,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 var TxSender = __webpack_require__(101),
     AbiBinProvider = __webpack_require__(38);
 
-var tokenHolderContractName = 'TokenHolder',
-    tokenRulesContractName = 'TokenRules';
+var tokenHolderContractName = 'TokenHolder';
 /**
  * It consists of methods for a user's TokenHolder.
  */
@@ -81913,31 +81930,13 @@ function () {
     oThis.abiBinProvider = new AbiBinProvider();
   }
   /**
-   * It is used to get the executable data for directTransfers method of TokenRules.
+   * It is used to get call prefix of executeRule method in TokenHolder contract.
    *
-   * @param transferTo List of addresses to transfer.
-   * @param transfersAmount List of amounts to transfer.
-   *
-   * @returns Executable data of directTransfers method.
+   * @returns Encoded signature of executeRule method.
    */
 
 
   _createClass(TokenHolder, [{
-    key: "getDirectTransferExecutableData",
-    value: function getDirectTransferExecutableData(transferTo, transfersAmount) {
-      var oThis = this;
-      var jsonInterface = oThis.abiBinProvider.getABI(tokenRulesContractName),
-          contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, oThis.tokenRules),
-          directTransferExecutable = contract.methods.directTransfers(transferTo, transfersAmount).encodeABI();
-      return directTransferExecutable;
-    }
-    /**
-     * It is used to get call prefix of executeRule method in TokenHolder contract.
-     *
-     * @returns Encoded signature of executeRule method.
-     */
-
-  }, {
     key: "getTokenHolderExecuteRuleCallPrefix",
     value: function getTokenHolderExecuteRuleCallPrefix() {
       var oThis = this;
@@ -82059,7 +82058,7 @@ var AbiBinProvider = __webpack_require__(38),
     Deployer = __webpack_require__(152),
     PricerRuleContractName = 'PricerRule';
 /**
- * Helper method which performs deployment of multiple Rules contract.
+ * Helper class which performs setup/deployment of multiple Rules contract.
  */
 
 
@@ -82170,6 +82169,7 @@ module.exports = Rules;
 /* 644 */
 /***/ (function(module, exports, __webpack_require__) {
 
+"use strict";
 // Copyright 2019 OpenST Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -82189,7 +82189,7 @@ module.exports = Rules;
 // http://www.simpletoken.org/
 //
 // ----------------------------------------------------------------------------
-'user strict';
+
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
@@ -82204,6 +82204,10 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 var AbiBinProvider = __webpack_require__(38),
     PricerRuleContractName = 'PricerRule',
     TxSender = __webpack_require__(101);
+/**
+ * Helper class which provides interaction methods of PricerRule contract.
+ */
+
 
 var PricerRule =
 /*#__PURE__*/
@@ -82223,7 +82227,7 @@ function () {
     oThis.abiBinProvider = new AbiBinProvider();
   }
   /**
-   * Adds a new price oracle. From should be worker only.
+   * Adds a new price oracle. From address should be only worker address.
    *
    * @param priceOracleAddress PriceOracle contract address.
    * @param txOptions Tx options.
@@ -82266,7 +82270,7 @@ function () {
       return addPriceOracle;
     }()
     /**
-     * Removes price oracle contract address for pay CurrencyCode. From should be worker only.
+     * Removes price oracle contract address for pay CurrencyCode. From address should be only worker address.
      *
      * @param payCurrencyCode QuoteCurrency code. e.g. ETH, BTC.
      * @param txOptions Tx options.
@@ -82309,7 +82313,7 @@ function () {
     }()
     /**
      * Sets an acceptance margin for the base currency price per pay
-     *         currency. From should be worker only.
+     *         currency. From address should be only worker address.
      *
      * @param payCurrencyCode QuoteCurrency code. e.g. ETH, BTC.
      * @param acceptanceMargin Acceptance margin for the base currency price per pay currency.
@@ -82353,7 +82357,7 @@ function () {
     }()
     /**
      * Removes an acceptance margin of the base currency price in the
-     *         specified pay currency. From should be worker only.
+     *         specified pay currency. From address should be only worker address.
      *
      * @param payCurrencyCode QuoteCurrency code. e.g. ETH, BTC.
      * @param txOptions Tx options.
@@ -82394,6 +82398,26 @@ function () {
 
       return removeAcceptanceMargin;
     }()
+    /**
+     * Constructs executable data for PricerRule.pay method.
+     *
+     * from Payment sender address.
+     * toList Array of receivers.
+     * amountList Array of amounts.
+     * payCurrencyCode Currency code of the specified amounts.
+     * baseCurrencyIntendedPrice The intended price of the base currency used during conversion within function.
+     */
+
+  }, {
+    key: "getPayExecutableData",
+    value: function getPayExecutableData(from, toList, amountList, payCurrencyCode, baseCurrencyIntendedPrice) {
+      var oThis = this;
+      var jsonInterface = oThis.abiBinProvider.getABI(PricerRuleContractName),
+          contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, oThis.pricerRuleAddress),
+          bytesPayCurrencyCode = oThis.auxiliaryWeb3.utils.stringToHex(payCurrencyCode.toString()),
+          directTransferExecutable = contract.methods.pay(from, toList, amountList, bytesPayCurrencyCode, baseCurrencyIntendedPrice).encodeABI();
+      return directTransferExecutable;
+    }
     /**
      * Adds a new price oracle.
      *

@@ -67,7 +67,8 @@ let wallets,
   tokenHolderSecondReceiver,
   gnosisSafeProxy,
   ephemeralKey,
-  mockTokenDeployerInstance;
+  mockTokenDeployerInstance,
+  tokenRulesObject;
 
 describe('Direct transfers between TH contracts', async function() {
   before(async function() {
@@ -109,13 +110,17 @@ describe('Direct transfers between TH contracts', async function() {
     tokenRulesAddress = response.receipt.contractAddress;
     assert.isNotNull(tokenRulesAddress, 'tokenRules contract address should not be null.');
 
-    let tokenRulesInstance = ContractsInstance.TokenRules(tokenRulesAddress, txOptions);
+    const tokenRulesContractInstance = ContractsInstance.TokenRules(tokenRulesAddress, txOptions);
 
     // Verifying stored organization and token address.
-    assert.strictEqual(mockToken, await tokenRulesInstance.methods.token().call(), 'Token address is incorrect');
+    assert.strictEqual(
+      mockToken,
+      await tokenRulesContractInstance.methods.token().call(),
+      'Token address is incorrect'
+    );
     assert.strictEqual(
       organization,
-      await tokenRulesInstance.methods.organization().call(),
+      await tokenRulesContractInstance.methods.organization().call(),
       'Organization address is incorrect'
     );
   });
@@ -180,10 +185,10 @@ describe('Direct transfers between TH contracts', async function() {
       gas: config.gas
     };
 
-    const tokenRulesInstance = new TokenRules(tokenRulesAddress, auxiliaryWeb3),
-      pricerRuleName = 'PricerRule',
+    tokenRulesObject = new TokenRules(tokenRulesAddress, auxiliaryWeb3);
+    const pricerRuleName = 'PricerRule',
       pricerRuleAbi = abiBinProvider.getABI('PricerRule'),
-      response = await tokenRulesInstance.registerRule(
+      response = await tokenRulesObject.registerRule(
         pricerRuleName,
         pricerRuleAddress,
         pricerRuleAbi.toString(),
@@ -194,12 +199,12 @@ describe('Direct transfers between TH contracts', async function() {
     assert.strictEqual(response.events.RuleRegistered['returnValues']._ruleAddress, pricerRuleAddress);
 
     // Verify the rule data using rule name.
-    const ruleByNameData = await tokenRulesInstance.getRuleByName(pricerRuleName, txOptions);
+    const ruleByNameData = await tokenRulesObject.getRuleByName(pricerRuleName, txOptions);
     assert.strictEqual(ruleByNameData.ruleName, pricerRuleName, 'Incorrect rule name was registered');
     assert.strictEqual(ruleByNameData.ruleAddress, pricerRuleAddress, pricerRuleAddress, 'Incorrect rule address');
 
     // Verify the rule data using rule address.
-    const ruleByAddressData = await tokenRulesInstance.getRuleByAddress(pricerRuleAddress, txOptions);
+    const ruleByAddressData = await tokenRulesObject.getRuleByAddress(pricerRuleAddress, txOptions);
     assert.strictEqual(ruleByAddressData.ruleName, pricerRuleName, 'Incorrect rule name was registered');
     assert.strictEqual(ruleByAddressData.ruleAddress, pricerRuleAddress, pricerRuleAddress, 'Incorrect rule address');
   });
@@ -225,8 +230,8 @@ describe('Direct transfers between TH contracts', async function() {
       config.NULL_ADDRESS,
       config.ZERO_BYTES,
       sessionKeys,
-      config.sessionKeysSpendingLimits,
-      config.sessionKeysExpirationHeights,
+      [config.sessionKeySpendingLimit],
+      [config.sessionKeyExpirationHeight],
       txOptions
     );
 
@@ -261,8 +266,8 @@ describe('Direct transfers between TH contracts', async function() {
       config.NULL_ADDRESS,
       config.ZERO_BYTES,
       sessionKeys,
-      config.sessionKeysSpendingLimits,
-      config.sessionKeysExpirationHeights,
+      [config.sessionKeySpendingLimit],
+      [config.sessionKeyExpirationHeight],
       txOptions
     );
 
@@ -292,8 +297,8 @@ describe('Direct transfers between TH contracts', async function() {
       proxyFactoryAddress,
       thMasterCopyAddress,
       sessionKeys,
-      config.sessionKeysSpendingLimits,
-      config.sessionKeysExpirationHeights,
+      [config.sessionKeySpendingLimit],
+      [config.sessionKeyExpirationHeight],
       txOptions
     );
 
@@ -323,7 +328,7 @@ describe('Direct transfers between TH contracts', async function() {
       secondReceiverInitialBalance = await contract.methods.balanceOf(tokenHolderSecondReceiver).call(),
       transferAmounts = [20, 10];
 
-    const directTransferExecutable = tokenHolder.getDirectTransferExecutableData(transferTos, transferAmounts),
+    const directTransferExecutable = tokenRulesObject.getDirectTransferExecutableData(transferTos, transferAmounts),
       nonce = 0;
 
     let transaction = {
