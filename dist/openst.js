@@ -8931,7 +8931,9 @@ function (_AbiBinProvider) {
   }
   /**
    * Getter to get ABI for a contract.
+   *
    * @param contractName Name of the contract.
+   *
    * @returns {String} ABI JSON string.
    */
 
@@ -8958,6 +8960,7 @@ function (_AbiBinProvider) {
     /**
      * Getter to get BIN for a contract.
      * @param contractName Name of the contract.
+     *
      * @returns {String} Binary string.
      */
 
@@ -80842,7 +80845,8 @@ function (_Contracts) {
    * Returns TokenRules instance.
    *
    * @param contractAddress TokenRules contract address.
-   * @param txOptions Tx options
+   * @param txOptions Tx options.
+   *
    * @returns {auxiliaryWeb3.eth.Contract}
    */
 
@@ -80861,6 +80865,7 @@ function (_Contracts) {
      *
      * @param contractAddress PricerRule contract address.
      * @param txOptions Tx options.
+     *
      * @returns {auxiliaryWeb3.eth.Contract}
      */
 
@@ -80877,6 +80882,7 @@ function (_Contracts) {
      * Returns web3 instance. If web3 is string constructs web3 object from string.
      *
      * @param web3 Web3 object.
+     *
      * @returns {Web3} Web3 object.
      * @private
      */
@@ -80966,6 +80972,7 @@ function () {
    * @param organization Organization which holds all the keys needed to administer the economy.
    * @param token EIP20 token contract address deployed for an economy.
    * @param txOptions Tx options.
+   *
    * @returns {Object} - Transaction receipt.
    */
 
@@ -81097,6 +81104,7 @@ function () {
    * Deploys gnosis MultiSig master copy contract.
    *
    * @param txOptions Tx options.
+   *
    * @returns {Object} - Transaction receipt.
    */
 
@@ -81139,6 +81147,7 @@ function () {
      * Deploys TokenHolder master copy contract.
      *
      * @param txOptions Tx options.
+     *
      * @returns {Object} - Transaction receipt.
      */
 
@@ -81180,6 +81189,7 @@ function () {
      * Deploys UserWalletFactory contract.
      *
      * @param txOptions Tx options.
+     *
      * @returns {Object} - Transaction receipt.
      */
 
@@ -81221,6 +81231,7 @@ function () {
      * Deploys ProxyFactory contract.
      *
      * @param txOptions Tx options.
+     *
      * @returns {Object} - Transaction receipt.
      */
 
@@ -81425,6 +81436,7 @@ function () {
    * @param threshold Number of required confirmations for a Safe transaction.
    * @param to Contract address for optional delegate call.
    * @param data Data payload for optional delegate call.
+   *
    * @returns {String}
    */
 
@@ -81458,6 +81470,7 @@ function () {
      * @param sessionKeys Array of session keys.
      * @param sessionKeysSpendingLimits Array of spending limits.
      * @param sessionKeysExpirationHeights Array of expiration heights.
+     *
      * @returns {*}
      */
 
@@ -81480,6 +81493,7 @@ function () {
      * @param sessionKeysSpendingLimits Session key's spending limits.
      * @param sessionKeysExpirationHeights Session key's expiration heights.
      * @param txOptions Tx options.
+     *
      * @returns Promise object.
      */
 
@@ -81526,6 +81540,7 @@ function () {
      * @param sessionKeys Session key addresses to authorize.
      * @param sessionKeysSpendingLimits Session key's spending limits.
      * @param sessionKeysExpirationHeights Session key's expiration heights.
+     *
      * @returns Promise object.
      */
 
@@ -81594,6 +81609,7 @@ function () {
      * @param sessionKeys Session key addresses to authorize.
      * @param sessionKeysSpendingLimits Session key's spending limits.
      * @param sessionKeysExpirationHeights Session key's expiration heights.
+     *
      * @returns Promise object.
      */
 
@@ -81763,6 +81779,7 @@ function () {
      *  - RuleAbi: JSON interface of the rule.
      *
      * @param ruleName Name of the rule.
+     *
      * @returns Rule data if present.
      */
 
@@ -81817,6 +81834,7 @@ function () {
      *  - RuleAbi: JSON interface of the rule.
      *
      * @param ruleAddress Address of the rule contract.
+     *
      * @returns Rule data if present.
      */
 
@@ -82093,6 +82111,7 @@ function () {
    *                                economy base currency to the token.
    * @param requiredPriceOracleDecimals Required decimals for price oracles.
    * @param txOptions Tx options.
+   *
    * @returns {Object} - Transaction receipt.
    */
 
@@ -82140,6 +82159,7 @@ function () {
      * @param conversionRateDecimals The conversion rate's decimals from the
      *                                economy base currency to the token.
      * @param requiredPriceOracleDecimals Required decimals for price oracles.
+     *
      * @returns {Object} - Transaction receipt.
      * @private
      */
@@ -82231,6 +82251,7 @@ function () {
    *
    * @param priceOracleAddress PriceOracle contract address.
    * @param txOptions Tx options.
+   *
    * @returns {Promise<*>}
    */
 
@@ -82274,6 +82295,7 @@ function () {
      *
      * @param payCurrencyCode QuoteCurrency code. e.g. ETH, BTC.
      * @param txOptions Tx options.
+     *
      * @returns {Promise<*>}
      */
 
@@ -82318,6 +82340,7 @@ function () {
      * @param payCurrencyCode QuoteCurrency code. e.g. ETH, BTC.
      * @param acceptanceMargin Acceptance margin for the base currency price per pay currency.
      * @param txOptions Tx options.
+     *
      * @returns {Promise<*>}
      */
 
@@ -82361,6 +82384,7 @@ function () {
      *
      * @param payCurrencyCode QuoteCurrency code. e.g. ETH, BTC.
      * @param txOptions Tx options.
+     *
      * @returns {Promise<*>}
      */
 
@@ -82401,11 +82425,13 @@ function () {
     /**
      * Constructs executable data for PricerRule.pay method.
      *
-     * from Payment sender address.
-     * toList Array of receivers.
-     * amountList Array of amounts.
-     * payCurrencyCode Currency code of the specified amounts.
-     * baseCurrencyIntendedPrice The intended price of the base currency used during conversion within function.
+     * @param from Payment sender address.
+     * @param toList Array of receivers.
+     * @param amountList Array of amounts.
+     * @param payCurrencyCode Currency code of the specified amounts.
+     * @param baseCurrencyIntendedPrice The intended price of the base currency used during conversion within function.
+     *
+     * @returns {String} PricerRule.pay executable data.
      */
 
   }, {
@@ -82422,6 +82448,7 @@ function () {
      * Adds a new price oracle.
      *
      * @param priceOracleAddress PriceOracle contract address.
+     *
      * @returns {Promise<*>} Promise object.
      * @private
      */
@@ -82436,6 +82463,7 @@ function () {
      * Removes the price oracle for the specified pay currency code.
      *
      * @param payCurrencyCode QuoteCurrency code. e.g. ETH, BTC.
+     *
      * @returns {Promise<*>} Promise object.
      * @private
      */
@@ -82452,6 +82480,7 @@ function () {
      *      currency. From should be worker only.
      * @param payCurrencyCode QuoteCurrency code. e.g. ETH, BTC.
      * @param acceptanceMargin Acceptance margin for the base currency price per pay currency.
+     *
      * @returns {*}
      * @private
      */
@@ -82468,6 +82497,7 @@ function () {
      *         specified pay currency. From should be worker only.
      *
      * @param payCurrencyCode QuoteCurrency code. e.g. ETH, BTC.
+     *
      * @returns {Promise<*>}
      * @private
      */
@@ -82483,6 +82513,7 @@ function () {
      * Returns PricerRule contract instance.
      *
      * @returns {oThis.auxiliaryWeb3.eth.Contract}
+     *
      * @private
      */
 
