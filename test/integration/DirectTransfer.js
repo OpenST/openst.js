@@ -78,7 +78,7 @@ describe('Direct transfers between TH contracts', async function() {
     facilitator = wallets[3].address;
   });
 
-  it('Should deploy Organization contract', async function() {
+  it('Deploys Organization contract', async function() {
     let orgHelper = new OrganizationHelper(auxiliaryWeb3, null);
     const orgConfig = {
       deployer: config.deployerAddress,
@@ -102,7 +102,7 @@ describe('Direct transfers between TH contracts', async function() {
     assert.isNotNull(mockToken, 'EIP20Token contract address should not be null.');
   });
 
-  it('Should deploy TokenRules contract', async function() {
+  it('Deploys TokenRules contract', async function() {
     const tokenRulesSetupInstance = new TokenRulesSetup(auxiliaryWeb3);
 
     const response = await tokenRulesSetupInstance.deploy(organization, mockToken, txOptions);
@@ -120,7 +120,7 @@ describe('Direct transfers between TH contracts', async function() {
     );
   });
 
-  it('Should deploy Gnosis MultiSig MasterCopy contract', async function() {
+  it('Deploys Gnosis MultiSig MasterCopy contract', async function() {
     const userSetup = new UserSetup(auxiliaryWeb3);
     const multiSigTxResponse = await userSetup.deployMultiSigMasterCopy(txOptions);
     gnosisSafeMasterCopyAddress = multiSigTxResponse.receipt.contractAddress;
@@ -128,7 +128,7 @@ describe('Direct transfers between TH contracts', async function() {
     assert.isNotNull(gnosisSafeMasterCopyAddress, 'gnosis safe master copy contract address should not be null.');
   });
 
-  it('Should deploy TokenHolder MasterCopy contract', async function() {
+  it('Deploys TokenHolder MasterCopy contract', async function() {
     const userSetup = new UserSetup(auxiliaryWeb3);
     const tokenHolderTxResponse = await userSetup.deployTokenHolderMasterCopy(txOptions);
     thMasterCopyAddress = tokenHolderTxResponse.receipt.contractAddress;
@@ -136,7 +136,7 @@ describe('Direct transfers between TH contracts', async function() {
     assert.isNotNull(thMasterCopyAddress, 'TH master copy contract address should not be null.');
   });
 
-  it('Should deploy UserWalletFactory contract', async function() {
+  it('Deploys UserWalletFactory contract', async function() {
     const userSetup = new UserSetup(auxiliaryWeb3);
     const userWalletFactoryResponse = await userSetup.deployUserWalletFactory(txOptions);
     userWalletFactoryAddress = userWalletFactoryResponse.receipt.contractAddress;
@@ -144,7 +144,7 @@ describe('Direct transfers between TH contracts', async function() {
     assert.isNotNull(userWalletFactoryAddress, 'UserWalletFactory contract address should not be null.');
   });
 
-  it('Should deploy ProxyFactory contract', async function() {
+  it('Deploys ProxyFactory contract', async function() {
     const userSetup = new UserSetup(auxiliaryWeb3);
     const proxyFactoryResponse = await userSetup.deployProxyFactory(txOptions);
     proxyFactoryAddress = proxyFactoryResponse.receipt.contractAddress;
@@ -152,7 +152,7 @@ describe('Direct transfers between TH contracts', async function() {
     assert.isNotNull(proxyFactoryAddress, 'Proxy contract address should not be null.');
   });
 
-  it('Should deploy PricerRule contract', async function() {
+  it('Deploys PricerRule contract', async function() {
     const rulesSetup = new RulesSetup(auxiliaryWeb3, organization, mockToken, tokenRulesAddress);
     const pricerRulesDeployResponse = await rulesSetup.deployPricerRule(
       bytesBaseCurrencyCode,
@@ -172,7 +172,7 @@ describe('Direct transfers between TH contracts', async function() {
     );
   });
 
-  it('Should register PricerRule rule', async function() {
+  it('Registers PricerRule rule', async function() {
     // Only worker can registerRule.
     const txOptions = {
       from: worker,
@@ -204,7 +204,7 @@ describe('Direct transfers between TH contracts', async function() {
     assert.strictEqual(ruleByAddressData.ruleAddress, pricerRuleAddress, pricerRuleAddress, 'Incorrect rule address');
   });
 
-  it('Should create first user wallet', async function() {
+  it('Creates first user wallet', async function() {
     const userInstance = new User(
       gnosisSafeMasterCopyAddress,
       thMasterCopyAddress,
@@ -276,7 +276,7 @@ describe('Direct transfers between TH contracts', async function() {
     tokenHolderFirstReceiver = userWalletEvent._tokenHolderProxy;
   });
 
-  it('Should create a company wallet', async function() {
+  it('Creates a company wallet', async function() {
     const userInstance = new User(
       null,
       thMasterCopyAddress,
