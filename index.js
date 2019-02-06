@@ -29,7 +29,7 @@ const TokenRulesHelper = require('./lib/helper/TokenRules');
 const TokenHolderHelper = require('./lib/helper/TokenHolder');
 
 const SignEIP1077Extension = require('./utils/SignEIP1077Extension');
-SignEIP1077Extension();
+new SignEIP1077Extension();
 
 module.exports = {
   Setup: {

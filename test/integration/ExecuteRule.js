@@ -20,8 +20,7 @@
 
 const chai = require('chai'),
   Web3 = require('web3'),
-  Package = require('../../index'),
-  Account = require('eth-lib/lib/account');
+  Package = require('../../index');
 
 const TokenRulesSetup = Package.Setup.TokenRules,
   UserSetup = Package.Setup.User,
@@ -238,14 +237,15 @@ describe('ExecuteRule', async function() {
       to: tokenRulesAddress,
       data: directTransferExecutable,
       nonce: nonce,
-      callPrefix: await tokenHolder.getTokenHolderExecuteRuleCallPrefix()
+      callPrefix: await tokenHolder.getTokenHolderExecuteRuleCallPrefix(),
+      value: 0,
+      gasPrice: 0,
+      gas: 0
     };
 
-    const eip1077TransactionHash = ephemeralKey.getEIP1077TransactionHash(transaction),
-      exTxSignature = Account.sign(eip1077TransactionHash, ephemeralKey.privateKey),
-      vrs = Account.decodeSignature(exTxSignature);
+    const vrs = ephemeralKey.signEIP1077Transaction(transaction);
 
-    await tokenHolder.executeRule(directTransferExecutable, nonce, vrs[1], vrs[2], vrs[0], txOptions);
+    await tokenHolder.executeRule(directTransferExecutable, nonce, vrs.r, vrs.s, vrs.v, txOptions);
 
     const finalTHProxyBalance = await contract.methods.balanceOf(tokenHolderProxy).call(),
       finalReceiverBalance = await contract.methods.balanceOf(receiver.address).call(),

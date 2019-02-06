@@ -19,114 +19,101 @@
 // ----------------------------------------------------------------------------
 
 'use strict';
+
 const _ = require('underscore'),
+  Account = require('eth-lib/lib/account'),
   Accounts = require('web3-eth-accounts'),
   web3Utils = require('web3-utils'),
   helpers = require('web3-core-helpers');
 
-/**
- * It is used to get the hash in EIP1077 format.
- */
-let EIP1077Extender = function() {
-  web3Utils.toEIP1077TransactionHash = (transaction) => {
-    transaction = helpers.formatters.inputCallFormatter(transaction);
+web3Utils.toEIP1077TransactionHash = (transaction, version) => {
+  transaction = helpers.formatters.inputCallFormatter(transaction);
 
-    const version = transaction.version || '0x0';
-    transaction.value = web3Utils.toBN(transaction.value || '0');
-    transaction.nonce = web3Utils.toBN(transaction.nonce || '0');
-    transaction.gasPrice = web3Utils.toBN(transaction.gasPrice || '0');
-    transaction.gas = web3Utils.toBN(transaction.gas || '0');
-    transaction.gasToken = web3Utils.toBN(transaction.gasToken || '0');
-    transaction.operationType = web3Utils.toBN(transaction.operationType || '0');
-    transaction.extraHash = transaction.extraHash || '0x00';
+  transaction.value = web3Utils.toBN(transaction.value || '0').toString();
+  transaction.gasPrice = web3Utils.toBN(transaction.gasPrice || '0').toString();
+  transaction.gas = web3Utils.toBN(transaction.gas || '0').toString();
+  transaction.gasToken = web3Utils.toBN(transaction.gasToken || '0').toString();
+  transaction.operationType = web3Utils.toBN(transaction.operationType || '0').toString();
+  transaction.nonce = web3Utils.toBN(transaction.nonce || '0').toString();
+  transaction.to = transaction.to || '0x';
+  transaction.data = transaction.data || '0x';
+  transaction.extraHash = transaction.extraHash || '0x00';
 
-    const txHash = web3Utils.soliditySha3(
-      {
-        t: 'bytes1',
-        v: '0x19'
-      },
-      {
-        t: 'bytes1',
-        v: version
-      },
-      {
-        t: 'address',
-        v: transaction.from
-      },
-      {
-        t: 'address',
-        v: transaction.to
-      },
-      {
-        t: 'uint8',
-        v: transaction.value
-      },
-      {
-        t: 'bytes32',
-        v: web3Utils.keccak256(transaction.data)
-      },
-      {
-        t: 'uint256',
-        v: transaction.nonce
-      },
-      {
-        t: 'uint8',
-        v: transaction.gasPrice
-      },
-      {
-        t: 'uint8',
-        v: transaction.gas
-      },
-      {
-        t: 'uint8',
-        v: transaction.gasToken
-      },
-      {
-        t: 'bytes4',
-        v: transaction.callPrefix
-      },
-      {
-        t: 'uint8',
-        v: transaction.operationType
-      },
-      {
-        t: 'bytes32',
-        v: transaction.extraHash
-      }
-    );
+  /** EIP1077
+   keccak256(
+   byte(0x19), // Will be taken care by hashEIP191Message
+   byte(0), // Will be taken care by hashEIP191Message
+   from,
+   to,
+   value,
+   dataHash,
+   nonce,
+   gasPrice,
+   gas,
+   gasToken,
+   callPrefix,
+   operationType,
+   extraHash
+   );
+   **/
 
-    return txHash;
-  };
-
-  Accounts.prototype.getEIP1077TransactionHash = (transaction, callback) => {
-    if (transaction.nonce < 0 || transaction.gas < 0 || transaction.gasPrice < 0) {
-      let error = new Error('Gas, gasPrice or nonce is lower than 0');
-      callback && callback(error);
-      throw error;
-    }
-
-    let txHash;
-
-    try {
-      txHash = web3Utils.toEIP1077TransactionHash(transaction);
-    } catch (error) {
-      callback && callback(error);
-      throw error;
-    }
-
-    callback && callback(null, txHash);
-    return txHash;
-  };
-
-  const org_addAccountFunctions = Accounts.prototype._addAccountFunctions;
-  Accounts.prototype._addAccountFunctions = function(account) {
-    const oAccounts = this;
-    account = org_addAccountFunctions.apply(oAccounts, arguments);
-    account.getEIP1077TransactionHash = function(transaction, callback) {
-      return oAccounts.getEIP1077TransactionHash(transaction, callback);
-    };
-
-    return account;
-  };
+  version = version || '0x00';
+  let txHash = web3Utils.soliditySha3(
+    { t: 'bytes', v: '0x19' }, // prefix
+    { t: 'bytes', v: version }, // version control
+    { t: 'address', v: transaction.from }, //from
+    { t: 'address', v: transaction.to }, //to
+    { t: 'uint8', v: transaction.value }, //value
+    { t: 'bytes', v: web3Utils.soliditySha3(transaction.data) }, //dataHash
+    { t: 'uint256', v: transaction.nonce }, //nonce
+    { t: 'uint8', v: transaction.gasPrice }, //gasPrice
+    { t: 'uint8', v: transaction.gas }, //gas
+    { t: 'uint8', v: transaction.gasToken }, //gasToken
+    { t: 'bytes4', v: transaction.callPrefix }, //callPrefix
+    { t: 'uint8', v: transaction.operationType }, //operationType
+    { t: 'bytes32', v: transaction.extraHash }
+  );
+  return txHash;
 };
-module.exports = EIP1077Extender;
+
+Accounts.prototype.signEIP1077Transaction = (transaction, privateKey, callback, version) => {
+  if (transaction.nonce < 0 || transaction.gas < 0 || transaction.gasPrice < 0) {
+    let error = new Error('Gas, gasPrice or nonce is lower than 0');
+    callback && callback(error);
+    throw error;
+  }
+
+  let result;
+  try {
+    let txHash = web3Utils.toEIP1077TransactionHash(transaction, version);
+    let signature = Account.sign(txHash, privateKey);
+    let vrs = Account.decodeSignature(signature);
+    result = {
+      messageHash: txHash,
+      v: vrs[0],
+      r: vrs[1],
+      s: vrs[2],
+      signature: signature
+    };
+  } catch (error) {
+    callback && callback(error);
+    throw error;
+  }
+
+  callback && callback(null, result);
+  return result;
+};
+
+const org_addAccountFunctions = Accounts.prototype._addAccountFunctions;
+Accounts.prototype._addAccountFunctions = function(account) {
+  const oAccounts = this;
+  account = org_addAccountFunctions.apply(oAccounts, arguments);
+
+  account.signEIP1077Transaction = function(transaction, callback, version) {
+    return oAccounts.signEIP1077Transaction(transaction, account.privateKey, callback, version);
+  };
+
+  return account;
+};
+
+module.exports = Accounts;
