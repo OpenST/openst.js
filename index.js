@@ -27,20 +27,26 @@ const User = require('./lib/setup/User');
 const UserHelper = require('./lib/helper/User');
 const TokenRulesHelper = require('./lib/helper/TokenRules');
 const TokenHolderHelper = require('./lib/helper/TokenHolder');
+const Rules = require('./lib/setup/Rules');
+const PricerRule = require('./lib/helper/rules/PricerRule');
 
 const SignEIP1077Extension = require('./utils/SignEIP1077Extension');
 new SignEIP1077Extension();
 
 module.exports = {
-  Setup: {
-    TokenRules: TokenRules,
-    User: User
-  },
   AbiBinProvider: AbiBinProvider,
   Contracts: Contracts,
+  Setup: {
+    TokenRules: TokenRules,
+    User: User,
+    Rules: Rules
+  },
   Helpers: {
     User: UserHelper,
     TokenRules: TokenRulesHelper,
-    TokenHolder: TokenHolderHelper
+    TokenHolder: TokenHolderHelper,
+    Rules: {
+      PricerRule: PricerRule
+    }
   }
 };
