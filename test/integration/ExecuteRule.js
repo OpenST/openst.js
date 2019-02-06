@@ -21,7 +21,6 @@
 const chai = require('chai'),
   Web3 = require('web3'),
   Package = require('../../index'),
-  TokenHolder = require('./../../lib/helper/TokenHolder'),
   Account = require('eth-lib/lib/account');
 
 const TokenRulesSetup = Package.Setup.TokenRules,
@@ -33,7 +32,8 @@ const TokenRulesSetup = Package.Setup.TokenRules,
   Contracts = Package.Contracts,
   User = Package.Helpers.User,
   AbiBinProvider = Package.AbiBinProvider,
-  TokenRules = Package.Helpers.TokenRules;
+  TokenRules = Package.Helpers.TokenRules,
+  TokenHolder = Package.Helpers.TokenHolder;
 
 const auxiliaryWeb3 = new Web3(config.gethRpcEndPoint),
   web3WalletHelper = new Web3WalletHelper(auxiliaryWeb3),
