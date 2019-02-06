@@ -81735,8 +81735,8 @@ function () {
       var oThis = this;
       var jsonInterface = oThis.abiBinProvider.getABI(contractName),
           contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, oThis.tokenRules),
-          directTransferExecutable = contract.methods.directTransfers(transferTo, transfersAmount).encodeABI();
-      return directTransferExecutable;
+          directTransferExecutableData = contract.methods.directTransfers(transferTo, transfersAmount).encodeABI();
+      return directTransferExecutableData;
     }
     /**
      * Private method which is used to register a custom rule in the economy.
@@ -82415,8 +82415,8 @@ function () {
       var jsonInterface = oThis.abiBinProvider.getABI(PricerRuleContractName),
           contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, oThis.pricerRuleAddress),
           bytesPayCurrencyCode = oThis.auxiliaryWeb3.utils.stringToHex(payCurrencyCode.toString()),
-          directTransferExecutable = contract.methods.pay(from, toList, amountList, bytesPayCurrencyCode, baseCurrencyIntendedPrice).encodeABI();
-      return directTransferExecutable;
+          payExecutableData = contract.methods.pay(from, toList, amountList, bytesPayCurrencyCode, baseCurrencyIntendedPrice).encodeABI();
+      return payExecutableData;
     }
     /**
      * Adds a new price oracle.
