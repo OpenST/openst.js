@@ -51,8 +51,7 @@
     "webpack": "4.19.1",
     "webpack-cli": "3.1.0",
     "webpack-uglify-js-plugin": "1.1.9",
-    "package-json-cleanup-loader": "1.0.3",
-    "ethereumjs-util": "5.2.0"
+    "package-json-cleanup-loader": "1.0.3"
   },
   "pre-commit": {
     "run": [

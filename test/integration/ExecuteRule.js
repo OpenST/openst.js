@@ -22,7 +22,7 @@ const chai = require('chai'),
   Web3 = require('web3'),
   Package = require('../../index'),
   TokenHolder = require('./../../lib/helper/TokenHolder'),
-  EthUtils = require('ethereumjs-util');
+  Account = require('eth-lib/lib/account');
 
 const TokenRulesSetup = Package.Setup.TokenRules,
   UserSetup = Package.Setup.User,
@@ -220,7 +220,7 @@ describe('ExecuteRule', async function() {
       contract = new auxiliaryWeb3.eth.Contract(mockTokenAbi, mockToken, txOptions);
 
     // Funding TH proxy with tokens.
-    const amount = '1111',
+    const amount = config.tokenHolderBalance,
       txObject = contract.methods.transfer(tokenHolderProxy, amount),
       receiver = wallets[6];
     await txObject.send(txOptions);
@@ -238,24 +238,14 @@ describe('ExecuteRule', async function() {
       to: tokenRulesAddress,
       data: directTransferExecutable,
       nonce: nonce,
-      callPrefix: tokenHolder.getTokenHolderExecuteRuleCallPrefix()
+      callPrefix: await tokenHolder.getTokenHolderExecuteRuleCallPrefix()
     };
 
-    const eip1077TransactionHash = ephemeralKey.getEIP1077TransactionHash(transaction);
+    const eip1077TransactionHash = ephemeralKey.getEIP1077TransactionHash(transaction),
+      exTxSignature = Account.sign(eip1077TransactionHash, ephemeralKey.privateKey),
+      vrs = Account.decodeSignature(exTxSignature);
 
-    const exTxSignature = EthUtils.ecsign(
-      EthUtils.toBuffer(eip1077TransactionHash),
-      EthUtils.toBuffer(ephemeralKey.privateKey)
-    );
-
-    await tokenHolder.executeRule(
-      directTransferExecutable,
-      nonce,
-      EthUtils.bufferToHex(exTxSignature.r),
-      EthUtils.bufferToHex(exTxSignature.s),
-      exTxSignature.v,
-      txOptions
-    );
+    await tokenHolder.executeRule(directTransferExecutable, nonce, vrs[1], vrs[2], vrs[0], txOptions);
 
     const finalTHProxyBalance = await contract.methods.balanceOf(tokenHolderProxy).call(),
       finalReceiverBalance = await contract.methods.balanceOf(receiver.address).call(),
