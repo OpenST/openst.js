@@ -31,7 +31,8 @@ const TokenRulesSetup = Package.Setup.TokenRules,
   Contracts = Package.Contracts,
   User = Package.Helpers.User,
   AbiBinProvider = Package.AbiBinProvider,
-  TokenRules = Package.Helpers.TokenRules;
+  TokenRules = Package.Helpers.TokenRules,
+  TokenHolder = Package.Helpers.TokenHolder;
 
 const auxiliaryWeb3 = new Web3(config.gethRpcEndPoint),
   web3WalletHelper = new Web3WalletHelper(auxiliaryWeb3),
@@ -56,7 +57,10 @@ let wallets,
   mockToken,
   owner = config.deployerAddress,
   tokenHolderProxy,
-  gnosisSafeProxy;
+  gnosisSafeProxy,
+  ephemeralKey,
+  deployerInstance,
+  tokenRules;
 
 describe('ExecuteRule', async function() {
   before(async function() {
@@ -83,7 +87,7 @@ describe('ExecuteRule', async function() {
   });
 
   it('Deploys EIP20Token contract', async function() {
-    const deployerInstance = new MockContractsDeployer(config.deployerAddress, auxiliaryWeb3);
+    deployerInstance = new MockContractsDeployer(config.deployerAddress, auxiliaryWeb3);
 
     await deployerInstance.deployMockToken();
 
@@ -94,7 +98,7 @@ describe('ExecuteRule', async function() {
   it('Should deploy TokenRules contract', async function() {
     this.timeout(3 * 60000);
 
-    const tokenRules = new TokenRulesSetup(auxiliaryWeb3);
+    tokenRules = new TokenRulesSetup(auxiliaryWeb3);
 
     const response = await tokenRules.deploy(organization, mockToken, txOptions, auxiliaryWeb3);
     tokenRulesAddress = response.receipt.contractAddress;
@@ -149,9 +153,10 @@ describe('ExecuteRule', async function() {
       auxiliaryWeb3
     );
 
+    ephemeralKey = wallets[5];
     const owners = [wallets[3].address],
       threshold = 1,
-      sessionKeys = [wallets[5].address],
+      sessionKeys = [ephemeralKey.address],
       sessionKeysSpendingLimits = [1000000],
       sessionKeysExpirationHeights = [100000000000];
 
@@ -206,5 +211,57 @@ describe('ExecuteRule', async function() {
     const ruleByAddressData = await rules.getRuleByAddress(mockRuleAddress);
     assert.strictEqual(ruleByAddressData.ruleName, mockRule, 'Incorrect rule name was registered');
     assert.strictEqual(ruleByAddressData.ruleAddress, mockRuleAddress, 'Incorrect rule address');
+  });
+
+  it('Should perform direct transfer of tokens', async function() {
+    const tokenHolder = new TokenHolder(auxiliaryWeb3, tokenRulesAddress, tokenHolderProxy),
+      mockTokenAbi = deployerInstance.abiBinProvider.getABI('MockToken'),
+      contract = new auxiliaryWeb3.eth.Contract(mockTokenAbi, mockToken, txOptions);
+
+    // Funding TH proxy with tokens.
+    const amount = config.tokenHolderBalance,
+      txObject = contract.methods.transfer(tokenHolderProxy, amount),
+      receiver = wallets[6];
+    await txObject.send(txOptions);
+
+    const initialTHProxyBalance = await contract.methods.balanceOf(tokenHolderProxy).call(),
+      transferTo = [receiver.address],
+      receiverInitialBalance = await contract.methods.balanceOf(receiver.address).call(),
+      transferAmount = [20];
+
+    const directTransferExecutable = tokenHolder.getDirectTransferExecutableData(transferTo, transferAmount),
+      nonce = 0;
+
+    let transaction = {
+      from: tokenHolderProxy,
+      to: tokenRulesAddress,
+      data: directTransferExecutable,
+      nonce: nonce,
+      callPrefix: await tokenHolder.getTokenHolderExecuteRuleCallPrefix(),
+      value: 0,
+      gasPrice: 0,
+      gas: 0
+    };
+
+    const vrs = ephemeralKey.signEIP1077Transaction(transaction);
+
+    await tokenHolder.executeRule(directTransferExecutable, nonce, vrs.r, vrs.s, vrs.v, txOptions);
+
+    const finalTHProxyBalance = await contract.methods.balanceOf(tokenHolderProxy).call(),
+      finalReceiverBalance = await contract.methods.balanceOf(receiver.address).call(),
+      expectedReceiverBalance = parseInt(receiverInitialBalance) + transferAmount[0];
+
+    assert.strictEqual(
+      initialTHProxyBalance - transferAmount[0],
+      parseInt(finalTHProxyBalance),
+      `TokenHolder proxy balance is ${finalTHProxyBalance} and expected balance is ${initialTHProxyBalance -
+        transferAmount[0]}`
+    );
+
+    assert.strictEqual(
+      parseInt(finalReceiverBalance),
+      expectedReceiverBalance,
+      `Receiver account token balance is ${finalReceiverBalance} and expected balance is ${expectedReceiverBalance}`
+    );
   });
 });

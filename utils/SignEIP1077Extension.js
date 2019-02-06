@@ -1,23 +1,40 @@
+// Copyright 2019 OpenST Ltd.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// ----------------------------------------------------------------------------
+//
+// http://www.simpletoken.org/
+//
+// ----------------------------------------------------------------------------
+
 'use strict';
+
 const _ = require('underscore'),
   Account = require('eth-lib/lib/account'),
   Accounts = require('web3-eth-accounts'),
-  utils = require('web3-utils'),
-  Bytes = require('eth-lib/lib/bytes'),
-  helpers = require('web3-core-helpers'),
-  Hash = require('eth-lib/lib/hash');
+  web3Utils = require('web3-utils'),
+  helpers = require('web3-core-helpers');
 
-const DEBUG = false;
-
-utils.toEIP1077TransactionHash = (transaction, version) => {
+web3Utils.toEIP1077TransactionHash = (transaction, version) => {
   transaction = helpers.formatters.inputCallFormatter(transaction);
 
-  transaction.value = utils.toBN(transaction.value || '0').toString();
-  transaction.gasPrice = utils.toBN(transaction.gasPrice || '0').toString();
-  transaction.gas = utils.toBN(transaction.gas || '0').toString();
-  transaction.gasToken = utils.toBN(transaction.gasToken || '0').toString();
-  transaction.operationType = utils.toBN(transaction.operationType || '0').toString();
-  transaction.nonce = utils.toBN(transaction.nonce || '0').toString();
+  transaction.value = web3Utils.toBN(transaction.value || '0').toString();
+  transaction.gasPrice = web3Utils.toBN(transaction.gasPrice || '0').toString();
+  transaction.gas = web3Utils.toBN(transaction.gas || '0').toString();
+  transaction.gasToken = web3Utils.toBN(transaction.gasToken || '0').toString();
+  transaction.operationType = web3Utils.toBN(transaction.operationType || '0').toString();
+  transaction.nonce = web3Utils.toBN(transaction.nonce || '0').toString();
   transaction.to = transaction.to || '0x';
   transaction.data = transaction.data || '0x';
   transaction.extraHash = transaction.extraHash || '0x00';
@@ -41,13 +58,13 @@ utils.toEIP1077TransactionHash = (transaction, version) => {
    **/
 
   version = version || '0x00';
-  let txHash = utils.soliditySha3(
+  let txHash = web3Utils.soliditySha3(
     { t: 'bytes', v: '0x19' }, // prefix
     { t: 'bytes', v: version }, // version control
     { t: 'address', v: transaction.from }, //from
     { t: 'address', v: transaction.to }, //to
     { t: 'uint8', v: transaction.value }, //value
-    { t: 'bytes', v: utils.soliditySha3(transaction.data) }, //dataHash
+    { t: 'bytes', v: web3Utils.soliditySha3(transaction.data) }, //dataHash
     { t: 'uint256', v: transaction.nonce }, //nonce
     { t: 'uint8', v: transaction.gasPrice }, //gasPrice
     { t: 'uint8', v: transaction.gas }, //gas
@@ -68,7 +85,7 @@ Accounts.prototype.signEIP1077Transaction = (transaction, privateKey, callback, 
 
   let result;
   try {
-    let txHash = utils.toEIP1077TransactionHash(transaction, version);
+    let txHash = web3Utils.toEIP1077TransactionHash(transaction, version);
     let signature = Account.sign(txHash, privateKey);
     let vrs = Account.decodeSignature(signature);
     result = {

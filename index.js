@@ -26,6 +26,10 @@ const TokenRules = require('./lib/setup/TokenRules');
 const User = require('./lib/setup/User');
 const UserHelper = require('./lib/helper/User');
 const TokenRulesHelper = require('./lib/helper/TokenRules');
+const TokenHolderHelper = require('./lib/helper/TokenHolder');
+
+const SignEIP1077Extension = require('./utils/SignEIP1077Extension');
+new SignEIP1077Extension();
 
 module.exports = {
   Setup: {
@@ -36,6 +40,7 @@ module.exports = {
   Contracts: Contracts,
   Helpers: {
     User: UserHelper,
-    TokenRules: TokenRulesHelper
+    TokenRules: TokenRulesHelper,
+    TokenHolder: TokenHolderHelper
   }
 };
