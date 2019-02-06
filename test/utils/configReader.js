@@ -40,7 +40,12 @@ ConfigReader.prototype = {
   ZERO_BYTES: '0x0000000000000000000000000000000000000000000000000000000000000000',
   NULL_ADDRESS: '0x0000000000000000000000000000000000000000',
   tokenHolderBalance: '1111',
-  baseCurrencyCode: 'OST'
+  baseCurrencyCode: 'OST',
+  conversionRate: 2,
+  conversionRateDecimals: 18,
+  requiredPriceOracleDecimals: 18,
+  sessionKeysSpendingLimits: [1000000],
+  sessionKeysExpirationHeights: [100000000000]
 };
 
 module.exports = new ConfigReader();
