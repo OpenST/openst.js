@@ -32,7 +32,8 @@ const TokenRulesSetup = Package.Setup.TokenRules,
   Contracts = Package.Contracts,
   User = Package.Helpers.User,
   TokenRules = Package.Helpers.TokenRules,
-  AbiBinProvider = Package.AbiBinProvider;
+  AbiBinProvider = Package.AbiBinProvider,
+  TokenHolder = Package.Helpers.TokenHolder;
 
 const auxiliaryWeb3 = new Web3(config.gethRpcEndPoint),
   ContractsInstance = new Contracts(auxiliaryWeb3),
@@ -55,6 +56,7 @@ let wallets,
   userWalletFactoryAddress,
   thMasterCopyAddress,
   gnosisSafeMasterCopyAddress,
+  proxyFactoryAddress,
   tokenRulesAddress,
   pricerRuleAddress,
   worker,
@@ -64,7 +66,9 @@ let wallets,
   mockToken,
   owner = config.deployerAddress,
   tokenHolderProxy,
-  gnosisSafeProxy;
+  gnosisSafeProxy,
+  ephemeralKey,
+  mockTokenDeployerInstance;
 
 describe('ExecuteRule', async function() {
   before(async function() {
@@ -91,19 +95,20 @@ describe('ExecuteRule', async function() {
   });
 
   it('Deploys EIP20Token contract', async function() {
-    const deployerInstance = new MockContractsDeployer(config.deployerAddress, auxiliaryWeb3);
+    mockTokenDeployerInstance = new MockContractsDeployer(config.deployerAddress, auxiliaryWeb3);
 
-    await deployerInstance.deployMockToken();
+    await mockTokenDeployerInstance.deployMockToken();
 
-    mockToken = deployerInstance.addresses.MockToken;
+    mockToken = mockTokenDeployerInstance.addresses.MockToken;
     assert.isNotNull(mockToken, 'EIP20Token contract address should not be null.');
   });
 
   it('Should deploy TokenRules contract', async function() {
-    const tokenRules = new TokenRulesSetup(auxiliaryWeb3);
+    const tokenRulesSetupInstance = new TokenRulesSetup(auxiliaryWeb3);
 
-    const response = await tokenRules.deploy(organization, mockToken, txOptions);
+    const response = await tokenRulesSetupInstance.deploy(organization, mockToken, txOptions);
     tokenRulesAddress = response.receipt.contractAddress;
+    assert.isNotNull(tokenRulesAddress, 'tokenRules contract address should not be null.');
 
     let tokenRulesInstance = ContractsInstance.TokenRules(tokenRulesAddress, txOptions);
 
@@ -121,6 +126,7 @@ describe('ExecuteRule', async function() {
     const multiSigTxResponse = await userSetup.deployMultiSigMasterCopy(txOptions);
     gnosisSafeMasterCopyAddress = multiSigTxResponse.receipt.contractAddress;
     assert.strictEqual(multiSigTxResponse.receipt.status, true);
+    assert.isNotNull(gnosisSafeMasterCopyAddress, 'gnosis safe master copy contract address should not be null.');
   });
 
   it('Should deploy TokenHolder MasterCopy contract', async function() {
@@ -128,6 +134,7 @@ describe('ExecuteRule', async function() {
     const tokenHolderTxResponse = await userSetup.deployTokenHolderMasterCopy(txOptions);
     thMasterCopyAddress = tokenHolderTxResponse.receipt.contractAddress;
     assert.strictEqual(tokenHolderTxResponse.receipt.status, true);
+    assert.isNotNull(thMasterCopyAddress, 'TH master copy contract address should not be null.');
   });
 
   it('Should deploy UserWalletFactory contract', async function() {
@@ -135,11 +142,18 @@ describe('ExecuteRule', async function() {
     const userWalletFactoryResponse = await userSetup.deployUserWalletFactory(txOptions);
     userWalletFactoryAddress = userWalletFactoryResponse.receipt.contractAddress;
     assert.strictEqual(userWalletFactoryResponse.receipt.status, true);
+    assert.isNotNull(userWalletFactoryAddress, 'UserWalletFactory contract address should not be null.');
+  });
+
+  it('Should deploy ProxyFactory contract', async function() {
+    const userSetup = new UserSetup(auxiliaryWeb3);
+    const proxyFactoryResponse = await userSetup.deployProxyFactory(txOptions);
+    proxyFactoryAddress = proxyFactoryResponse.receipt.contractAddress;
+    assert.strictEqual(proxyFactoryResponse.receipt.status, true);
+    assert.isNotNull(proxyFactoryAddress, 'Proxy contract address should not be null.');
   });
 
   it('Should deploy PricerRule contract', async function() {
-    // this.timeout(60000);
-
     const rulesSetup = new RulesSetup(auxiliaryWeb3, organization, mockToken, tokenRulesAddress);
     const pricerRulesDeployResponse = await rulesSetup.deployPricerRule(
       bytesBaseCurrencyCode,
@@ -160,8 +174,6 @@ describe('ExecuteRule', async function() {
   });
 
   it('Should register PricerRule rule', async function() {
-    //this.timeout(3 * 60000);
-
     // Only worker can registerRule.
     const txOptions = {
       from: worker,
@@ -203,9 +215,10 @@ describe('ExecuteRule', async function() {
       auxiliaryWeb3
     );
 
+    ephemeralKey = wallets[5];
     const owners = [wallets[3].address],
       threshold = 1,
-      sessionKeys = [wallets[5].address],
+      sessionKeys = [ephemeralKey.address],
       sessionKeysSpendingLimits = [1000000],
       sessionKeysExpirationHeights = [100000000000];
 
@@ -228,5 +241,90 @@ describe('ExecuteRule', async function() {
 
     gnosisSafeProxy = userWalletEvent._gnosisSafeProxy;
     tokenHolderProxy = userWalletEvent._tokenHolderProxy;
+  });
+
+  it('Should create a company wallet', async function() {
+    const userInstance = new User(
+      null,
+      thMasterCopyAddress,
+      mockToken,
+      tokenRulesAddress,
+      userWalletFactoryAddress,
+      auxiliaryWeb3
+    );
+
+    const sessionKeys = [wallets[5].address],
+      sessionKeysSpendingLimits = [1000000],
+      sessionKeysExpirationHeights = [100000000000];
+
+    const response = await userInstance.createCompanyWallet(
+      proxyFactoryAddress,
+      thMasterCopyAddress,
+      sessionKeys,
+      sessionKeysSpendingLimits,
+      sessionKeysExpirationHeights,
+      txOptions
+    );
+
+    assert.strictEqual(response.status, true, 'Company wallet creation failed.');
+
+    // Fetching the company tokenholder proxy address for the user.
+    const returnValues = response.events.ProxyCreated.returnValues;
+    const proxyEvent = JSON.parse(JSON.stringify(returnValues));
+
+    const companyTHProxy = proxyEvent._proxy;
+    assert.isNotNull(companyTHProxy, 'Company TH contract address should not be null.');
+  });
+
+  it('Should perform direct transfer of tokens', async function() {
+    const tokenHolder = new TokenHolder(auxiliaryWeb3, tokenRulesAddress, tokenHolderProxy),
+      mockTokenAbi = mockTokenDeployerInstance.abiBinProvider.getABI('MockToken'),
+      contract = new auxiliaryWeb3.eth.Contract(mockTokenAbi, mockToken, txOptions);
+
+    // Funding TH proxy with tokens.
+    const amount = config.tokenHolderBalance,
+      txObject = contract.methods.transfer(tokenHolderProxy, amount),
+      receiver = wallets[6];
+    await txObject.send(txOptions);
+
+    const initialTHProxyBalance = await contract.methods.balanceOf(tokenHolderProxy).call(),
+      transferTo = [receiver.address],
+      receiverInitialBalance = await contract.methods.balanceOf(receiver.address).call(),
+      transferAmount = [20];
+
+    const directTransferExecutable = tokenHolder.getDirectTransferExecutableData(transferTo, transferAmount),
+      nonce = 0;
+
+    let transaction = {
+      from: tokenHolderProxy,
+      to: tokenRulesAddress,
+      data: directTransferExecutable,
+      nonce: nonce,
+      callPrefix: await tokenHolder.getTokenHolderExecuteRuleCallPrefix(),
+      value: 0,
+      gasPrice: 0,
+      gas: 0
+    };
+
+    const vrs = ephemeralKey.signEIP1077Transaction(transaction);
+
+    await tokenHolder.executeRule(directTransferExecutable, nonce, vrs.r, vrs.s, vrs.v, txOptions);
+
+    const finalTHProxyBalance = await contract.methods.balanceOf(tokenHolderProxy).call(),
+      finalReceiverBalance = await contract.methods.balanceOf(receiver.address).call(),
+      expectedReceiverBalance = parseInt(receiverInitialBalance) + transferAmount[0];
+
+    assert.strictEqual(
+      initialTHProxyBalance - transferAmount[0],
+      parseInt(finalTHProxyBalance),
+      `TokenHolder proxy balance is ${finalTHProxyBalance} and expected balance is ${initialTHProxyBalance -
+        transferAmount[0]}`
+    );
+
+    assert.strictEqual(
+      parseInt(finalReceiverBalance),
+      expectedReceiverBalance,
+      `Receiver account token balance is ${finalReceiverBalance} and expected balance is ${expectedReceiverBalance}`
+    );
   });
 });
