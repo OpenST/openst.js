@@ -81940,9 +81940,9 @@ function () {
     key: "getTokenHolderExecuteRuleCallPrefix",
     value: function getTokenHolderExecuteRuleCallPrefix() {
       var oThis = this;
-      var jsonInterface = oThis.abiBinProvider.getABI(tokenHolderContractName),
-          contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, oThis.tokenHolderProxy);
-      return contract.methods.EXECUTE_RULE_CALLPREFIX().call();
+      var executeRuleHash = oThis.auxiliaryWeb3.utils.soliditySha3('executeRule(address,bytes,uint256,uint8,bytes32,bytes32)');
+      var executeRuleCallPrefix = executeRuleHash.substring(0, 10);
+      return executeRuleCallPrefix;
     }
     /**
      * It is used to execute executable data signed by a session key.
