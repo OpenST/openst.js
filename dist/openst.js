@@ -16841,9 +16841,9 @@ ABICoder.prototype.decodeParameter = function (type, bytes) {
  * @return {Array} array of plain params
  */
 ABICoder.prototype.decodeParameters = function (outputs, bytes) {
-    // if (outputs.length > 0 && (!bytes || bytes === '0x' || bytes === '0X')) {
-    //     throw new Error('Returned values aren\'t valid, did it run Out of Gas?');
-    // }
+    if (outputs.length > 0 && (!bytes || bytes === '0x' || bytes === '0X')) {
+        throw new Error('Returned values aren\'t valid, did it run Out of Gas?');
+    }
 
     var res = ethersAbiCoder.decode(this.mapTypes(outputs), '0x' + bytes.replace(/0x/i, ''));
     var returnValue = new Result();
@@ -81037,7 +81037,8 @@ var AbiBinProvider = __webpack_require__(51),
 
 var MultiSigMasterCopyContractName = 'GnosisSafe',
     THMasterCopyContractName = 'TokenHolder',
-    UserWalletFactoryContractName = 'UserWalletFactory';
+    UserWalletFactoryContractName = 'UserWalletFactory',
+    ProxyFactoryContractName = 'ProxyFactory';
 /**
  * Performs setup and deployment tasks for user.
  */
@@ -81180,6 +81181,47 @@ function () {
       return deployUserWalletFactory;
     }()
     /**
+     * Deploys ProxyFactory contract.
+     *
+     * @param txOptions Tx options.
+     * @returns {Object} - Transaction receipt.
+     */
+
+  }, {
+    key: "deployProxyFactory",
+    value: function () {
+      var _deployProxyFactory = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee4(txOptions) {
+        var oThis, txObject, txReceipt;
+        return regeneratorRuntime.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                oThis = this;
+                txObject = oThis._deployProxyFactoryRawTx();
+                _context4.next = 4;
+                return new Deployer(ProxyFactoryContractName, txObject, oThis.auxiliaryWeb3, txOptions).deploy();
+
+              case 4:
+                txReceipt = _context4.sent;
+                return _context4.abrupt("return", txReceipt);
+
+              case 6:
+              case "end":
+                return _context4.stop();
+            }
+          }
+        }, _callee4, this);
+      }));
+
+      function deployProxyFactory(_x4) {
+        return _deployProxyFactory.apply(this, arguments);
+      }
+
+      return deployProxyFactory;
+    }()
+    /**
      * Private method which Deploys gnosis MultiSig master copy contract.
      *
      * @returns {txObject} - Transaction object.
@@ -81239,6 +81281,26 @@ function () {
         arguments: []
       });
     }
+    /**
+     * Private method which deploys ProxyFactory contract.
+     *
+     * @returns {txObject} Transaction object.
+     * @private
+     */
+
+  }, {
+    key: "_deployProxyFactoryRawTx",
+    value: function _deployProxyFactoryRawTx() {
+      var oThis = this;
+      var abiBinProvider = oThis.abiBinProvider;
+      var jsonInterface = abiBinProvider.getABI(ProxyFactoryContractName);
+      var bin = abiBinProvider.getBIN(ProxyFactoryContractName);
+      var contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, null);
+      return contract.deploy({
+        data: bin,
+        arguments: []
+      });
+    }
   }]);
 
   return User;
@@ -81285,6 +81347,8 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 var AbiBinProvider = __webpack_require__(51);
 
 var UserWalletFactoryContractName = 'UserWalletFactory';
+var ProxyFactoryContractName = 'ProxyFactory';
+var THMasterCopyContractName = 'TokenHolder';
 
 var TxSender = __webpack_require__(151);
 /**
@@ -81351,6 +81415,24 @@ function () {
       }, [owners, threshold, to, data]);
     }
     /**
+     * Returns TokenHolder setup executable data.
+     *
+     * @param owner Owner address. Owner could be hardware wallet.
+     * @param sessionKeys Array of session keys.
+     * @param sessionKeysSpendingLimits Array of spending limits.
+     * @param sessionKeysExpirationHeights Array of expiration heights.
+     * @returns {*}
+     */
+
+  }, {
+    key: "getTokenHolderSetupExecutableData",
+    value: function getTokenHolderSetupExecutableData(owner, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights) {
+      var oThis = this;
+      var thMasterCopyAbi = oThis.abiBinProvider.getABI(THMasterCopyContractName);
+      var tokenRuleContract = new oThis.auxiliaryWeb3.eth.Contract(thMasterCopyAbi, oThis.tokenHolderMasterCopy);
+      return tokenRuleContract.methods.setup(oThis.eip20Token, oThis.tokenRules, owner, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights).encodeABI();
+    }
+    /**
      * It is used for creation and configuration of gnosis safe and token holder proxy contract for user.
      *
      * @param owners List of owners of the multisig.
@@ -81399,6 +81481,52 @@ function () {
       return createUserWallet;
     }()
     /**
+     * Method for creation and configuration of token holder proxy contract for company
+     * with hardware wallet as it's owner.
+     *
+     * @param proxyFactory proxyFactory contract address.
+     * @param owner TokenHolder proxy owner address. It could be hardware wallet address.
+     * @param sessionKeys Session key addresses to authorize.
+     * @param sessionKeysSpendingLimits Session key's spending limits.
+     * @param sessionKeysExpirationHeights Session key's expiration heights.
+     * @returns Promise object.
+     */
+
+  }, {
+    key: "createCompanyWallet",
+    value: function () {
+      var _createCompanyWallet = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee2(proxyFactory, owner, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights, txOptions) {
+        var oThis, txObject, txReceipt;
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                oThis = this;
+                txObject = oThis._createCompanyWalletRawTx(proxyFactory, owner, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights);
+                _context2.next = 4;
+                return new TxSender(txObject, oThis.auxiliaryWeb3, txOptions).execute();
+
+              case 4:
+                txReceipt = _context2.sent;
+                return _context2.abrupt("return", txReceipt);
+
+              case 6:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      function createCompanyWallet(_x9, _x10, _x11, _x12, _x13, _x14) {
+        return _createCompanyWallet.apply(this, arguments);
+      }
+
+      return createCompanyWallet;
+    }()
+    /**
      * Private method used for creation and configuration of gnosis safe and tokenholder contract for an user.
      *
      * @param owners List of owners of the multisig.
@@ -81419,6 +81547,27 @@ function () {
       var jsonInterface = oThis.abiBinProvider.getABI(UserWalletFactoryContractName),
           contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, oThis.userWalletFactoryAddress);
       return contract.methods.createUserWallet(oThis.gnosisSafeMasterCopy, gnosisSafeData, oThis.tokenHolderMasterCopy, oThis.eip20Token, oThis.tokenRules, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights);
+    }
+    /**
+     * Private method used for creation and configuration of token holder proxy contract for company
+     * with hardware wallet as it's owner.
+     *
+     * @param proxyFactory proxyFactory contract address.
+     * @param owner TokenHolder proxy owner address. It could be hardware wallet address.
+     * @param sessionKeys Session key addresses to authorize.
+     * @param sessionKeysSpendingLimits Session key's spending limits.
+     * @param sessionKeysExpirationHeights Session key's expiration heights.
+     * @returns Promise object.
+     */
+
+  }, {
+    key: "_createCompanyWalletRawTx",
+    value: function _createCompanyWalletRawTx(proxyFactory, owner, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights) {
+      var oThis = this;
+      var thSetupExecutableData = oThis.getTokenHolderSetupExecutableData(owner, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights);
+      var jsonInterface = oThis.abiBinProvider.getABI(ProxyFactoryContractName),
+          contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, proxyFactory);
+      return contract.methods.createProxy(oThis.tokenHolderMasterCopy, thSetupExecutableData);
     }
   }]);
 

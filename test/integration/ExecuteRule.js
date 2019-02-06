@@ -49,6 +49,7 @@ let wallets,
   userWalletFactoryAddress,
   thMasterCopyAddress,
   gnosisSafeMasterCopyAddress,
+  proxyFactoryAddress,
   tokenRulesAddress,
   worker,
   organization,
@@ -102,6 +103,7 @@ describe('ExecuteRule', async function() {
 
     const response = await tokenRules.deploy(organization, mockToken, txOptions, auxiliaryWeb3);
     tokenRulesAddress = response.receipt.contractAddress;
+    assert.isNotNull(tokenRulesAddress, 'tokenRules contract address should not be null.');
 
     let contractInstance = Contracts.getTokenRules(auxiliaryWeb3, response.receipt.contractAddress, txOptions);
 
@@ -121,6 +123,7 @@ describe('ExecuteRule', async function() {
     const multiSigTxResponse = await userSetup.deployMultiSigMasterCopy(txOptions);
     gnosisSafeMasterCopyAddress = multiSigTxResponse.receipt.contractAddress;
     assert.strictEqual(multiSigTxResponse.receipt.status, true);
+    assert.isNotNull(gnosisSafeMasterCopyAddress, 'gnosis safe master copy contract address should not be null.');
   });
 
   it('Should deploy TokenHolder MasterCopy contract', async function() {
@@ -130,6 +133,7 @@ describe('ExecuteRule', async function() {
     const tokenHolderTxResponse = await userSetup.deployTokenHolderMasterCopy(txOptions);
     thMasterCopyAddress = tokenHolderTxResponse.receipt.contractAddress;
     assert.strictEqual(tokenHolderTxResponse.receipt.status, true);
+    assert.isNotNull(thMasterCopyAddress, 'TH master copy contract address should not be null.');
   });
 
   it('Should deploy UserWalletFactory contract', async function() {
@@ -139,6 +143,17 @@ describe('ExecuteRule', async function() {
     const userWalletFactoryResponse = await userSetup.deployUserWalletFactory(txOptions);
     userWalletFactoryAddress = userWalletFactoryResponse.receipt.contractAddress;
     assert.strictEqual(userWalletFactoryResponse.receipt.status, true);
+    assert.isNotNull(userWalletFactoryAddress, 'UserWalletFactory contract address should not be null.');
+  });
+
+  it('Should deploy ProxyFactory contract', async function() {
+    this.timeout(60000);
+
+    const userSetup = new UserSetup(auxiliaryWeb3);
+    const proxyFactoryResponse = await userSetup.deployProxyFactory(txOptions);
+    proxyFactoryAddress = proxyFactoryResponse.receipt.contractAddress;
+    assert.strictEqual(proxyFactoryResponse.receipt.status, true);
+    assert.isNotNull(proxyFactoryAddress, 'Proxy contract address should not be null.');
   });
 
   it('Should create a user wallet', async function() {
@@ -179,6 +194,41 @@ describe('ExecuteRule', async function() {
 
     gnosisSafeProxy = userWalletEvent._gnosisSafeProxy;
     tokenHolderProxy = userWalletEvent._tokenHolderProxy;
+  });
+
+  it('Should create a company wallet', async function() {
+    this.timeout(3 * 60000);
+
+    const userInstance = new User(
+      null,
+      thMasterCopyAddress,
+      mockToken,
+      tokenRulesAddress,
+      userWalletFactoryAddress,
+      auxiliaryWeb3
+    );
+
+    const sessionKeys = [wallets[5].address],
+      sessionKeysSpendingLimits = [1000000],
+      sessionKeysExpirationHeights = [100000000000];
+
+    const response = await userInstance.createCompanyWallet(
+      proxyFactoryAddress,
+      thMasterCopyAddress,
+      sessionKeys,
+      sessionKeysSpendingLimits,
+      sessionKeysExpirationHeights,
+      txOptions
+    );
+
+    assert.strictEqual(response.status, true, 'Company wallet creation failed.');
+
+    // Fetching the company tokenholder proxy address for the user.
+    const returnValues = response.events.ProxyCreated.returnValues;
+    const proxyEvent = JSON.parse(JSON.stringify(returnValues));
+
+    const companyTHProxy = proxyEvent._proxy;
+    assert.isNotNull(companyTHProxy, 'Company TH contract address should not be null.');
   });
 
   it('Should register a rule', async function() {
