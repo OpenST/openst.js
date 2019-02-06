@@ -2,6 +2,9 @@
 
 ## Version 0.10.0
 
+Rule setup: Pricer rule setup and interaction([66](https://github.com/OpenSTFoundation/openst.js/pull/66))
+User setup: Company to User Implementation([68](https://github.com/OpenSTFoundation/openst.js/pull/68))
+Direct transfer of tokens using TokenRules contract([67](https://github.com/OpenSTFoundation/openst.js/pull/67))
 TokenRules: Create a getter to fetch registered rules([#60](https://github.com/OpenSTFoundation/openst.js/pull/60))
 TokenRules : Rules registration framework for registration of rules([#60](https://github.com/OpenSTFoundation/openst.js/pull/60))
 User setup : Implement createUserWallet ([#55](https://github.com/OpenSTFoundation/openst.js/pull/55))
