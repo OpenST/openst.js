@@ -81425,8 +81425,8 @@ function () {
      */
 
   }, {
-    key: "getTokenHolderSetupData",
-    value: function getTokenHolderSetupData(owner, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights) {
+    key: "getTokenHolderSetupExecutableData",
+    value: function getTokenHolderSetupExecutableData(owner, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights) {
       var oThis = this;
       var thMasterCopyAbi = oThis.abiBinProvider.getABI(THMasterCopyContractName);
       var tokenRuleContract = new oThis.auxiliaryWeb3.eth.Contract(thMasterCopyAbi, oThis.tokenHolderMasterCopy);
@@ -81564,10 +81564,10 @@ function () {
     key: "_createCompanyWalletRawTx",
     value: function _createCompanyWalletRawTx(proxyFactory, owner, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights) {
       var oThis = this;
-      var thSetupData = oThis.getTokenHolderSetupData(owner, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights);
+      var thSetupExecutableData = oThis.getTokenHolderSetupExecutableData(owner, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights);
       var jsonInterface = oThis.abiBinProvider.getABI(ProxyFactoryContractName),
           contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, proxyFactory);
-      return contract.methods.createProxy(oThis.tokenHolderMasterCopy, thSetupData);
+      return contract.methods.createProxy(oThis.tokenHolderMasterCopy, thSetupExecutableData);
     }
   }]);
 

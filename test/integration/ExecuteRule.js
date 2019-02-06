@@ -223,7 +223,7 @@ describe('ExecuteRule', async function() {
 
     assert.strictEqual(response.status, true, 'Company wallet creation failed.');
 
-    // Fetching the gnosisSafe and tokenholder proxy address for the user.
+    // Fetching the company tokenholder proxy address for the user.
     const returnValues = response.events.ProxyCreated.returnValues;
     const proxyEvent = JSON.parse(JSON.stringify(returnValues));
 
