@@ -40,8 +40,7 @@ const auxiliaryWeb3 = new Web3(config.gethRpcEndPoint),
   web3WalletHelper = new Web3WalletHelper(auxiliaryWeb3),
   assert = chai.assert,
   OrganizationHelper = Mosaic.ChainSetup.OrganizationHelper,
-  abiBinProvider = new AbiBinProvider(),
-  bytesBaseCurrencyCode = auxiliaryWeb3.utils.stringToHex(config.baseCurrencyCode.toString());
+  abiBinProvider = new AbiBinProvider();
 
 let txOptions = {
   from: config.deployerAddress,
@@ -160,7 +159,7 @@ describe('Direct transfers between TH contracts', async function() {
   it('Deploys PricerRule contract', async function() {
     const rulesSetup = new RulesSetup(auxiliaryWeb3, organization, mockToken, tokenRulesAddress);
     const pricerRulesDeployResponse = await rulesSetup.deployPricerRule(
-      bytesBaseCurrencyCode,
+      config.baseCurrencyCode,
       config.conversionRate,
       config.conversionRateDecimals,
       config.requiredPriceOracleDecimals,

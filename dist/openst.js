@@ -82128,7 +82128,7 @@ function () {
             switch (_context.prev = _context.next) {
               case 0:
                 oThis = this;
-                txObject = oThis._deployPricerRuleRawTx(baseCurrencyCode, conversionRate, conversionRateDecimals, requiredPriceOracleDecimals, txOptions);
+                txObject = oThis._deployPricerRuleRawTx(baseCurrencyCode, conversionRate, conversionRateDecimals, requiredPriceOracleDecimals);
                 _context.next = 4;
                 return new Deployer(PricerRuleContractName, txObject, oThis.auxiliaryWeb3, txOptions).deploy();
 
@@ -82171,7 +82171,8 @@ function () {
       var abiBinProvider = oThis.abiBinProvider;
       var abi = abiBinProvider.getABI(PricerRuleContractName);
       var bin = abiBinProvider.getBIN(PricerRuleContractName);
-      var args = [oThis.organization, oThis.eip20Token, baseCurrencyCode, conversionRate, conversionRateDecimals, requiredPriceOracleDecimals, oThis.tokenRules];
+      var bytesBaseCurrencyCode = oThis.auxiliaryWeb3.utils.stringToHex(baseCurrencyCode.toString());
+      var args = [oThis.organization, oThis.eip20Token, bytesBaseCurrencyCode, conversionRate, conversionRateDecimals, requiredPriceOracleDecimals, oThis.tokenRules];
       var contract = new oThis.auxiliaryWeb3.eth.Contract(abi, null);
       return contract.deploy({
         data: bin,
@@ -82293,7 +82294,7 @@ function () {
     /**
      * Removes price oracle contract address for pay CurrencyCode. From address should be only worker address.
      *
-     * @param payCurrencyCode QuoteCurrency code. e.g. ETH, BTC.
+     * @param payCurrencyCode QuoteCurrency code. e.g. USD, ETH, BTC.
      * @param txOptions Tx options.
      *
      * @returns {Promise<*>}
@@ -82337,7 +82338,7 @@ function () {
      * Sets an acceptance margin for the base currency price per pay
      *         currency. From address should be only worker address.
      *
-     * @param payCurrencyCode QuoteCurrency code. e.g. ETH, BTC.
+     * @param payCurrencyCode QuoteCurrency code. e.g. USD, ETH, BTC.
      * @param acceptanceMargin Acceptance margin for the base currency price per pay currency.
      * @param txOptions Tx options.
      *
@@ -82382,7 +82383,7 @@ function () {
      * Removes an acceptance margin of the base currency price in the
      *         specified pay currency. From address should be only worker address.
      *
-     * @param payCurrencyCode QuoteCurrency code. e.g. ETH, BTC.
+     * @param payCurrencyCode QuoteCurrency code. e.g. USD, ETH, BTC.
      * @param txOptions Tx options.
      *
      * @returns {Promise<*>}
@@ -82496,7 +82497,7 @@ function () {
      * Removes an acceptance margin of the base currency price in the
      *         specified pay currency. From should be worker only.
      *
-     * @param payCurrencyCode QuoteCurrency code. e.g. ETH, BTC.
+     * @param payCurrencyCode QuoteCurrency code. e.g. USD, ETH, BTC.
      *
      * @returns {Promise<*>}
      * @private
