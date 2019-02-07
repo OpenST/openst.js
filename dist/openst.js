@@ -16986,9 +16986,9 @@ ABICoder.prototype.decodeParameter = function (type, bytes) {
  * @return {Array} array of plain params
  */
 ABICoder.prototype.decodeParameters = function (outputs, bytes) {
-    // if (outputs.length > 0 && (!bytes || bytes === '0x' || bytes === '0X')) {
-    //     throw new Error('Returned values aren\'t valid, did it run Out of Gas?');
-    // }
+    if (outputs.length > 0 && (!bytes || bytes === '0x' || bytes === '0X')) {
+        throw new Error('Returned values aren\'t valid, did it run Out of Gas?');
+    }
 
     var res = ethersAbiCoder.decode(this.mapTypes(outputs), '0x' + bytes.replace(/0x/i, ''));
     var returnValue = new Result();
@@ -32159,10 +32159,7 @@ class TypedData {
     for (let type of deps) {
       result += `${type}(${types[type].map(({ name, type }) => `${type} ${name}`).join(',')})`;
     }
-    console.log("types as string :- ",result);
     return result;
-
-
   }
 
   /**
@@ -32192,13 +32189,11 @@ class TypedData {
 
     // Add data-type hash.
     encTypes.push('bytes32');
-    
     encValues.push(oThis.hashDataType(dataType));
 
     // Add field contents.
     let types = oThis.getTypes();
     let dataTypeProperties = oThis.getDataForDataType(dataType);
-    
 
     for (let field of dataTypeProperties) {
       let value = data[field.name];
@@ -32217,7 +32212,7 @@ class TypedData {
         encValues.push(value);
       }
     }
-    
+
     return Web3Abi.encodeParameters(encTypes, encValues);
   }
 
@@ -32232,7 +32227,6 @@ class TypedData {
     const oThis = this;
 
     let encodedData = oThis.encodeData(dataType, data);
-    
     return Web3Utils.keccak256(encodedData);
   }
 
@@ -32246,9 +32240,8 @@ class TypedData {
     oThis.validate();
 
     let domainSeparator = oThis.hashData('EIP712Domain', oThis.domain);
-    
     let message = oThis.hashData(oThis.primaryType, oThis.message);
-    
+
     return Web3Utils.soliditySha3(
       { t: 'bytes', v: oThis.INITIAL_BYTE },
       { t: 'bytes', v: oThis.VERSION },
@@ -83000,7 +82993,7 @@ function () {
       }
     }
     /**
-     * Returns domain seperator from the
+     * Returns domain separator.
      *
      * @returns {Promise<*>}
      */
