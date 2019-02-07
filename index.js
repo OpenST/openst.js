@@ -46,9 +46,9 @@ module.exports = {
     User: UserHelper,
     TokenRules: TokenRulesHelper,
     TokenHolder: TokenHolderHelper,
+    GnosisSafe: GnosisSafeHelper,
     Rules: {
       PricerRule: PricerRule
-    },
-    GnosisSafe: GnosisSafeHelper
+    }
   }
 };

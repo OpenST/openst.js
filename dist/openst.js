@@ -37973,10 +37973,10 @@ module.exports = {
     User: UserHelper,
     TokenRules: TokenRulesHelper,
     TokenHolder: TokenHolderHelper,
+    GnosisSafe: GnosisSafeHelper,
     Rules: {
       PricerRule: PricerRule
-    },
-    GnosisSafe: GnosisSafeHelper
+    }
   }
 };
 
@@ -81995,24 +81995,6 @@ function () {
       return executableData;
     }
     /**
-     * It is used to get the executable data for directTransfers method of TokenRules.
-     *
-     * @param transferTo List of addresses to transfer.
-     * @param transfersAmount List of amounts to transfer.
-     *
-     * @returns Executable data of directTransfers method.
-     */
-
-  }, {
-    key: "getDirectTransferExecutableData",
-    value: function getDirectTransferExecutableData(transferTo, transfersAmount) {
-      var oThis = this;
-      var jsonInterface = oThis.abiBinProvider.getABI(tokenRulesContractName),
-          contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, oThis.tokenRules),
-          directTransferExecutable = contract.methods.directTransfers(transferTo, transfersAmount).encodeABI();
-      return directTransferExecutable;
-    }
-    /**
      * It is used to get call prefix of executeRule method in TokenHolder contract.
      *
      * @returns Encoded signature of executeRule method.
@@ -83000,6 +82982,8 @@ function () {
     key: "findPreviousOwner",
     value: function findPreviousOwner(listOfOwners, owner) {
       var sentinel = "0x0000000000000000000000000000000000000001";
+      console.log("list of owners :- ", listOfOwners);
+      console.log("owner :- ", owner);
 
       if (listOfOwners[0] == owner) {
         // If the owner is first in the linked list.
