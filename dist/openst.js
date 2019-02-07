@@ -82973,7 +82973,7 @@ function () {
       }
     }
     /**
-     * It is used to find previous owner for an owner. It is used for removing and replacing owners.
+     * It is used to find previous owner for an owner. It is used for removing and replacing of owners.
      *
      * @param listOfOwners List of owners.
      * @param owner Owner whose previous owner is needed.
