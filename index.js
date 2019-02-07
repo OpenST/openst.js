@@ -29,6 +29,7 @@ const TokenRulesHelper = require('./lib/helper/TokenRules');
 const TokenHolderHelper = require('./lib/helper/TokenHolder');
 const Rules = require('./lib/setup/Rules');
 const PricerRule = require('./lib/helper/rules/PricerRule');
+const GnosisSafeHelper = require('./lib/helper/GnosisSafe');
 
 const SignEIP1077Extension = require('./utils/SignEIP1077Extension');
 new SignEIP1077Extension();
@@ -47,6 +48,7 @@ module.exports = {
     TokenHolder: TokenHolderHelper,
     Rules: {
       PricerRule: PricerRule
-    }
+    },
+    GnosisSafe: GnosisSafeHelper
   }
 };
