@@ -373,9 +373,6 @@ describe('Wallet operations', async function() {
       ownerSignature.signature,
       txOptions
     );
-    console.log('session keyssss :- ', sessionKey);
-
-    console.log('result :- ', JSON.stringify(result));
 
     const txReceipt = await auxiliaryWeb3.eth.getTransactionReceipt(result.transactionHash);
 
