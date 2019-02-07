@@ -82128,7 +82128,7 @@ function () {
             switch (_context.prev = _context.next) {
               case 0:
                 oThis = this;
-                txObject = oThis._deployPricerRuleRawTx(baseCurrencyCode, conversionRate, conversionRateDecimals, requiredPriceOracleDecimals, txOptions);
+                txObject = oThis._deployPricerRuleRawTx(baseCurrencyCode, conversionRate, conversionRateDecimals, requiredPriceOracleDecimals);
                 _context.next = 4;
                 return new Deployer(PricerRuleContractName, txObject, oThis.auxiliaryWeb3, txOptions).deploy();
 
