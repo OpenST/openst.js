@@ -82171,7 +82171,7 @@ function () {
       var abiBinProvider = oThis.abiBinProvider;
       var abi = abiBinProvider.getABI(PricerRuleContractName);
       var bin = abiBinProvider.getBIN(PricerRuleContractName);
-      var bytesBaseCurrencyCode = auxiliaryWeb3.utils.stringToHex(baseCurrencyCode.toString());
+      var bytesBaseCurrencyCode = oThis.auxiliaryWeb3.utils.stringToHex(baseCurrencyCode.toString());
       var args = [oThis.organization, oThis.eip20Token, bytesBaseCurrencyCode, conversionRate, conversionRateDecimals, requiredPriceOracleDecimals, oThis.tokenRules];
       var contract = new oThis.auxiliaryWeb3.eth.Contract(abi, null);
       return contract.deploy({
