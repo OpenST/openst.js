@@ -82491,7 +82491,7 @@ function () {
     value: function _setAcceptanceMarginRawTx(payCurrencyCode, acceptanceMargin) {
       var oThis = this;
       var bytesPayCurrencyCode = oThis.auxiliaryWeb3.utils.stringToHex(payCurrencyCode.toString());
-      return oThis._pricerRuleContractInstance().methods.setAcceptedMargin(bytesPayCurrencyCode, acceptanceMargin);
+      return oThis._pricerRuleContractInstance().methods.setAcceptanceMargin(bytesPayCurrencyCode, acceptanceMargin);
     }
     /**
      * Removes an acceptance margin of the base currency price in the
@@ -82508,7 +82508,7 @@ function () {
     value: function _removeAcceptanceMarginRawTx(payCurrencyCode) {
       var oThis = this;
       var bytesPayCurrencyCode = oThis.auxiliaryWeb3.utils.stringToHex(payCurrencyCode.toString());
-      return oThis._pricerRuleContractInstance().methods.removeAcceptedMargin(bytesPayCurrencyCode);
+      return oThis._pricerRuleContractInstance().methods.removeAcceptanceMargin(bytesPayCurrencyCode);
     }
     /**
      * Returns PricerRule contract instance.
@@ -82530,6 +82530,8 @@ function () {
 
   return PricerRule;
 }();
+
+module.exports = PricerRule;
 
 /***/ }),
 /* 645 */
