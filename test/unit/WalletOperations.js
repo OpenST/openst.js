@@ -330,7 +330,7 @@ describe('Wallet operations', async function() {
 
   it('Should authorize session', async function() {
     const tokenHolderInstance = new TokenHolder(auxiliaryWeb3, tokenRulesAddress, tokenHolderProxy);
-    const sessionKey = wallets[8].address;
+    const sessionKey = wallets[7].address;
     const spendingLimit = config.sessionKeySpendingLimit;
     const expirationHeight = config.sessionKeyExpirationHeight;
     const owner = wallets[8];
@@ -387,6 +387,7 @@ describe('Wallet operations', async function() {
   });
 
   it('Should revoke session', async function() {
+    const tokenHolderInstance = new TokenHolder(auxiliaryWeb3, tokenRulesAddress, tokenHolderProxy);
     const sessionKey = wallets[7].address;
     const owner = wallets[8];
     const revokeSessionExData = tokenHolderInstance.getRevokeSessionExecutableData(sessionKey);
