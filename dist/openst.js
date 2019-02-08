@@ -83016,7 +83016,7 @@ function () {
       }
     }
     /**
-     * Returns domain seperator.
+     * Returns domain separator.
      *
      * @returns {Promise<*>}
      */
