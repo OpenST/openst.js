@@ -82701,6 +82701,24 @@ function () {
       return executableData;
     }
     /**
+     * Allows to update the number of required confirmations by Safe owners.
+     * This can only be done via a Safe transaction.
+     *
+     * @param threshold New threshold.
+     *
+     * @returns {*} Executable data to change threshold.
+     */
+
+  }, {
+    key: "getChangeThresholdExecutableData",
+    value: function getChangeThresholdExecutableData(threshold) {
+      var oThis = this;
+      var jsonInterface = oThis.abiBinProvider.getABI(gnosisSafeContractName),
+          contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, oThis.gnosisSafeProxy),
+          executableData = contract.methods.changeThreshold(threshold).encodeABI();
+      return executableData;
+    }
+    /**
      * Allows to execute a Safe transaction confirmed by required number of owners and then pays the account that
      * submitted the transaction.
      *
@@ -82985,8 +83003,6 @@ function () {
     key: "findPreviousOwner",
     value: function findPreviousOwner(listOfOwners, owner) {
       var sentinel = '0x0000000000000000000000000000000000000001';
-      console.log('list of owners :- ', listOfOwners);
-      console.log('owner :- ', owner);
 
       if (listOfOwners[0] == owner) {
         // If the owner is first in the linked list.
@@ -83000,7 +83016,7 @@ function () {
       }
     }
     /**
-     * Returns domain seperator from the
+     * Returns domain seperator.
      *
      * @returns {Promise<*>}
      */

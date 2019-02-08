@@ -65,7 +65,8 @@ let wallets,
   ephemeralKey,
   deployerInstance,
   tokenRules,
-  gnosisSafeProxyInstance;
+  gnosisSafeProxyInstance,
+  tokenHolderInstance;
 
 describe('Wallet operations', async function() {
   before(async function() {
@@ -150,14 +151,14 @@ describe('Wallet operations', async function() {
     );
 
     ephemeralKey = wallets[5];
-    const owners = [wallets[3].address],
+    const owners = [wallets[3].address, wallets[9].address],
       threshold = 1,
       sessionKeys = [ephemeralKey.address],
       sessionKeysSpendingLimits = [config.sessionKeySpendingLimit],
       sessionKeysExpirationHeights = [config.sessionKeyExpirationHeight];
 
     const response = await userInstance.createUserWallet(
-      [owners[0]],
+      owners,
       threshold,
       config.NULL_ADDRESS,
       config.ZERO_BYTES,
@@ -226,62 +227,7 @@ describe('Wallet operations', async function() {
     assert.strictEqual(addedOwnerEvent.owner, ownerToAdd.address, 'Incorrect owner added');
   });
 
-  // it('Should remove wallet', async function() {
-  //
-  //   gnosisSafeProxyInstance = new GnosisSafe(gnosisSafeProxy, auxiliaryWeb3);
-  //   console.log("ownersss :- ",await  gnosisSafeProxyInstance.getOwners());
-  //   const removeOwner = wallets[9],
-  //     prevOwner = wallets[7],
-  //     owner = wallets[3];
-  //   const owners = await gnosisSafeProxyInstance.getOwners();
-  //   const previousOwner = gnosisSafeProxyInstance.findPreviousOwner(owners, removeOwner.address);
-  //
-  //   const removeOwnerExData = gnosisSafeProxyInstance.getRemoveOwnerExecutableData(
-  //       previousOwner, // previous owner.
-  //       removeOwner.address, // owner to be removed.
-  //       1 // threshold
-  //     );
-  //
-  //   const nonce = await gnosisSafeProxyInstance.getNonce();
-  //   const safeTxData = gnosisSafeProxyInstance.getSafeTxData(
-  //     gnosisSafeProxy,
-  //     0,
-  //     removeOwnerExData,
-  //     0,
-  //     0,
-  //     0,
-  //     0,
-  //     config.NULL_ADDRESS,
-  //     config.NULL_ADDRESS,
-  //     nonce
-  //   );
-  //
-  //   // 2. Generate EIP712 Signature.
-  //   const ownerSig1 = await prevOwner.signEIP712TypedData(safeTxData);
-  //   const ownerSig2 = await owner.signEIP712TypedData(safeTxData);
-  //   const result = await gnosisSafeProxyInstance.execTransaction(
-  //     gnosisSafeProxy,
-  //     0,
-  //     removeOwnerExData,
-  //     0,
-  //     0,
-  //     0,
-  //     0,
-  //     config.NULL_ADDRESS,
-  //     config.NULL_ADDRESS,
-  //     (ownerSig1.signature + ownerSig2.signa,
-  //     txOptions
-  //   );
-  //
-  //   const removedOwnerReturnValues = result.events.RemovedOwner.returnValues;
-  //   const removedOwnerEvent = JSON.parse(JSON.stringify(removedOwnerReturnValues));
-  //
-  //   assert.strictEqual(removedOwnerEvent.owner, removeOwner.address, "Incorrect removed owner address");
-  //
-  // });
-
   it('Should replace wallet', async function() {
-    gnosisSafeProxyInstance = new GnosisSafe(gnosisSafeProxy, auxiliaryWeb3);
     const owners = await gnosisSafeProxyInstance.getOwners();
 
     const newOwner = wallets[8],
@@ -333,12 +279,61 @@ describe('Wallet operations', async function() {
     assert.strictEqual(removedOwnerEvent.owner, owner.address, 'Incorrect owner removed');
   });
 
+  it('Should remove wallet', async function() {
+    const removeOwner = wallets[7],
+      prevOwner = wallets[7];
+
+    const owners = await gnosisSafeProxyInstance.getOwners();
+    const previousOwner = gnosisSafeProxyInstance.findPreviousOwner(owners, removeOwner.address);
+
+    const removeOwnerExData = gnosisSafeProxyInstance.getRemoveOwnerExecutableData(
+      previousOwner, // previous owner.
+      removeOwner.address, // owner to be removed.
+      1 // threshold
+    );
+
+    const nonce = await gnosisSafeProxyInstance.getNonce();
+    const safeTxData = gnosisSafeProxyInstance.getSafeTxData(
+      gnosisSafeProxy,
+      0,
+      removeOwnerExData,
+      0,
+      0,
+      0,
+      0,
+      config.NULL_ADDRESS,
+      config.NULL_ADDRESS,
+      nonce
+    );
+
+    // 2. Generate EIP712 Signature.
+    const ownerSig1 = await prevOwner.signEIP712TypedData(safeTxData);
+    const result = await gnosisSafeProxyInstance.execTransaction(
+      gnosisSafeProxy,
+      0,
+      removeOwnerExData,
+      0,
+      0,
+      0,
+      0,
+      config.NULL_ADDRESS,
+      config.NULL_ADDRESS,
+      ownerSig1.signature,
+      txOptions
+    );
+
+    const removedOwnerReturnValues = result.events.RemovedOwner.returnValues;
+    const removedOwnerEvent = JSON.parse(JSON.stringify(removedOwnerReturnValues));
+
+    assert.strictEqual(removedOwnerEvent.owner, removeOwner.address, 'Incorrect removed owner address');
+  });
+
   it('Should authorize session', async function() {
     const tokenHolderInstance = new TokenHolder(auxiliaryWeb3, tokenRulesAddress, tokenHolderProxy);
     const sessionKey = wallets[8].address;
     const spendingLimit = config.sessionKeySpendingLimit;
     const expirationHeight = config.sessionKeyExpirationHeight;
-    const prevOwner = wallets[7];
+    const owner = wallets[8];
     const authorizeSessionExData = tokenHolderInstance.getAuthorizeSessionExecutableData(
       sessionKey,
       spendingLimit,
@@ -359,7 +354,7 @@ describe('Wallet operations', async function() {
       nonce
     );
 
-    const ownerSignature = await prevOwner.signEIP712TypedData(safeTxData);
+    const ownerSignature = await owner.signEIP712TypedData(safeTxData);
     const result = await gnosisSafeProxyInstance.execTransaction(
       tokenHolderProxy,
       0,
@@ -392,9 +387,8 @@ describe('Wallet operations', async function() {
   });
 
   it('Should revoke session', async function() {
-    const tokenHolderInstance = new TokenHolder(auxiliaryWeb3, tokenRulesAddress, tokenHolderProxy);
-    const sessionKey = wallets[8].address;
-    const prevOwner = wallets[7];
+    const sessionKey = wallets[7].address;
+    const owner = wallets[8];
     const revokeSessionExData = tokenHolderInstance.getRevokeSessionExecutableData(sessionKey);
 
     const nonce = await gnosisSafeProxyInstance.getNonce();
@@ -411,7 +405,7 @@ describe('Wallet operations', async function() {
       nonce
     );
 
-    const ownerSignature = await prevOwner.signEIP712TypedData(safeTxData);
+    const ownerSignature = await owner.signEIP712TypedData(safeTxData);
     const result = await gnosisSafeProxyInstance.execTransaction(
       tokenHolderProxy,
       0,
@@ -440,6 +434,51 @@ describe('Wallet operations', async function() {
       auxiliaryWeb3.utils.toChecksumAddress(sessionRevoked[0].events[0].value),
       auxiliaryWeb3.utils.toChecksumAddress(sessionKey),
       'Sessoin key revoked is incorrect'
+    );
+  });
+
+  it('Should change required threshold', async function() {
+    // Owners already added should be equal or less than the threshold limit. Here, we have 2-owners in the gnosisSafe proxy.
+    const newThreshold = 2;
+    const owner = wallets[8];
+    const changeThresholdExecutableData = gnosisSafeProxyInstance.getChangeThresholdExecutableData(newThreshold);
+
+    const nonce = await gnosisSafeProxyInstance.getNonce();
+    const safeTxData = gnosisSafeProxyInstance.getSafeTxData(
+      gnosisSafeProxy,
+      0,
+      changeThresholdExecutableData,
+      0,
+      0,
+      0,
+      0,
+      config.NULL_ADDRESS,
+      config.NULL_ADDRESS,
+      nonce
+    );
+
+    const ownerSignature = await owner.signEIP712TypedData(safeTxData);
+    const result = await gnosisSafeProxyInstance.execTransaction(
+      gnosisSafeProxy,
+      0,
+      changeThresholdExecutableData,
+      0,
+      0,
+      0,
+      0,
+      config.NULL_ADDRESS,
+      config.NULL_ADDRESS,
+      ownerSignature.signature,
+      txOptions
+    );
+
+    const changeThresholdReturnValues = result.events.ChangedThreshold.returnValues;
+    const changeThresholdEvent = JSON.parse(JSON.stringify(changeThresholdReturnValues));
+
+    assert.strictEqual(
+      changeThresholdEvent.threshold.toString(),
+      newThreshold.toString(),
+      'Expected threshold was not set'
     );
   });
 });
