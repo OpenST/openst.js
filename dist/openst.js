@@ -80883,7 +80883,7 @@ function (_Contracts) {
     var oThis = _assertThisInitialized(_assertThisInitialized(_this));
 
     oThis.auxiliaryWeb3 = auxiliaryWeb3;
-    oThis.abibinProvider = new AbiBinProvider();
+    oThis.abiBinProvider = new AbiBinProvider();
     return _this;
   }
   /**
@@ -80901,7 +80901,7 @@ function (_Contracts) {
     value: function TokenRules(contractAddress, txOptions) {
       var oThis = this;
       oThis.auxiliaryWeb3 = Contracts._getWeb3(oThis.auxiliaryWeb3);
-      var jsonInterface = oThis.abibinProvider.getABI('TokenRules');
+      var jsonInterface = oThis.abiBinProvider.getABI('TokenRules');
       var contractInstance = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, contractAddress, txOptions);
       return contractInstance;
     }
@@ -80919,7 +80919,7 @@ function (_Contracts) {
     value: function PricerRule(contractAddress, txOptions) {
       var oThis = this;
       oThis.auxiliaryWeb3 = Contracts._getWeb3(oThis.auxiliaryWeb3);
-      var jsonInterface = oThis.abibinProvider.getABI('PricerRule');
+      var jsonInterface = oThis.abiBinProvider.getABI('PricerRule');
       var contractInstance = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, contractAddress, txOptions);
       return contractInstance;
     }

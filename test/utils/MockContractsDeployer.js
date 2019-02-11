@@ -61,17 +61,21 @@ class MockContractsDeployer {
     return oThis.deploy('MockToken', web3, txOptions);
   }
 
-  deployPriceOracle() {}
+  deployPriceOracle(web3, args, txOptions) {
+    const oThis = this;
+    return oThis.deploy('PriceOracle', web3, args, txOptions);
+  }
 
   /**
-   * It deploys the contract.
+   * It deploys the mock contract.
    *
    * @param contractName Name for the contract to deploy.
    * @param web3 Auxiliary chain web3.
+   * @param args Deployment arguments.
    * @param txOptions Tx options.
    * @returns Promise object.
    */
-  deploy(contractName, web3, txOptions) {
+  deploy(contractName, web3, args = [], txOptions) {
     const oThis = this;
     web3 = web3 || oThis.web3;
     const abiBinProvider = oThis.abiBinProvider;
@@ -89,7 +93,6 @@ class MockContractsDeployer {
     }
     txOptions = defaultOptions;
 
-    let args = [];
     const contract = new web3.eth.Contract(abi, null, txOptions);
     let tx = contract.deploy(
       {
