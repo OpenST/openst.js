@@ -61,17 +61,7 @@ class MockContractsDeployer {
     return oThis.deploy('MockToken', web3, txOptions);
   }
 
-  /**
-   * It deploys mock gateway contract.
-   *
-   * @param web3 Auxiliary chain web3 object.
-   * @param txOptions Tx options.
-   * @returns Promise object.
-   */
-  deployMockGatewayPass(web3, txOptions) {
-    const oThis = this;
-    return oThis.deploy('MockGatewayPass', web3, txOptions);
-  }
+  deployPriceOracle() {}
 
   /**
    * It deploys the contract.
