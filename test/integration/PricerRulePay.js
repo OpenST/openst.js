@@ -30,18 +30,20 @@ const chai = require('chai'),
 const TokenRulesSetup = Package.Setup.TokenRules,
   UserSetup = Package.Setup.User,
   RulesSetup = Package.Setup.Rules,
-  Contracts = Package.Contracts,
+  OpenSTContracts = Package.Contracts,
   User = Package.Helpers.User,
   TokenRules = Package.Helpers.TokenRules,
   AbiBinProvider = Package.AbiBinProvider,
   TokenHolder = Package.Helpers.TokenHolder;
 
 const auxiliaryWeb3 = new Web3(config.gethRpcEndPoint),
-  ContractsInstance = new Contracts(auxiliaryWeb3),
+  openSTContractsInstance = new OpenSTContracts(auxiliaryWeb3),
   web3WalletHelper = new Web3WalletHelper(auxiliaryWeb3),
   assert = chai.assert,
   OrganizationHelper = Mosaic.ChainSetup.OrganizationHelper,
-  abiBinProvider = new AbiBinProvider();
+  abiBinProvider = new AbiBinProvider(),
+  bytesBaseCurrencyCode = auxiliaryWeb3.utils.stringToHex(config.baseCurrencyCode.toString()),
+  bytesPayCurrencyCode = auxiliaryWeb3.utils.stringToHex(config.payCurrencyCode.toString());
 
 let txOptions = {
   from: config.deployerAddress,
@@ -71,8 +73,11 @@ let wallets,
   mockTokenDeployerInstance,
   tokenRulesObject,
   priceOracleAddress,
-  opsManaged = config.deployerAddress,
-  pricerRuleHelperObject;
+  priceOracleOwner = config.deployerAddress,
+  priceOracleOpsAddress,
+  pricerRuleHelperObject,
+  priceOracleContractInstance,
+  pricerRuleInstance;
 
 describe('TH transfers through PricerRule Pay', async function() {
   before(async function() {
@@ -82,6 +87,7 @@ describe('TH transfers through PricerRule Pay', async function() {
     beneficiary = wallets[2].address;
     facilitator = wallets[3].address;
     relayer = facilitator;
+    priceOracleOpsAddress = wallets[1].address;
   });
 
   it('Deploys Organization contract', async function() {
@@ -115,7 +121,7 @@ describe('TH transfers through PricerRule Pay', async function() {
     tokenRulesAddress = response.receipt.contractAddress;
     assert.isNotNull(tokenRulesAddress, 'tokenRules contract address should not be null.');
 
-    const tokenRulesContractInstance = ContractsInstance.TokenRules(tokenRulesAddress, txOptions);
+    const tokenRulesContractInstance = openSTContractsInstance.TokenRules(tokenRulesAddress, txOptions);
 
     // Verifying stored organization and token address.
     assert.strictEqual(
@@ -163,29 +169,48 @@ describe('TH transfers through PricerRule Pay', async function() {
   });
 
   it('Deploys PriceOracle contract', async function() {
-    const bytesBaseCurrencyCode = auxiliaryWeb3.utils.stringToHex(config.baseCurrencyCode.toString());
-    const bytesPayCurrencyCode = auxiliaryWeb3.utils.stringToHex(config.payCurrencyCode.toString());
     const pricerOracleArgs = [bytesBaseCurrencyCode, bytesPayCurrencyCode];
     const priceOracleTxOptions = {
-      from: opsManaged,
+      from: priceOracleOwner,
       gasPrice: config.gasPrice,
       gas: config.gas
     };
-    await mockTokenDeployerInstance.deployPriceOracle(auxiliaryWeb3, pricerOracleArgs, priceOracleTxOptions);
+    const priceOracleDeployResponse = await mockTokenDeployerInstance.deployPriceOracle(
+      auxiliaryWeb3,
+      pricerOracleArgs,
+      priceOracleTxOptions
+    );
+    assert.strictEqual(priceOracleDeployResponse.status, true);
     priceOracleAddress = mockTokenDeployerInstance.addresses.PriceOracle;
     assert.isNotNull(priceOracleAddress, 'PriceOracle contract address should not be null.');
   });
 
-  it('Sets Ops address and price in PriceOracle contract', async function() {
-    const setPriceOptions = {
-      from: opsManaged,
+  it('Sets Ops address in PriceOracle contract', async function() {
+    const setOpsOptions = {
+      from: priceOracleOwner,
       gasPrice: config.gasPrice,
       gas: config.gas
     };
     const jsonInterface = mockTokenDeployerInstance.abiBinProvider.getABI('PriceOracle');
-    let contractInstance = new auxiliaryWeb3.eth.Contract(jsonInterface, priceOracleAddress, setPriceOptions);
-    // TODO: Sets ops
-    // TODO: Sets Price
+    priceOracleContractInstance = new auxiliaryWeb3.eth.Contract(jsonInterface, priceOracleAddress);
+    const setOpsTxObject = priceOracleContractInstance.methods.setOpsAddress(priceOracleOpsAddress);
+    const setOpsReceipt = await setOpsTxObject.send(setOpsOptions);
+    assert.strictEqual(setOpsReceipt.status, true);
+    assert.strictEqual(await priceOracleContractInstance.methods.opsAddress().call(), priceOracleOpsAddress);
+  });
+
+  it('Sets price in PriceOracle contract', async function() {
+    const setPriceOptions = {
+      from: priceOracleOpsAddress,
+      gasPrice: config.gasPrice,
+      gas: config.gas
+    };
+    const setPriceTxObject = priceOracleContractInstance.methods.setPrice(config.price);
+    const setPriceReceipt = await setPriceTxObject.send(setPriceOptions);
+    assert.strictEqual(setPriceReceipt.status, true);
+
+    const setPriceValueFromContract = await priceOracleContractInstance.methods.getPrice().call();
+    assert.strictEqual(setPriceValueFromContract, config.price);
   });
 
   it('Deploys PricerRule contract', async function() {
@@ -199,7 +224,7 @@ describe('TH transfers through PricerRule Pay', async function() {
     );
     assert.strictEqual(pricerRulesDeployResponse.receipt.status, true);
     pricerRuleAddress = pricerRulesDeployResponse.receipt.contractAddress;
-    const pricerRuleInstance = ContractsInstance.PricerRule(pricerRuleAddress, txOptions);
+    pricerRuleInstance = openSTContractsInstance.PricerRule(pricerRuleAddress, txOptions);
     // Sanity check
     assert.strictEqual(
       await pricerRuleInstance.methods.tokenRules().call(),
@@ -215,8 +240,17 @@ describe('TH transfers through PricerRule Pay', async function() {
       gas: config.gas
     };
     pricerRuleHelperObject = new PricerRule(auxiliaryWeb3, pricerRuleAddress);
-    const txResponse = await pricerRuleHelperObject.addPriceOracle(priceOracleAddress, addPriceOracleTxOptions);
-    // TODO: Validate if pricer oracle is added or not
+    const addPriceOracleReceipt = await pricerRuleHelperObject.addPriceOracle(
+      priceOracleAddress,
+      addPriceOracleTxOptions
+    );
+    console.log('addPriceOracleReceipt:', addPriceOracleReceipt);
+    assert.strictEqual(addPriceOracleReceipt.status, true);
+    pricerRuleInstance = openSTContractsInstance.PricerRule(pricerRuleAddress, txOptions);
+    assert.strictEqual(
+      await pricerRuleInstance.methods.baseCurrencyPriceOracles(bytesBaseCurrencyCode).call(),
+      priceOracleAddress
+    );
   });
 
   it('Sets AcceptanceMargin in PricerRule', async function() {
@@ -225,11 +259,17 @@ describe('TH transfers through PricerRule Pay', async function() {
       gasPrice: config.gasPrice,
       gas: config.gas
     };
-    const txResponse = await pricerRuleHelperObject.setAcceptanceMargin(
-      priceOracleAddress,
+    const setAcceptanceMarginReceipt = await pricerRuleHelperObject.setAcceptanceMargin(
+      bytesPayCurrencyCode,
+      config.acceptanceMargin,
       setAcceptanceMarginTxOptions
     );
-    // TODO: Validate if acceptance margin is set or not
+    console.log('setAcceptanceMarginReceipt:', setAcceptanceMarginReceipt);
+    assert.strictEqual(setAcceptanceMarginReceipt.status, true);
+    assert.strictEqual(
+      await pricerRuleInstance.methods.baseCurrencyPriceAcceptanceMargins(bytesBaseCurrencyCode).call(),
+      config.acceptanceMargin
+    );
   });
 
   it('Registers PricerRule rule', async function() {
@@ -389,12 +429,12 @@ describe('TH transfers through PricerRule Pay', async function() {
       transferAmounts = ['20000000000', '10000000000'];
 
     const nonce = 0;
-
+    const intendedPrice = config.price;
     const pricerRulePayExecutable = pricerRuleHelperObject.getPayExecutableData(
       tokenHolderSender,
       transferTos,
       transferAmounts,
-      null,
+      config.payCurrencyCode,
       intendedPrice
     );
 

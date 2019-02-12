@@ -80924,6 +80924,82 @@ function (_Contracts) {
       return contractInstance;
     }
     /**
+     * Static method which returns TokenRules contract instance.
+     *
+     * @param originWeb3 Origin chain web3 object.
+     * @param address TokenRules contract address.
+     * @param options Tx options.
+     * @returns {web3.eth.Contract} Contract instance.
+     * @constructor
+     */
+
+  }], [{
+    key: "getTokenRules",
+    value: function getTokenRules(originWeb3, address, options) {
+      var originWeb3Object = Contracts._getWeb3(originWeb3);
+
+      var jsonInterface = abiBinProvider.getABI('TokenRules');
+      var contract = new originWeb3Object.eth.Contract(jsonInterface, address, options);
+      return contract;
+    }
+    /**
+     * Static method which returns PricerRule contract instance.
+     *
+     * @param originWeb3 Origin chain web3 object.
+     * @param address PricerRule contract instance.
+     * @param options Tx options.
+     * @returns {web3.eth.Contract} Contract instance.
+     * @constructor
+     */
+
+  }, {
+    key: "getPricerRule",
+    value: function getPricerRule(originWeb3, address, options) {
+      var originWeb3Object = Contracts._getWeb3(originWeb3);
+
+      var jsonInterface = abiBinProvider.getABI('PricerRule');
+      var contract = new originWeb3Object.eth.Contract(jsonInterface, address, options);
+      return contract;
+    }
+    /**
+     * Static method which returns TokenHolder contract instance.
+     *
+     * @param auxiliaryWeb3 Auxiliary chain web3 object.
+     * @param address TokenHolder contract address.
+     * @param options Tx options.
+     * @returns {web3.eth.Contract} Contract instance.
+     * @constructor
+     */
+
+  }, {
+    key: "getTokenHolder",
+    value: function getTokenHolder(auxiliaryWeb3, address, options) {
+      var auxiliaryWeb3Object = Contracts._getWeb3(auxiliaryWeb3);
+
+      var jsonInterface = abiBinProvider.getABI('TokenHolder');
+      var contract = new auxiliaryWeb3Object.eth.Contract(jsonInterface, address, options);
+      return contract;
+    }
+    /**
+     * Static method which returns GnosisSafe contract instance.
+     *
+     * @param auxiliaryWeb3 Auxiliary chain web3 object.
+     * @param address GnosisSafe contract address.
+     * @param options Tx options.
+     * @returns {web3.eth.Contract} Contract instance.
+     * @constructor
+     */
+
+  }, {
+    key: "getTokenHolder",
+    value: function getTokenHolder(auxiliaryWeb3, address, options) {
+      var auxiliaryWeb3Object = Contracts._getWeb3(auxiliaryWeb3);
+
+      var jsonInterface = abiBinProvider.getABI('GnosisSafe');
+      var contract = new auxiliaryWeb3Object.eth.Contract(jsonInterface, address, options);
+      return contract;
+    }
+    /**
      * Returns web3 instance. If web3 is string constructs web3 object from string.
      *
      * @param web3 Web3 object.
@@ -80932,7 +81008,7 @@ function (_Contracts) {
      * @private
      */
 
-  }], [{
+  }, {
     key: "_getWeb3",
     value: function _getWeb3(web3) {
       if (web3 instanceof Web3) {

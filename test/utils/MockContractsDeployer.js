@@ -115,7 +115,6 @@ class MockContractsDeployer {
       })
       .on('receipt', function(receipt) {
         txReceipt = receipt;
-        console.log('\t - Receipt:\n\x1b[2m', JSON.stringify(receipt), '\x1b[0m\n');
       })
       .then(function(instance) {
         oThis.addresses[contractName] = instance.options.address;

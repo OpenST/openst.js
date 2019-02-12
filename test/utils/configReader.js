@@ -46,7 +46,9 @@ ConfigReader.prototype = {
   conversionRateDecimals: 18,
   requiredPriceOracleDecimals: 18,
   sessionKeySpendingLimit: 1000000,
-  sessionKeyExpirationHeight: 100000000000
+  sessionKeyExpirationHeight: 10000000000,
+  price: '10000000000',
+  acceptanceMargin: '10000000000'
 };
 
 module.exports = new ConfigReader();
