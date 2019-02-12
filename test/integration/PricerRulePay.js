@@ -244,11 +244,9 @@ describe('TH transfers through PricerRule Pay', async function() {
       priceOracleAddress,
       addPriceOracleTxOptions
     );
-    console.log('addPriceOracleReceipt:', addPriceOracleReceipt);
     assert.strictEqual(addPriceOracleReceipt.status, true);
-    pricerRuleInstance = openSTContractsInstance.PricerRule(pricerRuleAddress, txOptions);
     assert.strictEqual(
-      await pricerRuleInstance.methods.baseCurrencyPriceOracles(bytesBaseCurrencyCode).call(),
+      await pricerRuleInstance.methods.baseCurrencyPriceOracles(bytesPayCurrencyCode).call(),
       priceOracleAddress
     );
   });
@@ -267,7 +265,7 @@ describe('TH transfers through PricerRule Pay', async function() {
     console.log('setAcceptanceMarginReceipt:', setAcceptanceMarginReceipt);
     assert.strictEqual(setAcceptanceMarginReceipt.status, true);
     assert.strictEqual(
-      await pricerRuleInstance.methods.baseCurrencyPriceAcceptanceMargins(bytesBaseCurrencyCode).call(),
+      await pricerRuleInstance.methods.baseCurrencyPriceAcceptanceMargins(bytesPayCurrencyCode).call(),
       config.acceptanceMargin
     );
   });
