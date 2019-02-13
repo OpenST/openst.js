@@ -81157,13 +81157,16 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-var AbiBinProvider = __webpack_require__(32),
-    Deployer = __webpack_require__(153);
+var AbiBinProvider = __webpack_require__(32);
 
-var MultiSigMasterCopyContractName = 'GnosisSafe',
-    THMasterCopyContractName = 'TokenHolder',
-    UserWalletFactoryContractName = 'UserWalletFactory',
-    ProxyFactoryContractName = 'ProxyFactory';
+var Deployer = __webpack_require__(153);
+
+var MultiSigMasterCopyContractName = 'GnosisSafe';
+var THMasterCopyContractName = 'TokenHolder';
+var UserWalletFactoryContractName = 'UserWalletFactory';
+var ProxyFactoryContractName = 'ProxyFactory';
+var CreateAndAddModulesContractName = 'CreateAndAddModules';
+var DelayedRecoveryModuleMasterCopyContractName = 'DelayedRecoveryModule';
 /**
  * Performs setup and deployment tasks for user.
  */
@@ -81181,19 +81184,13 @@ function () {
     oThis.auxiliaryWeb3 = auxiliaryWeb3;
     oThis.abiBinProvider = new AbiBinProvider();
   }
-  /**
-   * Deploys gnosis MultiSig master copy contract.
-   *
-   * @param txOptions Tx options.
-   *
-   * @returns {Object} - Transaction receipt.
-   */
+  /** Deploys DelayedRecoveryModule master copy. */
 
 
   _createClass(User, [{
-    key: "deployMultiSigMasterCopy",
+    key: "deployDelayedRecoveryModuleMasterCopy",
     value: function () {
-      var _deployMultiSigMasterCopy = _asyncToGenerator(
+      var _deployDelayedRecoveryModuleMasterCopy = _asyncToGenerator(
       /*#__PURE__*/
       regeneratorRuntime.mark(function _callee(txOptions) {
         var oThis, txObject, txReceipt;
@@ -81202,9 +81199,9 @@ function () {
             switch (_context.prev = _context.next) {
               case 0:
                 oThis = this;
-                txObject = oThis._deployMultiSigMasterCopyRawTx();
+                txObject = oThis._deployDelayedRecoveryModuleMasterCopyRawTx();
                 _context.next = 4;
-                return new Deployer(MultiSigMasterCopyContractName, txObject, oThis.auxiliaryWeb3, txOptions).deploy();
+                return new Deployer(DelayedRecoveryModuleMasterCopyContractName, txObject, oThis.auxiliaryWeb3, txOptions).deploy();
 
               case 4:
                 txReceipt = _context.sent;
@@ -81218,7 +81215,85 @@ function () {
         }, _callee, this);
       }));
 
-      function deployMultiSigMasterCopy(_x) {
+      function deployDelayedRecoveryModuleMasterCopy(_x) {
+        return _deployDelayedRecoveryModuleMasterCopy.apply(this, arguments);
+      }
+
+      return deployDelayedRecoveryModuleMasterCopy;
+    }()
+    /** Deploys Gnosis CreateAndAddModules contract. */
+
+  }, {
+    key: "deployCreateAndAddModules",
+    value: function () {
+      var _deployCreateAndAddModules = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee2(txOptions) {
+        var oThis, txObject, txReceipt;
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                oThis = this;
+                txObject = oThis._deployCreateAndAddModulesRawTx();
+                _context2.next = 4;
+                return new Deployer(CreateAndAddModulesContractName, txObject, oThis.auxiliaryWeb3, txOptions).deploy();
+
+              case 4:
+                txReceipt = _context2.sent;
+                return _context2.abrupt("return", txReceipt);
+
+              case 6:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      function deployCreateAndAddModules(_x2) {
+        return _deployCreateAndAddModules.apply(this, arguments);
+      }
+
+      return deployCreateAndAddModules;
+    }()
+    /**
+     * Deploys gnosis MultiSig master copy contract.
+     *
+     * @param txOptions Tx options.
+     *
+     * @returns {Object} - Transaction receipt.
+     */
+
+  }, {
+    key: "deployMultiSigMasterCopy",
+    value: function () {
+      var _deployMultiSigMasterCopy = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee3(txOptions) {
+        var oThis, txObject, txReceipt;
+        return regeneratorRuntime.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                oThis = this;
+                txObject = oThis._deployMultiSigMasterCopyRawTx();
+                _context3.next = 4;
+                return new Deployer(MultiSigMasterCopyContractName, txObject, oThis.auxiliaryWeb3, txOptions).deploy();
+
+              case 4:
+                txReceipt = _context3.sent;
+                return _context3.abrupt("return", txReceipt);
+
+              case 6:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3, this);
+      }));
+
+      function deployMultiSigMasterCopy(_x3) {
         return _deployMultiSigMasterCopy.apply(this, arguments);
       }
 
@@ -81237,30 +81312,30 @@ function () {
     value: function () {
       var _deployTokenHolderMasterCopy = _asyncToGenerator(
       /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee2(txOptions) {
+      regeneratorRuntime.mark(function _callee4(txOptions) {
         var oThis, txObject, txReceipt;
-        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+        return regeneratorRuntime.wrap(function _callee4$(_context4) {
           while (1) {
-            switch (_context2.prev = _context2.next) {
+            switch (_context4.prev = _context4.next) {
               case 0:
                 oThis = this;
                 txObject = oThis._deployTokenHolderMasterCopyRawTx();
-                _context2.next = 4;
+                _context4.next = 4;
                 return new Deployer(THMasterCopyContractName, txObject, oThis.auxiliaryWeb3, txOptions).deploy();
 
               case 4:
-                txReceipt = _context2.sent;
-                return _context2.abrupt("return", txReceipt);
+                txReceipt = _context4.sent;
+                return _context4.abrupt("return", txReceipt);
 
               case 6:
               case "end":
-                return _context2.stop();
+                return _context4.stop();
             }
           }
-        }, _callee2, this);
+        }, _callee4, this);
       }));
 
-      function deployTokenHolderMasterCopy(_x2) {
+      function deployTokenHolderMasterCopy(_x4) {
         return _deployTokenHolderMasterCopy.apply(this, arguments);
       }
 
@@ -81279,30 +81354,30 @@ function () {
     value: function () {
       var _deployUserWalletFactory = _asyncToGenerator(
       /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee3(txOptions) {
+      regeneratorRuntime.mark(function _callee5(txOptions) {
         var oThis, txObject, txReceipt;
-        return regeneratorRuntime.wrap(function _callee3$(_context3) {
+        return regeneratorRuntime.wrap(function _callee5$(_context5) {
           while (1) {
-            switch (_context3.prev = _context3.next) {
+            switch (_context5.prev = _context5.next) {
               case 0:
                 oThis = this;
                 txObject = oThis._deployUserWalletFactoryRawTx();
-                _context3.next = 4;
+                _context5.next = 4;
                 return new Deployer(UserWalletFactoryContractName, txObject, oThis.auxiliaryWeb3, txOptions).deploy();
 
               case 4:
-                txReceipt = _context3.sent;
-                return _context3.abrupt("return", txReceipt);
+                txReceipt = _context5.sent;
+                return _context5.abrupt("return", txReceipt);
 
               case 6:
               case "end":
-                return _context3.stop();
+                return _context5.stop();
             }
           }
-        }, _callee3, this);
+        }, _callee5, this);
       }));
 
-      function deployUserWalletFactory(_x3) {
+      function deployUserWalletFactory(_x5) {
         return _deployUserWalletFactory.apply(this, arguments);
       }
 
@@ -81321,35 +81396,65 @@ function () {
     value: function () {
       var _deployProxyFactory = _asyncToGenerator(
       /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee4(txOptions) {
+      regeneratorRuntime.mark(function _callee6(txOptions) {
         var oThis, txObject, txReceipt;
-        return regeneratorRuntime.wrap(function _callee4$(_context4) {
+        return regeneratorRuntime.wrap(function _callee6$(_context6) {
           while (1) {
-            switch (_context4.prev = _context4.next) {
+            switch (_context6.prev = _context6.next) {
               case 0:
                 oThis = this;
                 txObject = oThis._deployProxyFactoryRawTx();
-                _context4.next = 4;
+                _context6.next = 4;
                 return new Deployer(ProxyFactoryContractName, txObject, oThis.auxiliaryWeb3, txOptions).deploy();
 
               case 4:
-                txReceipt = _context4.sent;
-                return _context4.abrupt("return", txReceipt);
+                txReceipt = _context6.sent;
+                return _context6.abrupt("return", txReceipt);
 
               case 6:
               case "end":
-                return _context4.stop();
+                return _context6.stop();
             }
           }
-        }, _callee4, this);
+        }, _callee6, this);
       }));
 
-      function deployProxyFactory(_x4) {
+      function deployProxyFactory(_x6) {
         return _deployProxyFactory.apply(this, arguments);
       }
 
       return deployProxyFactory;
     }()
+    /** Creates and returns transaction object for DelayedRecoveryModule master copy. */
+
+  }, {
+    key: "_deployDelayedRecoveryModuleMasterCopyRawTx",
+    value: function _deployDelayedRecoveryModuleMasterCopyRawTx() {
+      var oThis = this;
+      var abiBinProvider = oThis.abiBinProvider;
+      var jsonInterface = abiBinProvider.getABI(DelayedRecoveryModuleMasterCopyContractName);
+      var bin = abiBinProvider.getBIN(DelayedRecoveryModuleMasterCopyContractName);
+      var contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, null);
+      return contract.deploy({
+        data: bin,
+        arguments: []
+      });
+    }
+    /** Creates and returns transaction object for CreateAndAddModules contract */
+
+  }, {
+    key: "_deployCreateAndAddModulesRawTx",
+    value: function _deployCreateAndAddModulesRawTx() {
+      var oThis = this;
+      var abiBinProvider = oThis.abiBinProvider;
+      var jsonInterface = abiBinProvider.getABI(CreateAndAddModulesContractName);
+      var bin = abiBinProvider.getBIN(CreateAndAddModulesContractName);
+      var contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, null);
+      return contract.deploy({
+        data: bin,
+        arguments: []
+      });
+    }
     /**
      * Private method which Deploys gnosis MultiSig master copy contract.
      *
@@ -81493,39 +81598,111 @@ function () {
    *
    * @param gnosisSafeMasterCopy The address of a master copy of gnosis safe contract.
    * @param tokenHolderMasterCopy The address of a master copy of token holder contract.
+   * @param delayedRecoveryModuleMasterCopy The address of a master copy of
+   *                                        recovery module contract.
    * @param eip20Token The address of an EIP20Token of an economy.
    * @param tokenRules The address of the token rules.
    * @param userWalletFactoryAddress Address of UserWalletFactory contract.
    * @param auxiliaryWeb3 Auxiliary chain web3 object.
    */
-  function User(gnosisSafeMasterCopy, tokenHolderMasterCopy, eip20Token, tokenRules, userWalletFactoryAddress, auxiliaryWeb3) {
+  function User(gnosisSafeMasterCopy, delayedRecoveryModuleMasterCopy, tokenHolderMasterCopy, eip20Token, tokenRules, userWalletFactoryAddress, auxiliaryWeb3) {
     _classCallCheck(this, User);
 
     var oThis = this;
     oThis.gnosisSafeMasterCopy = gnosisSafeMasterCopy;
     oThis.tokenHolderMasterCopy = tokenHolderMasterCopy;
+    oThis.delayedRecoveryModuleMasterCopy = delayedRecoveryModuleMasterCopy;
     oThis.eip20Token = eip20Token;
     oThis.tokenRules = tokenRules;
     oThis.userWalletFactoryAddress = userWalletFactoryAddress;
     oThis.auxiliaryWeb3 = auxiliaryWeb3;
     oThis.abiBinProvider = new AbiBinProvider();
   }
-  /**
-   * Generate the executable data for setup method of GnosisSafe contract.
-   *
-   * @param owners List of owners of the multisig contract for a user.
-   * @param threshold Number of required confirmations for a Safe transaction.
-   * @param to Contract address for optional delegate call.
-   * @param data Data payload for optional delegate call.
-   *
-   * @returns {String}
-   */
-
 
   _createClass(User, [{
-    key: "getGnosisSafeData",
-    value: function getGnosisSafeData(owners, threshold, to, data) {
+    key: "getDelayedRecoveryModuleSetupData",
+    value: function getDelayedRecoveryModuleSetupData(recoveryOwnerAddress, recoveryControllerAddress, recoveryBlockDelay) {
       var oThis = this;
+      return oThis.auxiliaryWeb3.eth.abi.encodeFunctionCall({
+        name: 'setup',
+        type: 'function',
+        inputs: [{
+          type: 'address',
+          name: 'recoveryOwnerAddress'
+        }, {
+          type: 'address',
+          name: 'recoveryControllerAddress'
+        }, {
+          type: 'uint256',
+          name: 'recoveryBlockDelay'
+        }]
+      }, [recoveryOwnerAddress, recoveryControllerAddress, recoveryBlockDelay]);
+    }
+  }, {
+    key: "getDelayedRecoveryModuleCreationData",
+    value: function getDelayedRecoveryModuleCreationData(delayedRecoveryModuleMasterCopyAddress, delayedRecoverySetupData) {
+      var oThis = this;
+      return oThis.auxiliaryWeb3.eth.abi.encodeFunctionCall({
+        name: 'createProxy',
+        type: 'function',
+        inputs: [{
+          type: 'address',
+          name: 'delayedRecoveryModuleMasterCopyAddress'
+        }, {
+          type: 'bytes',
+          name: 'delayedRecoverySetupData'
+        }]
+      }, [delayedRecoveryModuleMasterCopyAddress, delayedRecoverySetupData]);
+    }
+  }, {
+    key: "getCreateAndAddModulesData",
+    value: function getCreateAndAddModulesData(proxyFactoryAddress, modulesCreationData) {
+      var oThis = this;
+      var ModuleDataWrapper = oThis.auxiliaryWeb3.eth.contract([{
+        constant: false,
+        inputs: [{
+          name: 'data',
+          type: 'bytes'
+        }],
+        name: 'setup',
+        outputs: [],
+        payable: false,
+        stateMutability: 'nonpayable',
+        type: 'function'
+      }]);
+      var mw = ModuleDataWrapper.at(1); // Remove method id (10) and position of data in payload (64)
+
+      var reducedModulesCreationData = modulesCreationData.reduce(function (acc, data) {
+        return acc + mw.setup.getData(data).substr(74);
+      }, '0x');
+      return oThis.auxiliaryWeb3.eth.abi.encodeFunctionCall({
+        name: 'createAndAddModules',
+        type: 'function',
+        inputs: [{
+          type: 'address',
+          name: 'proxyFactoryAddress'
+        }, {
+          type: 'bytes',
+          name: 'data'
+        }]
+      }, [proxyFactoryAddress, reducedModulesCreationData]);
+    }
+    /**
+     * Generate the executable data for setup method of GnosisSafe contract.
+     *
+     * @param owners List of owners of the multisig contract for a user.
+     * @param threshold Number of required confirmations for a Safe transaction.
+     *
+     * @returns {String}
+     */
+
+  }, {
+    key: "getGnosisSafeData",
+    value: function getGnosisSafeData(owners, threshold, proxyFactoryAddress, createAndAddModulesAddress, delayedRecoveryModuleMasterCopyAddress, recoveryOwnerAddress, recoveryControllerAddress, recoveryBlockDelay) {
+      var oThis = this;
+      var delayedRecoveryModuleSetupData = oThis.getDelayedRecoveryModuleSetupData(recoveryOwnerAddress, recoveryControllerAddress, recoveryBlockDelay);
+      var delayedRecoveryModuleCreationData = oThis.getDelayedRecoveryModuleCreationData(delayedRecoveryModuleMasterCopyAddress, delayedRecoveryModuleSetupData);
+      var createAndAddModulesData = oThis.getCreateAndAddModulesData(proxyFactoryAddress, [delayedRecoveryModuleCreationData]);
       return oThis.auxiliaryWeb3.eth.abi.encodeFunctionCall({
         name: 'setup',
         type: 'function',
@@ -81542,7 +81719,7 @@ function () {
           type: 'bytes',
           name: 'data'
         }]
-      }, [owners, threshold, to, data]);
+      }, [owners, threshold, createAndAddModulesAddress, createAndAddModulesData]);
     }
     /**
      * Returns TokenHolder setup executable data.
@@ -81677,8 +81854,8 @@ function () {
     value: function _createUserWalletRawTx(owners, threshold, to, data, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights) {
       var oThis = this;
       var gnosisSafeData = oThis.getGnosisSafeData(owners, threshold, to, data);
-      var jsonInterface = oThis.abiBinProvider.getABI(UserWalletFactoryContractName),
-          contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, oThis.userWalletFactoryAddress);
+      var jsonInterface = oThis.abiBinProvider.getABI(UserWalletFactoryContractName);
+      var contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, oThis.userWalletFactoryAddress);
       return contract.methods.createUserWallet(oThis.gnosisSafeMasterCopy, gnosisSafeData, oThis.tokenHolderMasterCopy, oThis.eip20Token, oThis.tokenRules, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights);
     }
     /**
@@ -81699,8 +81876,8 @@ function () {
     value: function _createCompanyWalletRawTx(proxyFactory, owner, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights) {
       var oThis = this;
       var thSetupExecutableData = oThis.getTokenHolderSetupExecutableData(owner, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights);
-      var jsonInterface = oThis.abiBinProvider.getABI(ProxyFactoryContractName),
-          contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, proxyFactory);
+      var jsonInterface = oThis.abiBinProvider.getABI(ProxyFactoryContractName);
+      var contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, proxyFactory);
       return contract.methods.createProxy(oThis.tokenHolderMasterCopy, thSetupExecutableData);
     }
   }]);
