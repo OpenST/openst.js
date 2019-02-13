@@ -81544,15 +81544,14 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 var AbiBinProvider = __webpack_require__(32);
 
+var TxSender = __webpack_require__(80);
+
 var UserWalletFactoryContractName = 'UserWalletFactory';
 var ProxyFactoryContractName = 'ProxyFactory';
 var THMasterCopyContractName = 'TokenHolder';
-
-var TxSender = __webpack_require__(80);
 /**
  * This is used to create wallet of an user and configure it.
  */
-
 
 var User =
 /*#__PURE__*/
@@ -81562,26 +81561,32 @@ function () {
    *
    * @param gnosisSafeMasterCopy The address of a master copy of gnosis safe contract.
    * @param tokenHolderMasterCopy The address of a master copy of token holder contract.
+   * @param createAndAddModules The address of a CreateAndAddModules contract.
    * @param delayedRecoveryModuleMasterCopy The address of a master copy of
    *                                        recovery module contract.
    * @param eip20Token The address of an EIP20Token of an economy.
    * @param tokenRules The address of the token rules.
-   * @param userWalletFactoryAddress Address of UserWalletFactory contract.
+   * @param userWalletFactory Address of UserWalletFactory contract.
+   * @param proxyFactory Address of ProxyFactory contract.
    * @param auxiliaryWeb3 Auxiliary chain web3 object.
    */
-  function User(gnosisSafeMasterCopy, delayedRecoveryModuleMasterCopy, tokenHolderMasterCopy, eip20Token, tokenRules, userWalletFactoryAddress, auxiliaryWeb3) {
+  function User(gnosisSafeMasterCopy, delayedRecoveryModuleMasterCopy, createAndAddModules, tokenHolderMasterCopy, eip20Token, tokenRules, userWalletFactory, proxyFactory, auxiliaryWeb3) {
     _classCallCheck(this, User);
 
     var oThis = this;
     oThis.gnosisSafeMasterCopy = gnosisSafeMasterCopy;
     oThis.tokenHolderMasterCopy = tokenHolderMasterCopy;
+    oThis.createAndAddModules = createAndAddModules;
     oThis.delayedRecoveryModuleMasterCopy = delayedRecoveryModuleMasterCopy;
     oThis.eip20Token = eip20Token;
     oThis.tokenRules = tokenRules;
-    oThis.userWalletFactoryAddress = userWalletFactoryAddress;
+    oThis.userWalletFactory = userWalletFactory;
+    oThis.proxyFactory = proxyFactory;
     oThis.auxiliaryWeb3 = auxiliaryWeb3;
     oThis.abiBinProvider = new AbiBinProvider();
   }
+  /** Generates DelayedRecoveryModule::setup() function data. */
+
 
   _createClass(User, [{
     key: "getDelayedRecoveryModuleSetupData",
@@ -81602,9 +81607,14 @@ function () {
         }]
       }, [recoveryOwnerAddress, recoveryControllerAddress, recoveryBlockDelay]);
     }
+    /**
+     * Generates ProxyFactory::createProxy() function data for
+     * DelayedRecoveryModule proxy's creation.
+     */
+
   }, {
     key: "getDelayedRecoveryModuleCreationData",
-    value: function getDelayedRecoveryModuleCreationData(delayedRecoveryModuleMasterCopyAddress, delayedRecoverySetupData) {
+    value: function getDelayedRecoveryModuleCreationData(delayedRecoverySetupData) {
       var oThis = this;
       return oThis.auxiliaryWeb3.eth.abi.encodeFunctionCall({
         name: 'createProxy',
@@ -81616,11 +81626,11 @@ function () {
           type: 'bytes',
           name: 'delayedRecoverySetupData'
         }]
-      }, [delayedRecoveryModuleMasterCopyAddress, delayedRecoverySetupData]);
+      }, [oThis.delayedRecoveryModuleMasterCopyAddress, delayedRecoverySetupData]);
     }
   }, {
     key: "getCreateAndAddModulesData",
-    value: function getCreateAndAddModulesData(proxyFactoryAddress, modulesCreationData) {
+    value: function getCreateAndAddModulesData(modulesCreationData) {
       var oThis = this;
       var ModuleDataWrapper = oThis.auxiliaryWeb3.eth.contract([{
         constant: false,
@@ -81644,12 +81654,12 @@ function () {
         type: 'function',
         inputs: [{
           type: 'address',
-          name: 'proxyFactoryAddress'
+          name: 'proxyFactory'
         }, {
           type: 'bytes',
           name: 'data'
         }]
-      }, [proxyFactoryAddress, reducedModulesCreationData]);
+      }, [oThis.proxyFactory, reducedModulesCreationData]);
     }
     /**
      * Generate the executable data for setup method of GnosisSafe contract.
@@ -81662,11 +81672,11 @@ function () {
 
   }, {
     key: "getGnosisSafeData",
-    value: function getGnosisSafeData(owners, threshold, proxyFactoryAddress, createAndAddModulesAddress, delayedRecoveryModuleMasterCopyAddress, recoveryOwnerAddress, recoveryControllerAddress, recoveryBlockDelay) {
+    value: function getGnosisSafeData(owners, threshold, recoveryOwnerAddress, recoveryControllerAddress, recoveryBlockDelay) {
       var oThis = this;
       var delayedRecoveryModuleSetupData = oThis.getDelayedRecoveryModuleSetupData(recoveryOwnerAddress, recoveryControllerAddress, recoveryBlockDelay);
-      var delayedRecoveryModuleCreationData = oThis.getDelayedRecoveryModuleCreationData(delayedRecoveryModuleMasterCopyAddress, delayedRecoveryModuleSetupData);
-      var createAndAddModulesData = oThis.getCreateAndAddModulesData(proxyFactoryAddress, [delayedRecoveryModuleCreationData]);
+      var delayedRecoveryModuleCreationData = oThis.getDelayedRecoveryModuleCreationData(oThis.delayedRecoveryModuleMasterCopyAddress, delayedRecoveryModuleSetupData);
+      var createAndAddModulesData = oThis.getCreateAndAddModulesData(oThis.proxyFactory, [delayedRecoveryModuleCreationData]);
       return oThis.auxiliaryWeb3.eth.abi.encodeFunctionCall({
         name: 'setup',
         type: 'function',
@@ -81683,7 +81693,7 @@ function () {
           type: 'bytes',
           name: 'data'
         }]
-      }, [owners, threshold, createAndAddModulesAddress, createAndAddModulesData]);
+      }, [owners, threshold, oThis.createAndAddModules, createAndAddModulesData]);
     }
     /**
      * Returns TokenHolder setup executable data.
@@ -81705,7 +81715,8 @@ function () {
       return tokenRuleContract.methods.setup(oThis.eip20Token, oThis.tokenRules, owner, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights).encodeABI();
     }
     /**
-     * It is used for creation and configuration of gnosis safe and token holder proxy contract for user.
+     * It is used for creation and configuration of gnosis safe and token holder
+     * proxy contract for user.
      *
      * @param owners List of owners of the multisig.
      * @param threshold Number of required confirmations for a Safe transaction.
@@ -81801,7 +81812,8 @@ function () {
       return createCompanyWallet;
     }()
     /**
-     * Private method used for creation and configuration of gnosis safe and tokenholder contract for an user.
+     * Private method used for creation and configuration of gnosis safe and
+     * tokenholder contract for an user.
      *
      * @param owners List of owners of the multisig.
      * @param threshold Number of required confirmations for a Safe transaction.
@@ -81819,7 +81831,7 @@ function () {
       var oThis = this;
       var gnosisSafeData = oThis.getGnosisSafeData(owners, threshold, to, data);
       var jsonInterface = oThis.abiBinProvider.getABI(UserWalletFactoryContractName);
-      var contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, oThis.userWalletFactoryAddress);
+      var contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, oThis.userWalletFactory);
       return contract.methods.createUserWallet(oThis.gnosisSafeMasterCopy, gnosisSafeData, oThis.tokenHolderMasterCopy, oThis.eip20Token, oThis.tokenRules, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights);
     }
     /**
