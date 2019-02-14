@@ -45,8 +45,8 @@ ConfigReader.prototype = {
   conversionRate: 10,
   conversionRateDecimals: 18,
   requiredPriceOracleDecimals: 18,
-  sessionKeySpendingLimit: 1000000,
-  sessionKeyExpirationHeight: 10000000000,
+  sessionKeySpendingLimit: '1000000000000000000000', //1000 ethers
+  sessionKeyExpirationHeight: '1000000000000000000',
   price: '10000000000',
   acceptanceMargin: '10000000000'
 };

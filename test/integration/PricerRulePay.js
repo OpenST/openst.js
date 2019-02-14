@@ -258,16 +258,15 @@ describe('TH transfers through PricerRule Pay', async function() {
       gas: config.gas
     };
     const setAcceptanceMarginReceipt = await pricerRuleHelperObject.setAcceptanceMargin(
-      bytesPayCurrencyCode,
+      config.payCurrencyCode,
       config.acceptanceMargin,
       setAcceptanceMarginTxOptions
     );
-    console.log('setAcceptanceMarginReceipt:', setAcceptanceMarginReceipt);
     assert.strictEqual(setAcceptanceMarginReceipt.status, true);
-    assert.strictEqual(
-      await pricerRuleInstance.methods.baseCurrencyPriceAcceptanceMargins(bytesPayCurrencyCode).call(),
-      config.acceptanceMargin
-    );
+    const contractAcceptanceMargin = await pricerRuleInstance.methods
+      .baseCurrencyPriceAcceptanceMargins(bytesPayCurrencyCode)
+      .call();
+    assert.strictEqual(contractAcceptanceMargin, config.acceptanceMargin);
   });
 
   it('Registers PricerRule rule', async function() {
