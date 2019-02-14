@@ -82044,8 +82044,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 var TxSender = __webpack_require__(80),
     AbiBinProvider = __webpack_require__(32);
 
-var tokenHolderContractName = 'TokenHolder',
-    tokenRulesContractName = 'TokenRules';
+var tokenHolderContractName = 'TokenHolder';
 /**
  * It consists of methods for a user's TokenHolder.
  */
@@ -82057,15 +82056,13 @@ function () {
    * Constructor of TokenHolder.
    *
    * @param auxiliaryWeb3 Auxiliary web3 object.
-   * @param tokenRules Token rules contract address.
    * @param tokenHolderProxy TokenHolder proxy address of a user.
    */
-  function TokenHolder(auxiliaryWeb3, tokenRules, tokenHolderProxy) {
+  function TokenHolder(auxiliaryWeb3, tokenHolderProxy) {
     _classCallCheck(this, TokenHolder);
 
     var oThis = this;
     oThis.auxiliaryWeb3 = auxiliaryWeb3;
-    oThis.tokenRules = tokenRules;
     oThis.tokenHolderProxy = tokenHolderProxy;
     oThis.abiBinProvider = new AbiBinProvider();
   }
@@ -82123,6 +82120,7 @@ function () {
     /**
      * It is used to execute executable data signed by a session key.
      *
+     * @param to Rule address.
      * @param data The payload of a function to be executed in the target contract.
      * @param nonce The nonce of an session key that was used to sign the transaction.
      * @param r `r` part of the signature.
@@ -82138,14 +82136,14 @@ function () {
     value: function () {
       var _executeRule = _asyncToGenerator(
       /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee(data, nonce, r, s, v, txOptions) {
+      regeneratorRuntime.mark(function _callee(to, data, nonce, r, s, v, txOptions) {
         var oThis, txObject, receipt;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
                 oThis = this;
-                txObject = oThis._executeRuleRawTx(oThis.tokenRules, data, nonce, r, s, v);
+                txObject = oThis._executeRuleRawTx(to, data, nonce, r, s, v);
                 _context.next = 4;
                 return new TxSender(txObject, oThis.auxiliaryWeb3, txOptions).execute();
 
@@ -82161,7 +82159,7 @@ function () {
         }, _callee, this);
       }));
 
-      function executeRule(_x, _x2, _x3, _x4, _x5, _x6) {
+      function executeRule(_x, _x2, _x3, _x4, _x5, _x6, _x7) {
         return _executeRule.apply(this, arguments);
       }
 
