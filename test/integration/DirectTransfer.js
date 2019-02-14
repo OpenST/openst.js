@@ -312,7 +312,7 @@ describe('Direct transfers between TH contracts', async function() {
   });
 
   it('Performs direct transfer of tokens', async function() {
-    const tokenHolder = new TokenHolder(auxiliaryWeb3, tokenRulesAddress, tokenHolderSender),
+    const tokenHolder = new TokenHolder(auxiliaryWeb3, tokenHolderSender),
       mockTokenAbi = mockTokenDeployerInstance.abiBinProvider.getABI('MockToken'),
       contract = new auxiliaryWeb3.eth.Contract(mockTokenAbi, mockToken, txOptions);
 

@@ -82004,8 +82004,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 var TxSender = __webpack_require__(80),
     AbiBinProvider = __webpack_require__(32);
 
-var tokenHolderContractName = 'TokenHolder',
-    tokenRulesContractName = 'TokenRules';
+var tokenHolderContractName = 'TokenHolder';
 /**
  * It consists of methods for a user's TokenHolder.
  */
