@@ -312,7 +312,7 @@ describe('Direct transfers between TH contracts', async function() {
   });
 
   it('Performs direct transfer of tokens', async function() {
-    const tokenHolder = new TokenHolder(auxiliaryWeb3, tokenRulesAddress, tokenHolderSender),
+    const tokenHolder = new TokenHolder(auxiliaryWeb3, tokenHolderSender),
       mockTokenAbi = mockTokenDeployerInstance.abiBinProvider.getABI('MockToken'),
       contract = new auxiliaryWeb3.eth.Contract(mockTokenAbi, mockToken, txOptions);
 
@@ -343,7 +343,7 @@ describe('Direct transfers between TH contracts', async function() {
 
     const vrs = ephemeralKey.signEIP1077Transaction(transaction);
 
-    await tokenHolder.executeRule(directTransferExecutable, nonce, vrs.r, vrs.s, vrs.v, txOptions);
+    await tokenHolder.executeRule(tokenRulesAddress, directTransferExecutable, nonce, vrs.r, vrs.s, vrs.v, txOptions);
 
     const finalTHProxyBalance = await contract.methods.balanceOf(tokenHolderSender).call(),
       firstReceiverFinalBalance = await contract.methods.balanceOf(tokenHolderFirstReceiver).call(),
