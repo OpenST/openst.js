@@ -80906,7 +80906,7 @@ function (_Contracts) {
       return contractInstance;
     }
     /**
-     * Returns PricerRule instance
+     * Returns PricerRule instance.
      *
      * @param contractAddress PricerRule contract address.
      * @param txOptions Tx options.
@@ -80925,6 +80925,7 @@ function (_Contracts) {
     }
     /**
      * Static method which returns delayed recovery module instance.
+     *
      * @param auxiliaryWeb3 Auxiliary web3 object.
      * @param address Delayed recovery module contract address.
      * @param options Tx options object.
