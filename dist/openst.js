@@ -80924,6 +80924,42 @@ function (_Contracts) {
       return contractInstance;
     }
     /**
+     * Returns GnosisSafe instance
+     *
+     * @param contractAddress GnosisSafe proxy contract address.
+     * @param txOptions Tx options.
+     *
+     * @returns {auxiliaryWeb3.eth.Contract}
+     */
+
+  }, {
+    key: "GnosisSafe",
+    value: function GnosisSafe(contractAddress, txOptions) {
+      var oThis = this;
+      oThis.auxiliaryWeb3 = Contracts._getWeb3(oThis.auxiliaryWeb3);
+      var jsonInterface = oThis.abibinProvider.getABI('GnosisSafe');
+      var contractInstance = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, contractAddress, txOptions);
+      return contractInstance;
+    }
+    /**
+     * Returns TokenHolder instance
+     *
+     * @param contractAddress TokenHolder contract address.
+     * @param txOptions Tx options.
+     *
+     * @returns {auxiliaryWeb3.eth.Contract}
+     */
+
+  }, {
+    key: "TokenHolder",
+    value: function TokenHolder(contractAddress, txOptions) {
+      var oThis = this;
+      oThis.auxiliaryWeb3 = Contracts._getWeb3(oThis.auxiliaryWeb3);
+      var jsonInterface = oThis.abibinProvider.getABI('TokenHolder');
+      var contractInstance = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, contractAddress, txOptions);
+      return contractInstance;
+    }
+    /**
      * Returns web3 instance. If web3 is string constructs web3 object from string.
      *
      * @param web3 Web3 object.
