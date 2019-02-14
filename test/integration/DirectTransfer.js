@@ -343,7 +343,7 @@ describe('Direct transfers between TH contracts', async function() {
 
     const vrs = ephemeralKey.signEIP1077Transaction(transaction);
 
-    await tokenHolder.executeRule(directTransferExecutable, nonce, vrs.r, vrs.s, vrs.v, txOptions);
+    await tokenHolder.executeRule(tokenRulesAddress, directTransferExecutable, nonce, vrs.r, vrs.s, vrs.v, txOptions);
 
     const finalTHProxyBalance = await contract.methods.balanceOf(tokenHolderSender).call(),
       firstReceiverFinalBalance = await contract.methods.balanceOf(tokenHolderFirstReceiver).call(),
