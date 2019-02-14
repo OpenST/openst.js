@@ -102,15 +102,11 @@ class MockContractsDeployer {
       txOptions
     );
 
-    console.log(`* Deploying ${contractName} Contract`);
     let txReceipt;
     return tx
       .send(txOptions)
-      .on('transactionHash', function(transactionHash) {
-        // console.log('\t - transaction hash:', transactionHash);
-      })
+      .on('transactionHash', function(transactionHash) {})
       .on('error', function(error) {
-        // console.log('\t !! Error !!', error, '\n\t !! ERROR !!\n');
         return Promise.reject(error);
       })
       .on('receipt', function(receipt) {
@@ -118,7 +114,6 @@ class MockContractsDeployer {
       })
       .then(function(instance) {
         oThis.addresses[contractName] = instance.options.address;
-        // console.log(`\t - ${contractName} Contract Address:`, instance.options.address);
         return txReceipt;
       });
   }

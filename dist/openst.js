@@ -12460,17 +12460,15 @@ function () {
                 return oThis.txObject.send(oThis.txOptions).on('receipt', function (value) {
                   receipt = value;
                 }).on('transactionHash', function (value) {
-                  console.log('transaction hash: ' + value);
                   transactionHash = value;
                 }).on('error', function (error) {
                   return Promise.reject(error);
                 });
 
               case 4:
-                console.log('Gas used : ', receipt.gasUsed);
                 return _context.abrupt("return", receipt);
 
-              case 6:
+              case 5:
               case "end":
                 return _context.stop();
             }
@@ -19172,44 +19170,40 @@ function () {
               case 0:
                 oThis = this;
                 receipt = null, transactionHash = null;
-                console.log('Deploying contract: ' + oThis.contractName);
-                _context.next = 5;
+                _context.next = 4;
                 return oThis.txObject.send(oThis.txOptions).on('receipt', function (value) {
                   receipt = value;
                 }).on('transactionHash', function (value) {
-                  console.log('transaction hash for ' + oThis.contractName + ' : ' + value);
                   transactionHash = value;
                 }).on('error', function (error) {
                   return Promise.reject(error);
                 });
 
-              case 5:
+              case 4:
                 instance = _context.sent;
                 contractAddress = null;
                 contractAddress = instance.options.address; // checking if the contract was deployed at all.
 
-                _context.next = 10;
+                _context.next = 9;
                 return oThis.web3.eth.getCode(contractAddress);
 
-              case 10:
+              case 9:
                 code = _context.sent;
 
                 if (!(code.length <= 2)) {
-                  _context.next = 13;
+                  _context.next = 12;
                   break;
                 }
 
                 return _context.abrupt("return", Promise.reject('Contract deployment failed. oThis.web3.eth.getCode returned empty code.'));
 
-              case 13:
-                console.log('Address  :', contractAddress);
-                console.log('Gas used :', receipt.gasUsed, '\n');
+              case 12:
                 return _context.abrupt("return", Promise.resolve({
                   receipt: receipt,
                   instance: instance
                 }));
 
-              case 16:
+              case 13:
               case "end":
                 return _context.stop();
             }
@@ -80857,6 +80851,7 @@ var AbiBinProvider = __webpack_require__(32);
 var Mosaic = __webpack_require__(129);
 
 var Contracts = Mosaic.Contracts;
+var abiBinProviderObject = new AbiBinProvider();
 /**
  * The class exposes instance of different contracts. Dappy can use the
  * instances to call contract methods. This gives Dappy flexibility in calling
@@ -80883,7 +80878,6 @@ function (_Contracts) {
     var oThis = _assertThisInitialized(_assertThisInitialized(_this));
 
     oThis.auxiliaryWeb3 = auxiliaryWeb3;
-    oThis.abiBinProvider = new AbiBinProvider();
     return _this;
   }
   /**
@@ -80901,7 +80895,7 @@ function (_Contracts) {
     value: function TokenRules(contractAddress, txOptions) {
       var oThis = this;
       oThis.auxiliaryWeb3 = Contracts._getWeb3(oThis.auxiliaryWeb3);
-      var jsonInterface = oThis.abiBinProvider.getABI('TokenRules');
+      var jsonInterface = abiBinProviderObject.getABI('TokenRules');
       var contractInstance = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, contractAddress, txOptions);
       return contractInstance;
     }
@@ -80919,7 +80913,7 @@ function (_Contracts) {
     value: function PricerRule(contractAddress, txOptions) {
       var oThis = this;
       oThis.auxiliaryWeb3 = Contracts._getWeb3(oThis.auxiliaryWeb3);
-      var jsonInterface = oThis.abiBinProvider.getABI('PricerRule');
+      var jsonInterface = abiBinProviderObject.getABI('PricerRule');
       var contractInstance = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, contractAddress, txOptions);
       return contractInstance;
     }
@@ -80974,7 +80968,7 @@ function (_Contracts) {
     value: function getTokenRules(auxiliaryWeb3, address, options) {
       var auxiliaryWeb3Object = Contracts._getWeb3(auxiliaryWeb3);
 
-      var jsonInterface = abiBinProvider.getABI('TokenRules');
+      var jsonInterface = abiBinProviderObject.getABI('TokenRules');
       var contract = new auxiliaryWeb3Object.eth.Contract(jsonInterface, address, options);
       return contract;
     }
@@ -80993,7 +80987,7 @@ function (_Contracts) {
     value: function getPricerRule(auxiliaryWeb3, address, options) {
       var auxiliaryWeb3Object = Contracts._getWeb3(auxiliaryWeb3);
 
-      var jsonInterface = abiBinProvider.getABI('PricerRule');
+      var jsonInterface = abiBinProviderObject.getABI('PricerRule');
       var contract = new auxiliaryWeb3Object.eth.Contract(jsonInterface, address, options);
       return contract;
     }
@@ -81012,7 +81006,7 @@ function (_Contracts) {
     value: function getTokenHolder(auxiliaryWeb3, address, options) {
       var auxiliaryWeb3Object = Contracts._getWeb3(auxiliaryWeb3);
 
-      var jsonInterface = abiBinProvider.getABI('TokenHolder');
+      var jsonInterface = abiBinProviderObject.getABI('TokenHolder');
       var contract = new auxiliaryWeb3Object.eth.Contract(jsonInterface, address, options);
       return contract;
     }
@@ -81031,7 +81025,7 @@ function (_Contracts) {
     value: function getGnosisSafe(auxiliaryWeb3, address, options) {
       var auxiliaryWeb3Object = Contracts._getWeb3(auxiliaryWeb3);
 
-      var jsonInterface = abiBinProvider.getABI('GnosisSafe');
+      var jsonInterface = abiBinProviderObject.getABI('GnosisSafe');
       var contract = new auxiliaryWeb3Object.eth.Contract(jsonInterface, address, options);
       return contract;
     }

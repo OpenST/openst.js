@@ -57,14 +57,11 @@ class TxSender {
         receipt = value;
       })
       .on('transactionHash', function(value) {
-        console.log('transaction hash: ' + value);
         transactionHash = value;
       })
       .on('error', function(error) {
         return Promise.reject(error);
       });
-
-    console.log('Gas used : ', receipt.gasUsed);
 
     return receipt;
   }

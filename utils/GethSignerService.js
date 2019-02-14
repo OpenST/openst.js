@@ -52,9 +52,7 @@ const Signer = function(web3Provider) {
       return Promise.reject('Unknown Address: ', _from);
     }
 
-    // console.log('GSS :: Fetching txpool Content');
     return web3.txpoolContent().then(function(txpoolContent) {
-      // console.log('GSS :: Got txpool Content');
       let pendingTransactions, queuedTransactions;
 
       pendingTransactions = txpoolContent.pending || {};
@@ -77,7 +75,6 @@ const Signer = function(web3Provider) {
         if (currentNonce > maxNonce) maxNonce = currentNonce;
       }
 
-      // console.log('GSS :: Computed maxNonce:', maxNonce);
       if (maxNonce >= 0) {
         return maxNonce + 1;
       }
@@ -98,19 +95,15 @@ const Signer = function(web3Provider) {
       return Promise.reject('Unknown Address', _from);
     }
 
-    // console.log('GSS :: Unlocking Account');
     let _fromPassphrase = _aToPwdMap[String(_from).toLowerCase()];
     return web3.eth.personal.unlockAccount(_from, _fromPassphrase).then(function() {
-      // console.log('GSS :: Account Unlocked! Signing Data');
       return web3.eth.sign(dataToSign, _from).then(function(signedData) {
-        // console.log('GSS :: Data Signed');
         return signedData;
       });
     });
   };
 
   oThis.signTransaction = function(transactionData, _from) {
-    //console.log('transactionData', transactionData);
     if (!transactionData || !transactionData.from) {
       return Promise.reject('Invalid transactionData');
     }
@@ -141,12 +134,9 @@ const Signer = function(web3Provider) {
       transactionData.data = '';
     }
 
-    // console.log('GSS :: Unlocking Account');
     let _fromPassphrase = _aToPwdMap[String(_from).toLowerCase()];
     return web3.eth.personal.unlockAccount(_from, _fromPassphrase).then(function() {
-      // console.log('GSS :: Account Unlocked! Signing Tx');
       return web3.eth.signTransaction(transactionData, _fromPassphrase).then(function(signedTx) {
-        // console.log('GSS :: Tx Signed');
         return signedTx;
       });
     });

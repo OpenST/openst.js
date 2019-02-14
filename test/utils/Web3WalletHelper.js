@@ -60,7 +60,6 @@ Web3WalletHelper.prototype = {
           resolved--;
           if (!resolved) {
             //All are done.
-            console.log('Web3 Wallet Account Add DONE!');
             resolve();
           }
         });

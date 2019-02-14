@@ -36,7 +36,6 @@ GethChecker.prototype = {
     }
 
     return Promise.all(promiseArray).then(function(response) {
-      console.log('All provided endpoints are up and running.');
       return response;
     });
   },
@@ -58,11 +57,8 @@ GethChecker.prototype = {
         if (chainTimer['retryCounter'] <= retryAttempts) {
           provider.eth.getBlockNumber(function(err, blocknumber) {
             if (err) {
-              console.log('Error in getBlockNumber on endPoint', endPoint);
             } else {
-              console.log('getBlockNumber on endPoint', endPoint, 'returned block number =', blocknumber);
               if (chainTimer['blockNumber'] != 0 && chainTimer['blockNumber'] != blocknumber) {
-                console.log('* Geth Checker - endPoint ' + endPoint + ' has new blocks.');
                 clearInterval(chainTimer['timer']);
                 onResolve();
               }
@@ -70,10 +66,6 @@ GethChecker.prototype = {
             }
           });
         } else {
-          console.log(
-            'Geth Checker - endPoint ' + endPoint + ' has no new blocks. Giving up after retries:',
-            retryAttempts
-          );
           onReject();
           process.exit(1);
         }
