@@ -21,24 +21,22 @@
 const chai = require('chai'),
   Web3 = require('web3'),
   Package = require('../../index'),
-  Account = require('eth-lib/lib/account'),
-  abiDecoder = require('abi-decoder');
+  abiDecoder = require('abi-decoder'),
+  MockContractsDeployer = require('../utils/MockContractsDeployer'),
+  Mosaic = require('@openstfoundation/mosaic-tbd'),
+  config = require('../utils/configReader'),
+  Web3WalletHelper = require('../utils/Web3WalletHelper');
 
 const TokenRulesSetup = Package.Setup.TokenRules,
   UserSetup = Package.Setup.User,
-  MockContractsDeployer = require('./../utils/MockContractsDeployer'),
-  Mosaic = require('@openstfoundation/mosaic-tbd'),
-  config = require('../utils/configReader'),
-  Web3WalletHelper = require('../utils/Web3WalletHelper'),
   Contracts = Package.Contracts,
   User = Package.Helpers.User,
   AbiBinProvider = Package.AbiBinProvider,
-  TokenRules = Package.Helpers.TokenRules,
   TokenHolder = Package.Helpers.TokenHolder,
   GnosisSafe = Package.Helpers.GnosisSafe;
 
 const auxiliaryWeb3 = new Web3(config.gethRpcEndPoint),
-  web3WalletHelper = new Web3WalletHelper(auxiliaryWeb3),
+  web3WalletHelperInstance = new Web3WalletHelper(auxiliaryWeb3),
   assert = chai.assert,
   OrganizationHelper = Mosaic.ChainSetup.OrganizationHelper,
   abiBinProvider = new AbiBinProvider();
@@ -65,13 +63,12 @@ let wallets,
   ephemeralKey,
   deployerInstance,
   tokenRules,
-  gnosisSafeProxyInstance,
-  tokenHolderInstance;
+  gnosisSafeProxyInstance;
 
 describe('Wallet operations', async function() {
   before(async function() {
-    await web3WalletHelper.init(auxiliaryWeb3);
-    wallets = web3WalletHelper.web3Object.eth.accounts.wallet;
+    await web3WalletHelperInstance.init(auxiliaryWeb3);
+    wallets = web3WalletHelperInstance.web3Object.eth.accounts.wallet;
     worker = wallets[1].address;
     beneficiary = wallets[2].address;
     facilitator = wallets[3].address;
@@ -140,6 +137,7 @@ describe('Wallet operations', async function() {
     assert.strictEqual(userWalletFactoryResponse.receipt.status, true);
   });
 
+  // wallet3, wallet9 are the owners.
   it('Should create a user wallet', async function() {
     const userInstance = new User(
       gnosisSafeMasterCopyAddress,
@@ -178,11 +176,13 @@ describe('Wallet operations', async function() {
     tokenHolderProxy = userWalletEvent._tokenHolderProxy;
   });
 
+  // wallet3, wallet9 are current owners.
+  // After AddWallet wallet3, wallet9, wallet7 are the owners.
   it('Should add wallet', async function() {
     gnosisSafeProxyInstance = new GnosisSafe(gnosisSafeProxy, auxiliaryWeb3);
 
     const ownerToAdd = wallets[7],
-      owner = wallets[3],
+      currentOwner = wallets[3],
       threshold = 1,
       ownerToAddWithThresholdExData = gnosisSafeProxyInstance.getAddOwnerWithThresholdExecutableData(
         ownerToAdd.address,
@@ -204,7 +204,7 @@ describe('Wallet operations', async function() {
     );
 
     // 2. Generate EIP712 Signature.
-    const ownerSignature = await owner.signEIP712TypedData(safeTxData);
+    const ownerSignature = await currentOwner.signEIP712TypedData(safeTxData);
 
     const result = await gnosisSafeProxyInstance.execTransaction(
       gnosisSafeProxy,
@@ -227,15 +227,17 @@ describe('Wallet operations', async function() {
     assert.strictEqual(addedOwnerEvent.owner, ownerToAdd.address, 'Incorrect owner added');
   });
 
+  // wallet3, wallet9, wallet7 are the owners.
+  // After ReplaceWallet wallet9, wallet7, wallet8 are the owners.
   it('Should replace wallet', async function() {
     const owners = await gnosisSafeProxyInstance.getOwners();
 
     const newOwner = wallets[8],
-      owner = wallets[3],
-      previousOwner = gnosisSafeProxyInstance.findPreviousOwner(owners, owner.address),
+      currentOwner = wallets[3],
+      previousOwner = gnosisSafeProxyInstance.findPreviousOwner(owners, currentOwner.address),
       swapOwnerExData = gnosisSafeProxyInstance.getSwapOwnerExecutableData(
         previousOwner, // previous owner.
-        owner.address, // owner to be replaceed
+        currentOwner.address, // owner to be replaced
         newOwner.address // new owner
       );
 
@@ -254,7 +256,7 @@ describe('Wallet operations', async function() {
     );
 
     // 2. Generate EIP712 Signature.
-    const ownerSignature = await owner.signEIP712TypedData(safeTxData);
+    const ownerSignature = await currentOwner.signEIP712TypedData(safeTxData);
     const result = await gnosisSafeProxyInstance.execTransaction(
       gnosisSafeProxy,
       0,
@@ -276,9 +278,11 @@ describe('Wallet operations', async function() {
     const removedOwnerEvent = JSON.parse(JSON.stringify(removedOwnerReturnValues));
 
     assert.strictEqual(addedOwnerEvent.owner, newOwner.address, 'Incorrect owner added');
-    assert.strictEqual(removedOwnerEvent.owner, owner.address, 'Incorrect owner removed');
+    assert.strictEqual(removedOwnerEvent.owner, currentOwner.address, 'Incorrect owner removed');
   });
 
+  // wallet9, wallet7, wallet8 are the owners.
+  // After RemoveWallet wallet9, wallet8 are the owners.
   it('Should remove wallet', async function() {
     const removeOwner = wallets[7],
       prevOwner = wallets[7];
@@ -328,12 +332,13 @@ describe('Wallet operations', async function() {
     assert.strictEqual(removedOwnerEvent.owner, removeOwner.address, 'Incorrect removed owner address');
   });
 
+  // wallet9, wallet8 are the owners.
   it('Should authorize session', async function() {
     const tokenHolderInstance = new TokenHolder(auxiliaryWeb3, tokenRulesAddress, tokenHolderProxy);
     const sessionKey = wallets[7].address;
     const spendingLimit = config.sessionKeySpendingLimit;
     const expirationHeight = config.sessionKeyExpirationHeight;
-    const owner = wallets[8];
+    const currentOwner = wallets[8];
     const authorizeSessionExData = tokenHolderInstance.getAuthorizeSessionExecutableData(
       sessionKey,
       spendingLimit,
@@ -354,7 +359,7 @@ describe('Wallet operations', async function() {
       nonce
     );
 
-    const ownerSignature = await owner.signEIP712TypedData(safeTxData);
+    const ownerSignature = await currentOwner.signEIP712TypedData(safeTxData);
     const result = await gnosisSafeProxyInstance.execTransaction(
       tokenHolderProxy,
       0,
@@ -386,10 +391,11 @@ describe('Wallet operations', async function() {
     );
   });
 
+  // wallet9, wallet8 are the owners.
   it('Should revoke session', async function() {
     const tokenHolderInstance = new TokenHolder(auxiliaryWeb3, tokenRulesAddress, tokenHolderProxy);
     const sessionKey = wallets[7].address;
-    const owner = wallets[8];
+    const currentOwner = wallets[8];
     const revokeSessionExData = tokenHolderInstance.getRevokeSessionExecutableData(sessionKey);
 
     const nonce = await gnosisSafeProxyInstance.getNonce();
@@ -406,7 +412,7 @@ describe('Wallet operations', async function() {
       nonce
     );
 
-    const ownerSignature = await owner.signEIP712TypedData(safeTxData);
+    const ownerSignature = await currentOwner.signEIP712TypedData(safeTxData);
     const result = await gnosisSafeProxyInstance.execTransaction(
       tokenHolderProxy,
       0,
@@ -434,14 +440,15 @@ describe('Wallet operations', async function() {
     assert.strictEqual(
       auxiliaryWeb3.utils.toChecksumAddress(sessionRevoked[0].events[0].value),
       auxiliaryWeb3.utils.toChecksumAddress(sessionKey),
-      'Sessoin key revoked is incorrect'
+      'Session key revoked is incorrect'
     );
   });
 
+  // wallet9, wallet8 are the owners.
   it('Should change required threshold', async function() {
     // Owners already added should be equal or less than the threshold limit. Here, we have 2-owners in the gnosisSafe proxy.
     const newThreshold = 2;
-    const owner = wallets[8];
+    const currentOwner = wallets[8];
     const changeThresholdExecutableData = gnosisSafeProxyInstance.getChangeThresholdExecutableData(newThreshold);
 
     const nonce = await gnosisSafeProxyInstance.getNonce();
@@ -458,7 +465,7 @@ describe('Wallet operations', async function() {
       nonce
     );
 
-    const ownerSignature = await owner.signEIP712TypedData(safeTxData);
+    const ownerSignature = await currentOwner.signEIP712TypedData(safeTxData);
     const result = await gnosisSafeProxyInstance.execTransaction(
       gnosisSafeProxy,
       0,
