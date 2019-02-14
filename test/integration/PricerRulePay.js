@@ -25,7 +25,8 @@ const chai = require('chai'),
   MockContractsDeployer = require('./../utils/MockContractsDeployer'),
   config = require('../utils/configReader'),
   Web3WalletHelper = require('../utils/Web3WalletHelper'),
-  PricerRule = require('../../lib/helper/rules/PricerRule');
+  PricerRule = require('../../lib/helper/rules/PricerRule'),
+  TxSender = require('../../utils/TxSender');
 
 const TokenRulesSetup = Package.Setup.TokenRules,
   UserSetup = Package.Setup.User,
@@ -87,7 +88,7 @@ describe('TH transfers through PricerRule Pay', async function() {
     beneficiary = wallets[2].address;
     facilitator = wallets[3].address;
     relayer = facilitator;
-    priceOracleOpsAddress = wallets[1].address;
+    priceOracleOpsAddress = wallets[4].address;
   });
 
   it('Deploys Organization contract', async function() {
@@ -194,7 +195,7 @@ describe('TH transfers through PricerRule Pay', async function() {
     const jsonInterface = mockTokenDeployerInstance.abiBinProvider.getABI('PriceOracle');
     priceOracleContractInstance = new auxiliaryWeb3.eth.Contract(jsonInterface, priceOracleAddress);
     const setOpsTxObject = priceOracleContractInstance.methods.setOpsAddress(priceOracleOpsAddress);
-    const setOpsReceipt = await setOpsTxObject.send(setOpsOptions);
+    const setOpsReceipt = await new TxSender(setOpsTxObject, auxiliaryWeb3, setOpsOptions).execute();
     assert.strictEqual(setOpsReceipt.status, true);
     assert.strictEqual(await priceOracleContractInstance.methods.opsAddress().call(), priceOracleOpsAddress);
   });
@@ -206,7 +207,7 @@ describe('TH transfers through PricerRule Pay', async function() {
       gas: config.gas
     };
     const setPriceTxObject = priceOracleContractInstance.methods.setPrice(config.price);
-    const setPriceReceipt = await setPriceTxObject.send(setPriceOptions);
+    const setPriceReceipt = await new TxSender(setPriceTxObject, auxiliaryWeb3, setPriceOptions).execute();
     assert.strictEqual(setPriceReceipt.status, true);
 
     const setPriceValueFromContract = await priceOracleContractInstance.methods.getPrice().call();
@@ -335,6 +336,22 @@ describe('TH transfers through PricerRule Pay', async function() {
 
     gnosisSafeProxy = userWalletEvent._gnosisSafeProxy;
     tokenHolderSender = userWalletEvent._tokenHolderProxy;
+
+    const senderTokenHolderInstance = await OpenSTContracts.getTokenHolder(auxiliaryWeb3, tokenHolderSender, txOptions);
+    const sessionKeyData = await senderTokenHolderInstance.methods.sessionKeys(ephemeralKey.address).call();
+    const sessionWindow = await senderTokenHolderInstance.methods.sessionWindow().call();
+    assert.strictEqual(
+      sessionKeyData.spendingLimit,
+      config.sessionKeySpendingLimit,
+      'Session spending limit is incorrect'
+    );
+    assert.strictEqual(
+      sessionKeyData.expirationHeight,
+      config.sessionKeyExpirationHeight,
+      'Session expiration height is incorrect'
+    );
+    assert.strictEqual(sessionKeyData.nonce, '0', 'Session key nonce is incorrect');
+    assert.strictEqual(sessionKeyData.session, sessionWindow, 'Session window is incorrect');
   });
 
   it('Creates first receiver user wallet', async function() {
@@ -412,18 +429,20 @@ describe('TH transfers through PricerRule Pay', async function() {
   it('Performs transfer through PricerRule.pay', async function() {
     const tokenHolder = new TokenHolder(auxiliaryWeb3, tokenHolderSender),
       mockTokenAbi = mockTokenDeployerInstance.abiBinProvider.getABI('MockToken'),
-      contract = new auxiliaryWeb3.eth.Contract(mockTokenAbi, mockToken, txOptions);
+      eip20TokenContractInstance = new auxiliaryWeb3.eth.Contract(mockTokenAbi, mockToken, txOptions);
 
     // Funding TH proxy with tokens.
-    const amount = config.tokenHolderBalance,
-      txObject = contract.methods.transfer(tokenHolderSender, amount);
+    const txObject = eip20TokenContractInstance.methods.transfer(tokenHolderSender, config.senderTokenHolderBalance);
     await txObject.send(txOptions);
+    const initialTHSenderBalance = await eip20TokenContractInstance.methods.balanceOf(tokenHolderSender).call();
+    assert.strictEqual(initialTHSenderBalance, config.senderTokenHolderBalance, 'Initial sender TH balance mismatch!');
 
-    const initialTHProxyBalance = await contract.methods.balanceOf(tokenHolderSender).call(),
-      transferTos = [tokenHolderFirstReceiver, tokenHolderSecondReceiver],
-      firstReceiverInitialBalance = await contract.methods.balanceOf(tokenHolderFirstReceiver).call(),
-      secondReceiverInitialBalance = await contract.methods.balanceOf(tokenHolderSecondReceiver).call(),
-      transferAmounts = ['20000000000', '10000000000'];
+    const transferTos = [tokenHolderFirstReceiver, tokenHolderSecondReceiver],
+      firstReceiverInitialBalance = await eip20TokenContractInstance.methods.balanceOf(tokenHolderFirstReceiver).call(),
+      secondReceiverInitialBalance = await eip20TokenContractInstance.methods
+        .balanceOf(tokenHolderSecondReceiver)
+        .call(),
+      transferAmounts = ['200', '100'];
 
     const nonce = 0;
     const intendedPrice = config.price;
@@ -435,9 +454,13 @@ describe('TH transfers through PricerRule Pay', async function() {
       intendedPrice
     );
 
+    const senderTokenHolderInstance = await OpenSTContracts.getTokenHolder(auxiliaryWeb3, tokenHolderSender, txOptions);
+    const executeRuleCallPrefix = await tokenHolder.getTokenHolderExecuteRuleCallPrefix();
+    const executeRuleCallPrefixFromContract = await senderTokenHolderInstance.methods.EXECUTE_RULE_CALLPREFIX().call();
+    assert.strictEqual(executeRuleCallPrefixFromContract, executeRuleCallPrefix);
     let transaction = {
-      from: relayer,
-      to: tokenHolderSender,
+      from: tokenHolderSender,
+      to: pricerRuleAddress,
       data: pricerRulePayExecutable,
       nonce: nonce,
       callPrefix: await tokenHolder.getTokenHolderExecuteRuleCallPrefix(),
@@ -448,20 +471,29 @@ describe('TH transfers through PricerRule Pay', async function() {
 
     const vrs = ephemeralKey.signEIP1077Transaction(transaction);
 
-    await tokenHolder.executeRule(pricerRuleAddress, pricerRulePayExecutable, nonce, vrs.r, vrs.s, vrs.v, txOptions);
+    const executeRuleResponse = await tokenHolder.executeRule(
+      pricerRuleAddress,
+      pricerRulePayExecutable,
+      nonce,
+      vrs.r,
+      vrs.s,
+      vrs.v,
+      txOptions
+    );
+    console.log('executeRuleResponse:', JSON.stringify(executeRuleResponse));
+    assert.strictEqual(executeRuleResponse.status, true, 'ExecuteRule response is failure!');
 
-    const finalTHProxyBalance = await contract.methods.balanceOf(tokenHolderSender).call(),
-      firstReceiverFinalBalance = await contract.methods.balanceOf(tokenHolderFirstReceiver).call(),
-      secondReceiverFinalBalance = await contract.methods.balanceOf(tokenHolderSecondReceiver).call(),
+    const finalTHSenderBalance = await eip20TokenContractInstance.methods.balanceOf(tokenHolderSender).call(),
+      firstReceiverFinalBalance = await eip20TokenContractInstance.methods.balanceOf(tokenHolderFirstReceiver).call(),
+      secondReceiverFinalBalance = await eip20TokenContractInstance.methods.balanceOf(tokenHolderSecondReceiver).call(),
       firstReceiverExpectedBalance = parseInt(firstReceiverInitialBalance) + transferAmounts[0],
-      secondReceiverExpectedBalance = parseInt(secondReceiverInitialBalance) + transferAmounts[1];
+      secondReceiverExpectedBalance = parseInt(secondReceiverInitialBalance) + transferAmounts[1],
+      expectedBalance = initialTHSenderBalance - transferAmounts[0] - transferAmounts[1];
 
     assert.strictEqual(
-      initialTHProxyBalance - transferAmounts[0] - transferAmounts[1],
-      parseInt(finalTHProxyBalance),
-      `TokenHolder sender balance is ${finalTHProxyBalance} and expected balance is ${initialTHProxyBalance -
-        transferAmounts[0] -
-        transferAmounts[1]}`
+      expectedBalance,
+      parseInt(finalTHSenderBalance),
+      `TokenHolder sender balance is ${finalTHSenderBalance} and expected balance is ${expectedBalance}`
     );
 
     assert.strictEqual(
