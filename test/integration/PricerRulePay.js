@@ -480,7 +480,6 @@ describe('TH transfers through PricerRule Pay', async function() {
       vrs.v,
       txOptions
     );
-    console.log('executeRuleResponse:', JSON.stringify(executeRuleResponse));
     assert.strictEqual(executeRuleResponse.status, true, 'ExecuteRule response is failure!');
 
     const finalTHSenderBalance = await eip20TokenContractInstance.methods.balanceOf(tokenHolderSender).call(),
