@@ -26,7 +26,7 @@ const _ = require('underscore'),
   web3Utils = require('web3-utils'),
   helpers = require('web3-core-helpers');
 
-web3Utils.toEIP1077TransactionHash = (transaction, version) => {
+web3Utils.toEIP1077TransactionHash = (transaction) => {
   transaction = helpers.formatters.inputCallFormatter(transaction);
 
   transaction.value = web3Utils.toBN(transaction.value || '0').toString();
@@ -57,7 +57,8 @@ web3Utils.toEIP1077TransactionHash = (transaction, version) => {
    );
    **/
 
-  version = version || '0x00';
+  // Version is 0 as per EIP1077: https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1077.md
+  const version = '0x00';
   let txHash = web3Utils.soliditySha3(
     { t: 'bytes', v: '0x19' }, // prefix
     { t: 'bytes', v: version }, // version control
@@ -76,7 +77,7 @@ web3Utils.toEIP1077TransactionHash = (transaction, version) => {
   return txHash;
 };
 
-Accounts.prototype.signEIP1077Transaction = (transaction, privateKey, callback, version) => {
+Accounts.prototype.signEIP1077Transaction = (transaction, privateKey, callback) => {
   if (transaction.nonce < 0 || transaction.gas < 0 || transaction.gasPrice < 0) {
     let error = new Error('Gas, gasPrice or nonce is lower than 0');
     callback && callback(error);
@@ -85,7 +86,7 @@ Accounts.prototype.signEIP1077Transaction = (transaction, privateKey, callback, 
 
   let result;
   try {
-    let txHash = web3Utils.toEIP1077TransactionHash(transaction, version);
+    let txHash = web3Utils.toEIP1077TransactionHash(transaction);
     let signature = Account.sign(txHash, privateKey);
     let vrs = Account.decodeSignature(signature);
     result = {
@@ -109,8 +110,8 @@ Accounts.prototype._addAccountFunctions = function(account) {
   const oAccounts = this;
   account = org_addAccountFunctions.apply(oAccounts, arguments);
 
-  account.signEIP1077Transaction = function(transaction, callback, version) {
-    return oAccounts.signEIP1077Transaction(transaction, account.privateKey, callback, version);
+  account.signEIP1077Transaction = function(transaction, callback) {
+    return oAccounts.signEIP1077Transaction(transaction, account.privateKey, callback);
   };
 
   return account;
