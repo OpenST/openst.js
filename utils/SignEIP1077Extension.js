@@ -59,7 +59,7 @@ web3Utils.toEIP1077TransactionHash = (transaction) => {
 
   // Version is 0 as per EIP1077: https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1077.md
   const version = '0x00';
-  let txHash = web3Utils.soliditySha3(
+  const txHash = web3Utils.soliditySha3(
     { t: 'bytes', v: '0x19' }, // prefix
     { t: 'bytes', v: version }, // version control
     { t: 'address', v: transaction.from }, //from
