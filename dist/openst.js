@@ -83200,15 +83200,15 @@ function () {
   /**
    * Recovery class constructor.
    *
-   * @param auxiliaryWeb3 auxiliary web3 object.
+   * @param auxiliaryWeb3 Auxiliary web3 object.
    * @param delayedRecoveryProxy delayedRecovery proxy contract address.
    */
   function Recovery(auxiliaryWeb3, delayedRecoveryProxy) {
     _classCallCheck(this, Recovery);
 
     var oThis = this;
-    oThis.delayedRecoveryProxy = delayedRecoveryProxy;
     oThis.auxiliaryWeb3 = auxiliaryWeb3;
+    oThis.delayedRecoveryProxy = delayedRecoveryProxy;
     oThis.abiBinProvider = new AbiBinProvider();
   }
   /**
