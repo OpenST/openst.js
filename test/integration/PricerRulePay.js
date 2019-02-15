@@ -418,7 +418,7 @@ describe('TH transfers through PricerRule Pay', async function() {
 
     assert.strictEqual(response.status, true, 'User wallet creation failed.');
 
-    // Fetching the gnosisSafe and tokenholder proxy address for the user.
+    // Fetching the gnosisSafe and TokenHolder proxy address for the user.
     let returnValues = response.events.UserWalletCreated.returnValues;
     let userWalletEvent = JSON.parse(JSON.stringify(returnValues));
 
@@ -480,6 +480,7 @@ describe('TH transfers through PricerRule Pay', async function() {
       vrs.v,
       txOptions
     );
+    console.log('executeRuleResponse:', JSON.stringify(executeRuleResponse));
     assert.strictEqual(executeRuleResponse.status, true, 'ExecuteRule response is failure!');
 
     const finalTHSenderBalance = await eip20TokenContractInstance.methods.balanceOf(tokenHolderSender).call(),

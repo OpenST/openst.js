@@ -21,14 +21,15 @@
 const chai = require('chai'),
   Web3 = require('web3'),
   Package = require('../../index'),
-  Mosaic = require('@openstfoundation/mosaic-tbd');
+  Mosaic = require('@openstfoundation/mosaic-tbd'),
+  TxSender = require('../../utils/TxSender'),
+  MockContractsDeployer = require('./../utils/MockContractsDeployer'),
+  config = require('../utils/configReader'),
+  Web3WalletHelper = require('../utils/Web3WalletHelper');
 
 const TokenRulesSetup = Package.Setup.TokenRules,
   UserSetup = Package.Setup.User,
   RulesSetup = Package.Setup.Rules,
-  MockContractsDeployer = require('./../utils/MockContractsDeployer'),
-  config = require('../utils/configReader'),
-  Web3WalletHelper = require('../utils/Web3WalletHelper'),
   Contracts = Package.Contracts,
   User = Package.Helpers.User,
   TokenRules = Package.Helpers.TokenRules,
@@ -317,9 +318,9 @@ describe('Direct transfers between TH contracts', async function() {
       contract = new auxiliaryWeb3.eth.Contract(mockTokenAbi, mockToken, txOptions);
 
     // Funding TH proxy with tokens.
-    const amount = config.tokenHolderBalance,
-      txObject = contract.methods.transfer(tokenHolderSender, amount);
-    await txObject.send(txOptions);
+    const amount = config.senderTokenHolderBalance,
+      transferTxObject = contract.methods.transfer(tokenHolderSender, amount),
+      transferReceipt = await new TxSender(transferTxObject, auxiliaryWeb3, txOptions).execute();
 
     const initialTHProxyBalance = await contract.methods.balanceOf(tokenHolderSender).call(),
       transferTos = [tokenHolderFirstReceiver, tokenHolderSecondReceiver],
