@@ -70603,12 +70603,13 @@ module.exports = {"2.16.840.1.101.3.4.1.1":"aes-128-ecb","2.16.840.1.101.3.4.1.2
 /* 562 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(Buffer) {// adapted from https://github.com/apatil/pemstrip
+// adapted from https://github.com/apatil/pemstrip
 var findProc = /Proc-Type: 4,ENCRYPTED[\n\r]+DEK-Info: AES-((?:128)|(?:192)|(?:256))-CBC,([0-9A-H]+)[\n\r]+([0-9A-z\n\r\+\/\=]+)[\n\r]+/m
-var startRegex = /^-----BEGIN ((?:.* KEY)|CERTIFICATE)-----/m
-var fullRegex = /^-----BEGIN ((?:.* KEY)|CERTIFICATE)-----([0-9A-z\n\r\+\/\=]+)-----END \1-----$/m
+var startRegex = /^-----BEGIN ((?:.*? KEY)|CERTIFICATE)-----/m
+var fullRegex = /^-----BEGIN ((?:.*? KEY)|CERTIFICATE)-----([0-9A-z\n\r\+\/\=]+)-----END \1-----$/m
 var evp = __webpack_require__(99)
 var ciphers = __webpack_require__(145)
+var Buffer = __webpack_require__(2).Buffer
 module.exports = function (okey, password) {
   var key = okey.toString()
   var match = key.match(findProc)
@@ -70618,8 +70619,8 @@ module.exports = function (okey, password) {
     decrypted = new Buffer(match2[2].replace(/[\r\n]/g, ''), 'base64')
   } else {
     var suite = 'aes' + match[1]
-    var iv = new Buffer(match[2], 'hex')
-    var cipherText = new Buffer(match[3].replace(/[\r\n]/g, ''), 'base64')
+    var iv = Buffer.from(match[2], 'hex')
+    var cipherText = Buffer.from(match[3].replace(/[\r\n]/g, ''), 'base64')
     var cipherKey = evp(password, iv.slice(0, 8), parseInt(match[1], 10)).key
     var out = []
     var cipher = ciphers.createDecipheriv(suite, cipherKey, iv)
@@ -70634,7 +70635,6 @@ module.exports = function (okey, password) {
   }
 }
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(3).Buffer))
 
 /***/ }),
 /* 563 */
@@ -82150,7 +82150,7 @@ function () {
     /**
      * It is used to execute executable data signed by a session key.
      *
-     * @param to Rule address.
+     * @param to The target contract address the transaction will be executed upon.
      * @param data The payload of a function to be executed in the target contract.
      * @param nonce The nonce of an session key that was used to sign the transaction.
      * @param r `r` part of the signature.
@@ -83230,7 +83230,7 @@ var _ = __webpack_require__(13),
     web3Utils = __webpack_require__(17),
     helpers = __webpack_require__(18);
 
-web3Utils.toEIP1077TransactionHash = function (transaction, version) {
+web3Utils.toEIP1077TransactionHash = function (transaction) {
   transaction = helpers.formatters.inputCallFormatter(transaction);
   transaction.value = web3Utils.toBN(transaction.value || '0').toString();
   transaction.gasPrice = web3Utils.toBN(transaction.gasPrice || '0').toString();
@@ -83258,8 +83258,9 @@ web3Utils.toEIP1077TransactionHash = function (transaction, version) {
    extraHash
    );
    **/
+  // Version is 0 as per EIP1077: https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1077.md
 
-  version = version || '0x00';
+  var version = '0x00';
   var txHash = web3Utils.soliditySha3({
     t: 'bytes',
     v: '0x19'
@@ -83315,7 +83316,7 @@ web3Utils.toEIP1077TransactionHash = function (transaction, version) {
   return txHash;
 };
 
-Accounts.prototype.signEIP1077Transaction = function (transaction, privateKey, callback, version) {
+Accounts.prototype.signEIP1077Transaction = function (transaction, privateKey, callback) {
   if (transaction.nonce < 0 || transaction.gas < 0 || transaction.gasPrice < 0) {
     var error = new Error('Gas, gasPrice or nonce is lower than 0');
     callback && callback(error);
@@ -83325,7 +83326,7 @@ Accounts.prototype.signEIP1077Transaction = function (transaction, privateKey, c
   var result;
 
   try {
-    var txHash = web3Utils.toEIP1077TransactionHash(transaction, version);
+    var txHash = web3Utils.toEIP1077TransactionHash(transaction);
     var signature = Account.sign(txHash, privateKey);
     var vrs = Account.decodeSignature(signature);
     result = {
@@ -83350,8 +83351,8 @@ Accounts.prototype._addAccountFunctions = function (account) {
   var oAccounts = this;
   account = org_addAccountFunctions.apply(oAccounts, arguments);
 
-  account.signEIP1077Transaction = function (transaction, callback, version) {
-    return oAccounts.signEIP1077Transaction(transaction, account.privateKey, callback, version);
+  account.signEIP1077Transaction = function (transaction, callback) {
+    return oAccounts.signEIP1077Transaction(transaction, account.privateKey, callback);
   };
 
   return account;
