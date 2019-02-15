@@ -83221,6 +83221,7 @@ function () {
    * @param s `s` part of the signature.
    * @param v `v` part of the signature.
    * @param txOptions Transaction options object.
+   *
    * @returns {Object} Transaction receipt.
    */
 
@@ -83266,6 +83267,7 @@ function () {
      * @param oldOwner Owner address to replace.
      * @param newOwner New owner address.
      * @param txOptions Transaction options object.
+     *
      * @returns {Object} Transaction receipt.
      */
 
@@ -83313,6 +83315,7 @@ function () {
      * @param s `s` part of the signature.
      * @param v `v` part of the signature.
      * @param txOptions Transaction options object.
+     *
      * @returns {Object} Transaction receipt.
      */
 
@@ -83357,6 +83360,7 @@ function () {
      * @param oldOwner Owner address to replace.
      * @param newOwner New owner address.
      * @param txOptions Transaction options object.
+     *
      * @returns {Object} Transaction receipt.
      */
 
@@ -83402,6 +83406,7 @@ function () {
      * @param s `s` part of the signature.
      * @param v `v` part of the signature.
      * @param txOptions Transaction options object.
+     *
      * @returns {Object} Transaction receipt.
      */
 
@@ -83506,7 +83511,7 @@ function () {
       return oThis._delayedRecoveryInstance().methods.abortRecoveryByController(prevOwner, oldOwner, newOwner);
     }
     /**
-     * Update the recovery owner.
+     * Updates recovery owner.
      *
      * @param newRecoveryOwner New recovery owner.
      * @param r `r` part of the signature.
@@ -83522,7 +83527,8 @@ function () {
       return oThis._delayedRecoveryInstance().methods.resetRecoveryOwner(newRecoveryOwner, r, s, v);
     }
     /**
-     * Constructs delayed recovery instance.
+     * Constructs and returns delayed recovery instance.
+     *
      * @returns Contract instance.
      * @private
      */
