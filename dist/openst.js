@@ -7150,7 +7150,7 @@ module.exports = !__webpack_require__(5)(function () {
 /* 15 */
 /***/ (function(module, exports) {
 
-var core = module.exports = { version: '2.6.4' };
+var core = module.exports = { version: '2.6.5' };
 if (typeof __e == 'number') __e = core; // eslint-disable-line no-undef
 
 
@@ -8051,6 +8051,8 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
 function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
 
 function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
@@ -8060,8 +8062,6 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 
 var Mosaic = __webpack_require__(129);
 
@@ -8094,7 +8094,7 @@ function (_AbiBinProvider) {
     binFolderPath = binFolderPath || DEFAULT_BIN_FOLDER_PATH;
     _this = _possibleConstructorReturn(this, _getPrototypeOf(OpenSTAbiBinProvider).call(this, abiFolderPath, binFolderPath));
 
-    var oThis = _assertThisInitialized(_assertThisInitialized(_this));
+    var oThis = _assertThisInitialized(_this);
 
     oThis.mosaicAbiBinProvider = new AbiBinProvider(mosaicAbiFolderPath, mosaicBinFolderPath);
     return _this;
@@ -36900,7 +36900,9 @@ var $pad = __webpack_require__(182);
 var userAgent = __webpack_require__(90);
 
 // https://github.com/zloirock/core-js/issues/280
-$export($export.P + $export.F * /Version\/10\.\d+(\.\d+)? Safari\//.test(userAgent), 'String', {
+var WEBKIT_BUG = /Version\/10\.\d+(\.\d+)?( Mobile\/\w+)? Safari\//.test(userAgent);
+
+$export($export.P + $export.F * WEBKIT_BUG, 'String', {
   padStart: function padStart(maxLength /* , fillString = ' ' */) {
     return $pad(this, maxLength, arguments.length > 1 ? arguments[1] : undefined, true);
   }
@@ -36927,7 +36929,9 @@ var $pad = __webpack_require__(182);
 var userAgent = __webpack_require__(90);
 
 // https://github.com/zloirock/core-js/issues/280
-$export($export.P + $export.F * /Version\/10\.\d+(\.\d+)? Safari\//.test(userAgent), 'String', {
+var WEBKIT_BUG = /Version\/10\.\d+(\.\d+)?( Mobile\/\w+)? Safari\//.test(userAgent);
+
+$export($export.P + $export.F * WEBKIT_BUG, 'String', {
   padEnd: function padEnd(maxLength /* , fillString = ' ' */) {
     return $pad(this, maxLength, arguments.length > 1 ? arguments[1] : undefined, false);
   }
@@ -80838,11 +80842,11 @@ function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) ===
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 
 var Web3 = __webpack_require__(40);
 
@@ -80875,7 +80879,7 @@ function (_Contracts) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(OpenSTContracts).call(this, null, auxiliaryWeb3));
 
-    var oThis = _assertThisInitialized(_assertThisInitialized(_this));
+    var oThis = _assertThisInitialized(_this);
 
     oThis.auxiliaryWeb3 = auxiliaryWeb3;
     return _this;
@@ -82411,6 +82415,8 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 var AbiBinProvider = __webpack_require__(32),
     PricerRuleContractName = 'PricerRule',
     TxSender = __webpack_require__(80);
+
+var BN = __webpack_require__(8);
 /**
  * Helper class which provides interaction methods of PricerRule contract.
  */
@@ -82632,6 +82638,20 @@ function () {
       return payExecutableData;
     }
     /**
+     * Converts PayCurrencyCode amount to BT amount.
+     *
+     * @param amountInWei Amount which is being transferred.
+     * @param priceInWei Price set in PriceOracle contract.
+     * @param conversionRate OST to BT conversion rate.
+     * @param conversionRateDecimals OST to BT conversion rate decimals.
+     *
+     * @returns {BigNumber} Converted BT amount.
+     */
+
+  }, {
+    key: "_addPriceOracleRawTx",
+
+    /**
      * Adds a new price oracle.
      *
      * @param priceOracleAddress PriceOracle contract address.
@@ -82639,9 +82659,6 @@ function () {
      * @returns {Promise<*>} Promise object.
      * @private
      */
-
-  }, {
-    key: "_addPriceOracleRawTx",
     value: function _addPriceOracleRawTx(priceOracleAddress) {
       var oThis = this;
       return oThis._pricerRuleContractInstance().methods.addPriceOracle(priceOracleAddress);
@@ -82711,6 +82728,14 @@ function () {
       var jsonInterface = oThis.abiBinProvider.getABI(PricerRuleContractName),
           contractInstance = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, oThis.pricerRuleAddress);
       return contractInstance;
+    }
+  }], [{
+    key: "convertPayCurrencyToToken",
+    value: function convertPayCurrencyToToken(amountInWei, priceInWei, conversionRate, conversionRateDecimals) {
+      var conversionRateDecimalsBN = new BN(10).pow(new BN(conversionRateDecimals));
+      var amountBN = new BN(amountInWei);
+      var priceBN = new BN(priceInWei);
+      return amountBN.mul(new BN(conversionRate)).div(priceBN).div(conversionRateDecimalsBN);
     }
   }]);
 

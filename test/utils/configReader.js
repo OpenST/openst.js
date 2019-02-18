@@ -42,9 +42,9 @@ ConfigReader.prototype = {
   senderTokenHolderBalance: '99999999999',
   baseCurrencyCode: 'OST',
   payCurrencyCode: 'USD',
-  conversionRate: 10,
-  conversionRateDecimals: 18,
-  requiredPriceOracleDecimals: 18,
+  conversionRate: '10',
+  conversionRateDecimals: '5',
+  requiredPriceOracleDecimals: '18',
   sessionKeySpendingLimit: '1000000000000000000000', //1000 ethers
   sessionKeyExpirationHeight: '1000000000000000000',
   price: '10000000000',

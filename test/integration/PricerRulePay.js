@@ -26,7 +26,8 @@ const chai = require('chai'),
   config = require('../utils/configReader'),
   Web3WalletHelper = require('../utils/Web3WalletHelper'),
   PricerRule = require('../../lib/helper/rules/PricerRule'),
-  TxSender = require('../../utils/TxSender');
+  TxSender = require('../../utils/TxSender'),
+  BN = require('bn.js');
 
 const TokenRulesSetup = Package.Setup.TokenRules,
   UserSetup = Package.Setup.User,
@@ -35,7 +36,8 @@ const TokenRulesSetup = Package.Setup.TokenRules,
   User = Package.Helpers.User,
   TokenRules = Package.Helpers.TokenRules,
   AbiBinProvider = Package.AbiBinProvider,
-  TokenHolder = Package.Helpers.TokenHolder;
+  TokenHolder = Package.Helpers.TokenHolder,
+  PricerRuleHelper = Package.Helpers.Rules.PricerRule;
 
 const auxiliaryWeb3 = new Web3(config.gethRpcEndPoint),
   openSTContractsInstance = new OpenSTContracts(auxiliaryWeb3),
@@ -56,7 +58,6 @@ let wallets,
   userWalletFactoryAddress,
   thMasterCopyAddress,
   gnosisSafeMasterCopyAddress,
-  proxyFactoryAddress,
   tokenRulesAddress,
   pricerRuleAddress,
   worker,
@@ -67,8 +68,8 @@ let wallets,
   mockToken,
   owner = config.deployerAddress,
   tokenHolderSender,
-  tokenHolderFirstReceiver,
-  tokenHolderSecondReceiver,
+  firstReceiver,
+  secondReceiver,
   gnosisSafeProxy,
   ephemeralKey,
   mockTokenDeployerInstance,
@@ -89,6 +90,8 @@ describe('TH transfers through PricerRule Pay', async function() {
     facilitator = wallets[3].address;
     relayer = facilitator;
     priceOracleOpsAddress = wallets[4].address;
+    firstReceiver = wallets[5].address;
+    secondReceiver = wallets[6].address;
   });
 
   it('Deploys Organization contract', async function() {
@@ -106,6 +109,7 @@ describe('TH transfers through PricerRule Pay', async function() {
     assert.isNotNull(organization, 'Organization contract address should not be null.');
   });
 
+  // TODO Update to EIP20Token
   it('Deploys EIP20Token contract', async function() {
     mockTokenDeployerInstance = new MockContractsDeployer(config.deployerAddress, auxiliaryWeb3);
 
@@ -196,7 +200,6 @@ describe('TH transfers through PricerRule Pay', async function() {
     priceOracleContractInstance = new auxiliaryWeb3.eth.Contract(jsonInterface, priceOracleAddress);
     const setOpsTxObject = priceOracleContractInstance.methods.setOpsAddress(priceOracleOpsAddress);
     const setOpsReceipt = await new TxSender(setOpsTxObject, auxiliaryWeb3, setOpsOptions).execute();
-    assert.strictEqual(setOpsReceipt.status, true);
     assert.strictEqual(await priceOracleContractInstance.methods.opsAddress().call(), priceOracleOpsAddress);
   });
 
@@ -223,7 +226,6 @@ describe('TH transfers through PricerRule Pay', async function() {
       config.requiredPriceOracleDecimals,
       txOptions
     );
-    assert.strictEqual(pricerRulesDeployResponse.receipt.status, true);
     pricerRuleAddress = pricerRulesDeployResponse.receipt.contractAddress;
     pricerRuleInstance = openSTContractsInstance.PricerRule(pricerRuleAddress, txOptions);
     // Sanity check
@@ -245,7 +247,6 @@ describe('TH transfers through PricerRule Pay', async function() {
       priceOracleAddress,
       addPriceOracleTxOptions
     );
-    assert.strictEqual(addPriceOracleReceipt.status, true);
     assert.strictEqual(
       await pricerRuleInstance.methods.baseCurrencyPriceOracles(bytesPayCurrencyCode).call(),
       priceOracleAddress
@@ -263,7 +264,6 @@ describe('TH transfers through PricerRule Pay', async function() {
       config.acceptanceMargin,
       setAcceptanceMarginTxOptions
     );
-    assert.strictEqual(setAcceptanceMarginReceipt.status, true);
     const contractAcceptanceMargin = await pricerRuleInstance.methods
       .baseCurrencyPriceAcceptanceMargins(bytesPayCurrencyCode)
       .call();
@@ -354,78 +354,6 @@ describe('TH transfers through PricerRule Pay', async function() {
     assert.strictEqual(sessionKeyData.session, sessionWindow, 'Session window is incorrect');
   });
 
-  it('Creates first receiver user wallet', async function() {
-    const userInstance = new User(
-      gnosisSafeMasterCopyAddress,
-      thMasterCopyAddress,
-      mockToken,
-      tokenRulesAddress,
-      userWalletFactoryAddress,
-      auxiliaryWeb3
-    );
-
-    ephemeralKey = wallets[5];
-    const owners = [wallets[3].address],
-      threshold = 1,
-      sessionKeys = [ephemeralKey.address];
-
-    const response = await userInstance.createUserWallet(
-      owners,
-      threshold,
-      config.NULL_ADDRESS,
-      config.ZERO_BYTES,
-      sessionKeys,
-      [config.sessionKeySpendingLimit],
-      [config.sessionKeyExpirationHeight],
-      txOptions
-    );
-
-    assert.strictEqual(response.status, true, 'User wallet creation failed.');
-
-    // Fetching the gnosisSafe and tokenholder proxy address for the user.
-    let returnValues = response.events.UserWalletCreated.returnValues;
-    let userWalletEvent = JSON.parse(JSON.stringify(returnValues));
-
-    gnosisSafeProxy = userWalletEvent._gnosisSafeProxy;
-    tokenHolderFirstReceiver = userWalletEvent._tokenHolderProxy;
-  });
-
-  it('Create second receiver user wallet', async function() {
-    const userInstance = new User(
-      gnosisSafeMasterCopyAddress,
-      thMasterCopyAddress,
-      mockToken,
-      tokenRulesAddress,
-      userWalletFactoryAddress,
-      auxiliaryWeb3
-    );
-
-    ephemeralKey = wallets[5];
-    const owners = [wallets[3].address],
-      threshold = 1,
-      sessionKeys = [ephemeralKey.address];
-
-    const response = await userInstance.createUserWallet(
-      owners,
-      threshold,
-      config.NULL_ADDRESS,
-      config.ZERO_BYTES,
-      sessionKeys,
-      [config.sessionKeySpendingLimit],
-      [config.sessionKeyExpirationHeight],
-      txOptions
-    );
-
-    assert.strictEqual(response.status, true, 'User wallet creation failed.');
-
-    // Fetching the gnosisSafe and TokenHolder proxy address for the user.
-    let returnValues = response.events.UserWalletCreated.returnValues;
-    let userWalletEvent = JSON.parse(JSON.stringify(returnValues));
-
-    gnosisSafeProxy = userWalletEvent._gnosisSafeProxy;
-    tokenHolderSecondReceiver = userWalletEvent._tokenHolderProxy;
-  });
-
   it('Performs transfer through PricerRule.pay', async function() {
     const tokenHolder = new TokenHolder(auxiliaryWeb3, tokenHolderSender),
       mockTokenAbi = mockTokenDeployerInstance.abiBinProvider.getABI('MockToken'),
@@ -434,30 +362,23 @@ describe('TH transfers through PricerRule Pay', async function() {
     // Funding TH proxy with tokens.
     const txObject = eip20TokenContractInstance.methods.transfer(tokenHolderSender, config.senderTokenHolderBalance);
     await txObject.send(txOptions);
-    const initialTHSenderBalance = await eip20TokenContractInstance.methods.balanceOf(tokenHolderSender).call();
-    assert.strictEqual(initialTHSenderBalance, config.senderTokenHolderBalance, 'Initial sender TH balance mismatch!');
+    const initialSenderBalance = await eip20TokenContractInstance.methods.balanceOf(tokenHolderSender).call();
+    assert.strictEqual(initialSenderBalance, config.senderTokenHolderBalance, 'Initial sender TH balance mismatch!');
 
-    const transferTos = [tokenHolderFirstReceiver, tokenHolderSecondReceiver],
-      firstReceiverInitialBalance = await eip20TokenContractInstance.methods.balanceOf(tokenHolderFirstReceiver).call(),
-      secondReceiverInitialBalance = await eip20TokenContractInstance.methods
-        .balanceOf(tokenHolderSecondReceiver)
-        .call(),
-      transferAmounts = ['200', '100'];
+    const transferTos = [firstReceiver, secondReceiver],
+      firstReceiverInitialBalance = await eip20TokenContractInstance.methods.balanceOf(firstReceiver).call(),
+      secondReceiverInitialBalance = await eip20TokenContractInstance.methods.balanceOf(secondReceiver).call(),
+      transferAmountsInUSD = ['2000000000000000', '1000000000000000'];
 
     const nonce = 0;
-    const intendedPrice = config.price;
     const pricerRulePayExecutable = pricerRuleHelperObject.getPayExecutableData(
       tokenHolderSender,
       transferTos,
-      transferAmounts,
+      transferAmountsInUSD,
       config.payCurrencyCode,
-      intendedPrice
+      config.price
     );
 
-    const senderTokenHolderInstance = await OpenSTContracts.getTokenHolder(auxiliaryWeb3, tokenHolderSender, txOptions);
-    const executeRuleCallPrefix = await tokenHolder.getTokenHolderExecuteRuleCallPrefix();
-    const executeRuleCallPrefixFromContract = await senderTokenHolderInstance.methods.EXECUTE_RULE_CALLPREFIX().call();
-    assert.strictEqual(executeRuleCallPrefixFromContract, executeRuleCallPrefix);
     let transaction = {
       from: tokenHolderSender,
       to: pricerRuleAddress,
@@ -480,31 +401,44 @@ describe('TH transfers through PricerRule Pay', async function() {
       vrs.v,
       txOptions
     );
-    console.log('executeRuleResponse:', JSON.stringify(executeRuleResponse));
     assert.strictEqual(executeRuleResponse.status, true, 'ExecuteRule response is failure!');
 
-    const finalTHSenderBalance = await eip20TokenContractInstance.methods.balanceOf(tokenHolderSender).call(),
-      firstReceiverFinalBalance = await eip20TokenContractInstance.methods.balanceOf(tokenHolderFirstReceiver).call(),
-      secondReceiverFinalBalance = await eip20TokenContractInstance.methods.balanceOf(tokenHolderSecondReceiver).call(),
-      firstReceiverExpectedBalance = parseInt(firstReceiverInitialBalance) + transferAmounts[0],
-      secondReceiverExpectedBalance = parseInt(secondReceiverInitialBalance) + transferAmounts[1],
-      expectedBalance = initialTHSenderBalance - transferAmounts[0] - transferAmounts[1];
+    const finalSenderBalance = await eip20TokenContractInstance.methods.balanceOf(tokenHolderSender).call(),
+      firstReceiverFinalBalance = await eip20TokenContractInstance.methods.balanceOf(firstReceiver).call(),
+      secondReceiverFinalBalance = await eip20TokenContractInstance.methods.balanceOf(secondReceiver).call();
+
+    const firstReceiverBTAmount = PricerRuleHelper.convertPayCurrencyToToken(
+      transferAmountsInUSD[0],
+      config.price,
+      config.conversionRate,
+      config.conversionRateDecimals
+    );
+    const secondReceiverBTAmount = PricerRuleHelper.convertPayCurrencyToToken(
+      transferAmountsInUSD[1],
+      config.price,
+      config.conversionRate,
+      config.conversionRateDecimals
+    );
+
+    const firstReceiverExpectedBalance = new BN(firstReceiverInitialBalance).add(firstReceiverBTAmount);
+    const secondReceiverExpectedBalance = new BN(firstReceiverInitialBalance).add(secondReceiverBTAmount);
+    const expectedSenderBalance = new BN(initialSenderBalance).sub(firstReceiverBTAmount).sub(secondReceiverBTAmount);
 
     assert.strictEqual(
-      expectedBalance,
-      parseInt(finalTHSenderBalance),
-      `TokenHolder sender balance is ${finalTHSenderBalance} and expected balance is ${expectedBalance}`
+      finalSenderBalance,
+      expectedSenderBalance.toString(10),
+      `TokenHolder sender balance is ${finalSenderBalance} and expected balance is ${expectedSenderBalance}`
     );
 
     assert.strictEqual(
-      parseInt(firstReceiverFinalBalance),
-      firstReceiverExpectedBalance,
+      firstReceiverFinalBalance,
+      firstReceiverExpectedBalance.toString(10),
       `First receiver account token balance is ${firstReceiverFinalBalance} and expected balance is ${firstReceiverExpectedBalance}`
     );
 
     assert.strictEqual(
-      parseInt(secondReceiverFinalBalance),
-      secondReceiverExpectedBalance,
+      secondReceiverFinalBalance,
+      secondReceiverExpectedBalance.toString(10),
       `Second receiver account token balance is ${secondReceiverFinalBalance} and expected balance is ${secondReceiverExpectedBalance}`
     );
   });
