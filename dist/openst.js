@@ -80859,6 +80859,7 @@ var AbiBinProvider = __webpack_require__(28);
 var Mosaic = __webpack_require__(129);
 
 var Contracts = Mosaic.Contracts;
+var abiBinProvider = new AbiBinProvider();
 /**
  * The class exposes instance of different contracts. Dappy can use the
  * instances to call contract methods. This gives Dappy flexibility in calling
@@ -80884,8 +80885,7 @@ function (_Contracts) {
 
     var oThis = _assertThisInitialized(_assertThisInitialized(_this));
 
-    oThis.auxiliaryWeb3 = auxiliaryWeb3;
-    oThis.abibinProvider = new AbiBinProvider();
+    oThis.auxiliaryWeb3 = Contracts._getWeb3(auxiliaryWeb3);
     return _this;
   }
   /**
@@ -80902,8 +80902,7 @@ function (_Contracts) {
     key: "TokenRules",
     value: function TokenRules(contractAddress, txOptions) {
       var oThis = this;
-      oThis.auxiliaryWeb3 = Contracts._getWeb3(oThis.auxiliaryWeb3);
-      var jsonInterface = oThis.abibinProvider.getABI('TokenRules');
+      var jsonInterface = abiBinProvider.getABI('TokenRules');
       var contractInstance = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, contractAddress, txOptions);
       return contractInstance;
     }
@@ -80920,23 +80919,10 @@ function (_Contracts) {
     key: "PricerRule",
     value: function PricerRule(contractAddress, txOptions) {
       var oThis = this;
-      oThis.auxiliaryWeb3 = Contracts._getWeb3(oThis.auxiliaryWeb3);
-      var jsonInterface = oThis.abibinProvider.getABI('PricerRule');
+      var jsonInterface = abiBinProvider.getABI('PricerRule');
       var contractInstance = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, contractAddress, txOptions);
       return contractInstance;
     }
-    /**
-     * Static method which returns delayed recovery module instance.
-     *
-     * @param auxiliaryWeb3 Auxiliary web3 object.
-     * @param address Delayed recovery module contract address.
-     * @param options Tx options object.
-     * @returns {auxiliaryWeb3Object.eth.Contract}
-     */
-
-  }, {
-    key: "GnosisSafe",
-
     /**
      * Returns GnosisSafe instance
      *
@@ -80945,10 +80931,13 @@ function (_Contracts) {
      *
      * @returns {auxiliaryWeb3.eth.Contract}
      */
+
+  }, {
+    key: "GnosisSafe",
     value: function GnosisSafe(contractAddress, txOptions) {
       var oThis = this;
       oThis.auxiliaryWeb3 = Contracts._getWeb3(oThis.auxiliaryWeb3);
-      var jsonInterface = oThis.abibinProvider.getABI('GnosisSafe');
+      var jsonInterface = abiBinProvider.getABI('GnosisSafe');
       var contractInstance = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, contractAddress, txOptions);
       return contractInstance;
     }
@@ -80965,18 +80954,17 @@ function (_Contracts) {
     key: "TokenHolder",
     value: function TokenHolder(contractAddress, txOptions) {
       var oThis = this;
-      oThis.auxiliaryWeb3 = Contracts._getWeb3(oThis.auxiliaryWeb3);
-      var jsonInterface = oThis.abibinProvider.getABI('TokenHolder');
+      var jsonInterface = abiBinProvider.getABI('TokenHolder');
       var contractInstance = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, contractAddress, txOptions);
       return contractInstance;
     }
     /**
-     * Returns web3 instance. If web3 is string constructs web3 object from string.
+     * Static method which returns delayed recovery module instance.
      *
-     * @param web3 Web3 object.
-     *
-     * @returns {Web3} Web3 object.
-     * @private
+     * @param auxiliaryWeb3 Auxiliary web3 object.
+     * @param address Delayed recovery module contract address.
+     * @param options Tx options object.
+     * @returns {auxiliaryWeb3Object.eth.Contract}
      */
 
   }], [{
@@ -80988,6 +80976,15 @@ function (_Contracts) {
       var contractInstance = new auxiliaryWeb3Object.eth.Contract(jsonInterface, address, options);
       return contractInstance;
     }
+    /**
+     * Returns web3 instance. If web3 is string constructs web3 object from string.
+     *
+     * @param web3 Web3 object.
+     *
+     * @returns {Web3} Web3 object.
+     * @private
+     */
+
   }, {
     key: "_getWeb3",
     value: function _getWeb3(web3) {
@@ -83189,10 +83186,11 @@ var AbiBinProvider = __webpack_require__(28);
 var DelayedRecoveryModuleContractName = 'DelayedRecoveryModule.sol';
 
 var TxSender = __webpack_require__(67);
+
+var abiBinProvider = new AbiBinProvider();
 /**
  * This library is used to interact with Recovery contracts.
  */
-
 
 var Recovery =
 /*#__PURE__*/
@@ -83209,7 +83207,6 @@ function () {
     var oThis = this;
     oThis.auxiliaryWeb3 = auxiliaryWeb3;
     oThis.delayedRecoveryProxy = delayedRecoveryProxy;
-    oThis.abiBinProvider = new AbiBinProvider();
   }
   /**
    * Initiates a recovery procedure.
@@ -83537,7 +83534,7 @@ function () {
     key: "_delayedRecoveryInstance",
     value: function _delayedRecoveryInstance() {
       var oThis = this;
-      var jsonInterface = oThis.abiBinProvider.getABI(DelayedRecoveryModuleContractName);
+      var jsonInterface = abiBinProvider.getABI(DelayedRecoveryModuleContractName);
       var contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, oThis.delayedRecoveryProxy);
       return contract;
     }
