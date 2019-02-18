@@ -7150,7 +7150,7 @@ module.exports = !__webpack_require__(5)(function () {
 /* 15 */
 /***/ (function(module, exports) {
 
-var core = module.exports = { version: '2.6.4' };
+var core = module.exports = { version: '2.6.5' };
 if (typeof __e == 'number') __e = core; // eslint-disable-line no-undef
 
 
@@ -7951,6 +7951,8 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
 function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
 
 function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
@@ -7960,8 +7962,6 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 
 var Mosaic = __webpack_require__(129);
 
@@ -7994,7 +7994,7 @@ function (_AbiBinProvider) {
     binFolderPath = binFolderPath || DEFAULT_BIN_FOLDER_PATH;
     _this = _possibleConstructorReturn(this, _getPrototypeOf(OpenSTAbiBinProvider).call(this, abiFolderPath, binFolderPath));
 
-    var oThis = _assertThisInitialized(_assertThisInitialized(_this));
+    var oThis = _assertThisInitialized(_this);
 
     oThis.mosaicAbiBinProvider = new AbiBinProvider(mosaicAbiFolderPath, mosaicBinFolderPath);
     return _this;
@@ -36906,7 +36906,9 @@ var $pad = __webpack_require__(182);
 var userAgent = __webpack_require__(90);
 
 // https://github.com/zloirock/core-js/issues/280
-$export($export.P + $export.F * /Version\/10\.\d+(\.\d+)? Safari\//.test(userAgent), 'String', {
+var WEBKIT_BUG = /Version\/10\.\d+(\.\d+)?( Mobile\/\w+)? Safari\//.test(userAgent);
+
+$export($export.P + $export.F * WEBKIT_BUG, 'String', {
   padStart: function padStart(maxLength /* , fillString = ' ' */) {
     return $pad(this, maxLength, arguments.length > 1 ? arguments[1] : undefined, true);
   }
@@ -36933,7 +36935,9 @@ var $pad = __webpack_require__(182);
 var userAgent = __webpack_require__(90);
 
 // https://github.com/zloirock/core-js/issues/280
-$export($export.P + $export.F * /Version\/10\.\d+(\.\d+)? Safari\//.test(userAgent), 'String', {
+var WEBKIT_BUG = /Version\/10\.\d+(\.\d+)?( Mobile\/\w+)? Safari\//.test(userAgent);
+
+$export($export.P + $export.F * WEBKIT_BUG, 'String', {
   padEnd: function padEnd(maxLength /* , fillString = ' ' */) {
     return $pad(this, maxLength, arguments.length > 1 ? arguments[1] : undefined, false);
   }
@@ -80846,11 +80850,11 @@ function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) ===
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 
 var Web3 = __webpack_require__(40);
 
@@ -80883,7 +80887,7 @@ function (_Contracts) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(OpenSTContracts).call(this, null, auxiliaryWeb3));
 
-    var oThis = _assertThisInitialized(_assertThisInitialized(_this));
+    var oThis = _assertThisInitialized(_this);
 
     oThis.auxiliaryWeb3 = Contracts._getWeb3(auxiliaryWeb3);
     return _this;
@@ -83577,7 +83581,7 @@ var _ = __webpack_require__(13),
     web3Utils = __webpack_require__(17),
     helpers = __webpack_require__(18);
 
-web3Utils.toEIP1077TransactionHash = function (transaction, version) {
+web3Utils.toEIP1077TransactionHash = function (transaction) {
   transaction = helpers.formatters.inputCallFormatter(transaction);
   transaction.value = web3Utils.toBN(transaction.value || '0').toString();
   transaction.gasPrice = web3Utils.toBN(transaction.gasPrice || '0').toString();
@@ -83605,8 +83609,9 @@ web3Utils.toEIP1077TransactionHash = function (transaction, version) {
    extraHash
    );
    **/
+  // Version is 0 as per EIP1077: https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1077.md
 
-  version = version || '0x00';
+  var version = '0x00';
   var txHash = web3Utils.soliditySha3({
     t: 'bytes',
     v: '0x19'
@@ -83662,7 +83667,7 @@ web3Utils.toEIP1077TransactionHash = function (transaction, version) {
   return txHash;
 };
 
-Accounts.prototype.signEIP1077Transaction = function (transaction, privateKey, callback, version) {
+Accounts.prototype.signEIP1077Transaction = function (transaction, privateKey, callback) {
   if (transaction.nonce < 0 || transaction.gas < 0 || transaction.gasPrice < 0) {
     var error = new Error('Gas, gasPrice or nonce is lower than 0');
     callback && callback(error);
@@ -83672,7 +83677,7 @@ Accounts.prototype.signEIP1077Transaction = function (transaction, privateKey, c
   var result;
 
   try {
-    var txHash = web3Utils.toEIP1077TransactionHash(transaction, version);
+    var txHash = web3Utils.toEIP1077TransactionHash(transaction);
     var signature = Account.sign(txHash, privateKey);
     var vrs = Account.decodeSignature(signature);
     result = {
@@ -83697,8 +83702,8 @@ Accounts.prototype._addAccountFunctions = function (account) {
   var oAccounts = this;
   account = org_addAccountFunctions.apply(oAccounts, arguments);
 
-  account.signEIP1077Transaction = function (transaction, callback, version) {
-    return oAccounts.signEIP1077Transaction(transaction, account.privateKey, callback, version);
+  account.signEIP1077Transaction = function (transaction, callback) {
+    return oAccounts.signEIP1077Transaction(transaction, account.privateKey, callback);
   };
 
   return account;
