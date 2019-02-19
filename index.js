@@ -30,7 +30,7 @@ const TokenHolder = require('./lib/helper/TokenHolder');
 const Rules = require('./lib/setup/Rules');
 const PricerRule = require('./lib/helper/rules/PricerRule');
 const GnosisSafe = require('./lib/helper/GnosisSafe');
-const Recovery = require('./lib/helper/Recovery');
+const Recovery = require('./lib/ContractInteract/Recovery');
 
 const SignEIP1077Extension = require('./utils/SignEIP1077Extension');
 new SignEIP1077Extension();
