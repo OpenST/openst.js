@@ -1,23 +1,3 @@
-// Copyright 2019 OpenST Ltd.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//    http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// ----------------------------------------------------------------------------
-//
-// http://www.simpletoken.org/
-//
-// ----------------------------------------------------------------------------
-
 const chai = require('chai'),
   Web3 = require('web3'),
   Package = require('../../index'),
@@ -442,6 +422,55 @@ describe('Wallet operations', async function() {
       auxiliaryWeb3.utils.toChecksumAddress(sessionKey),
       'Session key revoked is incorrect'
     );
+  });
+
+  // wallet9, wallet8 are the owners.
+  it('Should logout all authorized sessions', async function() {
+    const tokenHolderInstance = new TokenHolder(auxiliaryWeb3, tokenHolderProxy);
+    const currentOwner = wallets[9];
+    const logoutExData = tokenHolderInstance.getLogoutExecutableData();
+
+    const nonce = await gnosisSafeProxyInstance.getNonce();
+
+    const safeTxData = await gnosisSafeProxyInstance.getSafeTxData(
+      tokenHolderProxy,
+      0,
+      logoutExData,
+      0,
+      0,
+      0,
+      0,
+      config.NULL_ADDRESS,
+      config.NULL_ADDRESS,
+      nonce
+    );
+
+    const ownerSignature = await currentOwner.signEIP712TypedData(safeTxData);
+    const result = await gnosisSafeProxyInstance.execTransaction(
+      tokenHolderProxy,
+      0,
+      logoutExData,
+      0,
+      0,
+      0,
+      0,
+      config.NULL_ADDRESS,
+      config.NULL_ADDRESS,
+      ownerSignature.signature,
+      txOptions
+    );
+
+    const txReceipt = await auxiliaryWeb3.eth.getTransactionReceipt(result.transactionHash);
+
+    abiDecoder.addABI(abiBinProvider.getABI('GnosisSafe'));
+    abiDecoder.addABI(abiBinProvider.getABI('TokenHolder'));
+
+    const decodedResult = abiDecoder.decodeLogs(txReceipt.logs);
+
+    const sessionsLoggedOutEvent = JSON.parse(JSON.stringify(decodedResult));
+
+    assert.strictEqual(sessionsLoggedOutEvent[0].name, 'SessionsLoggedOut', 'Incorrect event emitted');
+    assert.strictEqual(sessionsLoggedOutEvent[0].events[0].value, '2', 'Incorrect sessionwindow value');
   });
 
   // wallet9, wallet8 are the owners.
