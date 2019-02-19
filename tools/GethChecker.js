@@ -1,4 +1,5 @@
 'use strict';
+
 /**
  * Check if the GETHs are generating new blocks
  *
