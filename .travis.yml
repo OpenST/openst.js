@@ -14,17 +14,8 @@ notifications:
     on_failure: always
 node_js:
   - "9"
-before_install:
-  - sudo apt-get update
-  - sudo apt-get install nodejs
-  - sudo apt-get install npm
-  - sudo apt-get install software-properties-common
-  - sudo add-apt-repository -y ppa:ethereum/ethereum
-  - sudo apt-get update
 install:
   - npm install
   - npm install -g mocha
 script:
   - npm run test
-after_script:
-  - kill $(ps aux | grep 'openst-setup/origin-geth' | awk '{print $2}')
