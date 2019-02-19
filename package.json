@@ -23,11 +23,7 @@
   },
   "scripts": {
     "test": "mocha --recursive --timeout 120000 test --exit",
-    "pre-commit": "lint-staged",
-    "webpack-build": "webpack --mode=production",
-    "web-pre-build": "node webPreBuild.js",
-    "web-build": "npm-run-all web-pre-build webpack-build",
-    "web-post-build": "git add dist/."
+    "pre-commit": "lint-staged"
   },
   "dependencies": {
     "@openstfoundation/mosaic-tbd": "https://github.com/OpenSTFoundation/mosaic-tbd.git"
@@ -53,12 +49,11 @@
     "webpack-cli": "3.1.0",
     "webpack-uglify-js-plugin": "1.1.9",
     "package-json-cleanup-loader": "1.0.3",
-    "abi-decoder": "1.2.0"
+    "abi-decoder": "1.2.0",
+    "wait-port": "0.2.2"
   },
   "pre-commit": {
     "run": [
-      "web-build",
-      "web-post-build",
       "pre-commit"
     ]
   },
