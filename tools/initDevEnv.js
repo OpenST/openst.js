@@ -98,10 +98,15 @@ InitDevEnv.prototype = {
     let facilitator = oThis._generateAddress(gethFolder);
     let miner = oThis._generateAddress(gethFolder);
     let organizationAddress = oThis._generateAddress(gethFolder);
+    let recoveryControllerAddress = oThis._generateAddress(gethFolder);
     let wallet1 = oThis._generateAddress(gethFolder);
     let wallet2 = oThis._generateAddress(gethFolder);
     let ephemeralKey1 = oThis._generateAddress(gethFolder);
     let ephemeralKey2 = oThis._generateAddress(gethFolder);
+
+    for (let i = 0; i < 10; ++i) {
+      oThis._generateAddress(gethFolder);
+    }
 
     oThis._modifyGenesisFile(
       setUpConfig.chain.chainId,
@@ -123,6 +128,7 @@ InitDevEnv.prototype = {
       facilitator: facilitator,
       miner: miner,
       organizationAddress: organizationAddress,
+      recoveryControllerAddress: recoveryControllerAddress,
       wallet1: wallet1,
       wallet2: wallet2,
       ephemeralKey1: ephemeralKey1,
@@ -134,11 +140,11 @@ InitDevEnv.prototype = {
       `geth --datadir '${gethFolder}'` +
       ` --networkid ${setUpConfig.chain.networkId}` +
       ` --port ${setUpConfig.chain.geth.port}` +
-      ` --mine --minerthreads 1 --targetgaslimit ${setUpConfig.chain.gas} --gasprice 0x3B9ACA00` +
-      ` --rpc --rpcapi eth,net,web3,personal,txpool --rpcaddr ${setUpConfig.chain.geth.host} --rpcport ${
+      ` --fakepow --mine --minerthreads 16 --targetgaslimit ${setUpConfig.chain.gas} --gasprice 0x3B9ACA00` +
+      ` --rpc --rpcapi eth,net,web3,personal,txpool,debug --rpcaddr ${setUpConfig.chain.geth.host} --rpcport ${
         setUpConfig.chain.geth.rpcport
       }` +
-      ` --ws --wsapi eth,net,web3,personal,txpool --wsaddr ${setUpConfig.chain.geth.host} --wsport ${
+      ` --ws --wsapi eth,net,web3,personal,txpool,debug --wsaddr ${setUpConfig.chain.geth.host} --wsport ${
         setUpConfig.chain.geth.wsport
       } --wsorigins '*'` +
       ` --etherbase ${miner} --unlock ${miner} --password ${passwordFilePath}` +
@@ -192,6 +198,7 @@ InitDevEnv.prototype = {
       'facilitator',
       'miner',
       'organizationAddress',
+      'recoveryControllerAddress',
       'wallet1',
       'wallet2'
     ];

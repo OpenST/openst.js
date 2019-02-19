@@ -28,6 +28,7 @@ const ConfigReader = function() {};
 
 ConfigReader.prototype = {
   deployerAddress: devEnvConfig.deployerAddress,
+  recoveryControllerAddress: devEnvConfig.recoveryControllerAddress,
   organizationAddress: devEnvConfig.organizationAddress,
   wallet1: devEnvConfig.wallet1,
   wallet2: devEnvConfig.wallet2,

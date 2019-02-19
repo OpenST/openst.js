@@ -54,6 +54,8 @@ let wallets,
   gnosisSafeMasterCopyAddress,
   proxyFactoryAddress,
   tokenRulesAddress,
+  delayedRecoveryModuleMasterCopyAddress,
+  createAndAddModulesAddress,
   pricerRuleAddress,
   worker,
   organization,
@@ -122,6 +124,25 @@ describe('Direct transfers between TH contracts', async function() {
       await tokenRulesContractInstance.methods.organization().call(),
       'Organization address is incorrect'
     );
+  });
+
+  it('Deploys DelayedRecoveryModule master copy.', async function() {
+    const userSetup = new UserSetup(auxiliaryWeb3);
+    const txResponse = await userSetup.deployDelayedRecoveryModuleMasterCopy(txOptions);
+    delayedRecoveryModuleMasterCopyAddress = txResponse.receipt.contractAddress;
+    assert.strictEqual(txResponse.receipt.status, true);
+    assert.isNotNull(
+      delayedRecoveryModuleMasterCopyAddress,
+      "DelayedRecoveryModule master copy contract's address is null."
+    );
+  });
+
+  it('Deploys CreateAndAddModules.', async function() {
+    const userSetup = new UserSetup(auxiliaryWeb3);
+    const txResponse = await userSetup.deployCreateAndAddModules(txOptions);
+    createAndAddModulesAddress = txResponse.receipt.contractAddress;
+    assert.strictEqual(txResponse.receipt.status, true);
+    assert.isNotNull(createAndAddModulesAddress, "createAndAddModules contract's address is null.");
   });
 
   it('Deploys Gnosis MultiSig MasterCopy contract', async function() {
@@ -209,12 +230,21 @@ describe('Direct transfers between TH contracts', async function() {
   });
 
   it('Creates first user wallet', async function() {
+    let txOptions = {
+      from: config.deployerAddress,
+      gasPrice: config.gasPrice,
+      gas: config.gas
+    };
+
     const userInstance = new User(
-      gnosisSafeMasterCopyAddress,
       thMasterCopyAddress,
+      gnosisSafeMasterCopyAddress,
+      delayedRecoveryModuleMasterCopyAddress,
+      createAndAddModulesAddress,
       mockToken,
       tokenRulesAddress,
       userWalletFactoryAddress,
+      proxyFactoryAddress,
       auxiliaryWeb3
     );
 
@@ -223,11 +253,16 @@ describe('Direct transfers between TH contracts', async function() {
       threshold = 1,
       sessionKeys = [ephemeralKey.address];
 
+    const recoveryOwnerAddress = wallets[7].address;
+    const recoveryControllerAddress = wallets[8].address;
+    const recoveryBlockDelay = 10;
+
     const response = await userInstance.createUserWallet(
       owners,
       threshold,
-      config.NULL_ADDRESS,
-      config.ZERO_BYTES,
+      recoveryOwnerAddress,
+      recoveryControllerAddress,
+      recoveryBlockDelay,
       sessionKeys,
       [config.sessionKeySpendingLimit],
       [config.sessionKeyExpirationHeight],
@@ -246,11 +281,14 @@ describe('Direct transfers between TH contracts', async function() {
 
   it('Should create second user wallet', async function() {
     const userInstance = new User(
-      gnosisSafeMasterCopyAddress,
       thMasterCopyAddress,
+      gnosisSafeMasterCopyAddress,
+      delayedRecoveryModuleMasterCopyAddress,
+      createAndAddModulesAddress,
       mockToken,
       tokenRulesAddress,
       userWalletFactoryAddress,
+      proxyFactoryAddress,
       auxiliaryWeb3
     );
 
@@ -259,11 +297,16 @@ describe('Direct transfers between TH contracts', async function() {
       threshold = 1,
       sessionKeys = [ephemeralKey.address];
 
+    const recoveryOwnerAddress = wallets[7].address;
+    const recoveryControllerAddress = wallets[8].address;
+    const recoveryBlockDelay = 10;
+
     const response = await userInstance.createUserWallet(
       owners,
       threshold,
-      config.NULL_ADDRESS,
-      config.ZERO_BYTES,
+      recoveryOwnerAddress,
+      recoveryControllerAddress,
+      recoveryBlockDelay,
       sessionKeys,
       [config.sessionKeySpendingLimit],
       [config.sessionKeyExpirationHeight],
@@ -282,11 +325,14 @@ describe('Direct transfers between TH contracts', async function() {
 
   it('Creates a company wallet', async function() {
     const userInstance = new User(
-      null,
       thMasterCopyAddress,
+      null, // gnosis safe master copy address
+      null, // delayed recovery module master copy address
+      null, // create and add modules contract address
       mockToken,
       tokenRulesAddress,
       userWalletFactoryAddress,
+      null, // proxy factory address
       auxiliaryWeb3
     );
 
@@ -317,18 +363,18 @@ describe('Direct transfers between TH contracts', async function() {
       contract = new auxiliaryWeb3.eth.Contract(mockTokenAbi, mockToken, txOptions);
 
     // Funding TH proxy with tokens.
-    const amount = config.tokenHolderBalance,
-      txObject = contract.methods.transfer(tokenHolderSender, amount);
+    const amount = config.tokenHolderBalance;
+    const txObject = contract.methods.transfer(tokenHolderSender, amount);
     await txObject.send(txOptions);
 
-    const initialTHProxyBalance = await contract.methods.balanceOf(tokenHolderSender).call(),
-      transferTos = [tokenHolderFirstReceiver, tokenHolderSecondReceiver],
-      firstReceiverInitialBalance = await contract.methods.balanceOf(tokenHolderFirstReceiver).call(),
-      secondReceiverInitialBalance = await contract.methods.balanceOf(tokenHolderSecondReceiver).call(),
-      transferAmounts = [20, 10];
+    const initialTHProxyBalance = await contract.methods.balanceOf(tokenHolderSender).call();
+    const transferTos = [tokenHolderFirstReceiver, tokenHolderSecondReceiver];
+    const firstReceiverInitialBalance = await contract.methods.balanceOf(tokenHolderFirstReceiver).call();
+    const secondReceiverInitialBalance = await contract.methods.balanceOf(tokenHolderSecondReceiver).call();
+    const transferAmounts = [20, 10];
 
-    const directTransferExecutable = tokenRulesObject.getDirectTransferExecutableData(transferTos, transferAmounts),
-      nonce = 0;
+    const directTransferExecutable = tokenRulesObject.getDirectTransferExecutableData(transferTos, transferAmounts);
+    const nonce = 0;
 
     let transaction = {
       from: tokenHolderSender,

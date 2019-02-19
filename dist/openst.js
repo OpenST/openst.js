@@ -12449,28 +12449,22 @@ function () {
       var _execute = _asyncToGenerator(
       /*#__PURE__*/
       regeneratorRuntime.mark(function _callee() {
-        var oThis, receipt, transactionHash;
+        var oThis, transactionHash;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
                 oThis = this;
-                receipt = null, transactionHash = null;
-                _context.next = 4;
-                return oThis.txObject.send(oThis.txOptions).on('receipt', function (value) {
-                  receipt = value;
-                }).on('transactionHash', function (value) {
-                  console.log('transaction hash: ' + value);
-                  transactionHash = value;
+                transactionHash = '';
+                return _context.abrupt("return", oThis.txObject.send(oThis.txOptions).on('transactionHash', function (transactionHash) {
+                  console.log('transactionHash = ' + transactionHash);
+                }).on('receipt', function (receipt) {
+                  console.log("Transaction (".concat(transactionHash, ") consumed ").concat(receipt.gasUsed, " gas."));
                 }).on('error', function (error) {
-                  return Promise.reject(error);
-                });
+                  console.log("Transaction (".concat(transactionHash, ") failed: ").concat(error));
+                }));
 
-              case 4:
-                console.log('Gas used : ', receipt.gasUsed);
-                return _context.abrupt("return", receipt);
-
-              case 6:
+              case 3:
               case "end":
                 return _context.stop();
             }
@@ -70609,13 +70603,12 @@ module.exports = {"2.16.840.1.101.3.4.1.1":"aes-128-ecb","2.16.840.1.101.3.4.1.2
 /* 562 */
 /***/ (function(module, exports, __webpack_require__) {
 
-// adapted from https://github.com/apatil/pemstrip
+/* WEBPACK VAR INJECTION */(function(Buffer) {// adapted from https://github.com/apatil/pemstrip
 var findProc = /Proc-Type: 4,ENCRYPTED[\n\r]+DEK-Info: AES-((?:128)|(?:192)|(?:256))-CBC,([0-9A-H]+)[\n\r]+([0-9A-z\n\r\+\/\=]+)[\n\r]+/m
-var startRegex = /^-----BEGIN ((?:.*? KEY)|CERTIFICATE)-----/m
-var fullRegex = /^-----BEGIN ((?:.*? KEY)|CERTIFICATE)-----([0-9A-z\n\r\+\/\=]+)-----END \1-----$/m
+var startRegex = /^-----BEGIN ((?:.* KEY)|CERTIFICATE)-----/m
+var fullRegex = /^-----BEGIN ((?:.* KEY)|CERTIFICATE)-----([0-9A-z\n\r\+\/\=]+)-----END \1-----$/m
 var evp = __webpack_require__(99)
 var ciphers = __webpack_require__(145)
-var Buffer = __webpack_require__(2).Buffer
 module.exports = function (okey, password) {
   var key = okey.toString()
   var match = key.match(findProc)
@@ -70625,8 +70618,8 @@ module.exports = function (okey, password) {
     decrypted = new Buffer(match2[2].replace(/[\r\n]/g, ''), 'base64')
   } else {
     var suite = 'aes' + match[1]
-    var iv = Buffer.from(match[2], 'hex')
-    var cipherText = Buffer.from(match[3].replace(/[\r\n]/g, ''), 'base64')
+    var iv = new Buffer(match[2], 'hex')
+    var cipherText = new Buffer(match[3].replace(/[\r\n]/g, ''), 'base64')
     var cipherKey = evp(password, iv.slice(0, 8), parseInt(match[1], 10)).key
     var out = []
     var cipher = ciphers.createDecipheriv(suite, cipherKey, iv)
@@ -70641,6 +70634,7 @@ module.exports = function (okey, password) {
   }
 }
 
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(3).Buffer))
 
 /***/ }),
 /* 563 */
@@ -81606,14 +81600,14 @@ function () {
    * @param proxyFactory Address of ProxyFactory contract.
    * @param auxiliaryWeb3 Auxiliary chain web3 object.
    */
-  function User(gnosisSafeMasterCopy, delayedRecoveryModuleMasterCopy, createAndAddModules, tokenHolderMasterCopy, eip20Token, tokenRules, userWalletFactory, proxyFactory, auxiliaryWeb3) {
+  function User(tokenHolderMasterCopy, gnosisSafeMasterCopy, delayedRecoveryModuleMasterCopy, createAndAddModules, eip20Token, tokenRules, userWalletFactory, proxyFactory, auxiliaryWeb3) {
     _classCallCheck(this, User);
 
     var oThis = this;
-    oThis.gnosisSafeMasterCopy = gnosisSafeMasterCopy;
     oThis.tokenHolderMasterCopy = tokenHolderMasterCopy;
-    oThis.createAndAddModules = createAndAddModules;
+    oThis.gnosisSafeMasterCopy = gnosisSafeMasterCopy;
     oThis.delayedRecoveryModuleMasterCopy = delayedRecoveryModuleMasterCopy;
+    oThis.createAndAddModules = createAndAddModules;
     oThis.eip20Token = eip20Token;
     oThis.tokenRules = tokenRules;
     oThis.userWalletFactory = userWalletFactory;
@@ -81657,33 +81651,29 @@ function () {
         type: 'function',
         inputs: [{
           type: 'address',
-          name: 'delayedRecoveryModuleMasterCopyAddress'
+          name: 'delayedRecoveryModuleMasterCopy'
         }, {
           type: 'bytes',
           name: 'delayedRecoverySetupData'
         }]
-      }, [oThis.delayedRecoveryModuleMasterCopyAddress, delayedRecoverySetupData]);
+      }, [oThis.delayedRecoveryModuleMasterCopy, delayedRecoverySetupData]);
     }
   }, {
     key: "getCreateAndAddModulesData",
     value: function getCreateAndAddModulesData(modulesCreationData) {
       var oThis = this;
-      var ModuleDataWrapper = oThis.auxiliaryWeb3.eth.contract([{
+      var ModuleDataWrapper = new oThis.auxiliaryWeb3.eth.Contract([{
         constant: false,
         inputs: [{
           name: 'data',
           type: 'bytes'
         }],
         name: 'setup',
-        outputs: [],
-        payable: false,
-        stateMutability: 'nonpayable',
         type: 'function'
-      }]);
-      var mw = ModuleDataWrapper.at(1); // Remove method id (10) and position of data in payload (64)
+      }]); // Remove method id (10) and position of data in payload (64)
 
       var reducedModulesCreationData = modulesCreationData.reduce(function (acc, data) {
-        return acc + mw.setup.getData(data).substr(74);
+        return acc + ModuleDataWrapper.methods.setup(data).encodeABI().substr(74);
       }, '0x');
       return oThis.auxiliaryWeb3.eth.abi.encodeFunctionCall({
         name: 'createAndAddModules',
@@ -81711,8 +81701,8 @@ function () {
     value: function getGnosisSafeData(owners, threshold, recoveryOwnerAddress, recoveryControllerAddress, recoveryBlockDelay) {
       var oThis = this;
       var delayedRecoveryModuleSetupData = oThis.getDelayedRecoveryModuleSetupData(recoveryOwnerAddress, recoveryControllerAddress, recoveryBlockDelay);
-      var delayedRecoveryModuleCreationData = oThis.getDelayedRecoveryModuleCreationData(oThis.delayedRecoveryModuleMasterCopyAddress, delayedRecoveryModuleSetupData);
-      var createAndAddModulesData = oThis.getCreateAndAddModulesData(oThis.proxyFactory, [delayedRecoveryModuleCreationData]);
+      var delayedRecoveryModuleCreationData = oThis.getDelayedRecoveryModuleCreationData(delayedRecoveryModuleSetupData);
+      var createAndAddModulesData = oThis.getCreateAndAddModulesData([delayedRecoveryModuleCreationData]);
       return oThis.auxiliaryWeb3.eth.abi.encodeFunctionCall({
         name: 'setup',
         type: 'function',
@@ -81771,22 +81761,23 @@ function () {
     value: function () {
       var _createUserWallet = _asyncToGenerator(
       /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee(owners, threshold, to, data, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights, txOptions) {
-        var oThis, txObject, txReceipt;
+      regeneratorRuntime.mark(function _callee(owners, threshold, recoveryOwnerAddress, recoveryControllerAddress, recoveryBlockDelay, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights, txOptions) {
+        var oThis, txObject, txSender1, txReceipt;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
                 oThis = this;
-                txObject = oThis._createUserWalletRawTx(owners, threshold, to, data, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights);
-                _context.next = 4;
-                return new TxSender(txObject, oThis.auxiliaryWeb3, txOptions).execute();
+                txObject = oThis._createUserWalletRawTx(owners, threshold, recoveryOwnerAddress, recoveryControllerAddress, recoveryBlockDelay, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights);
+                txSender1 = new TxSender(txObject, oThis.auxiliaryWeb3, txOptions);
+                _context.next = 5;
+                return txSender1.execute();
 
-              case 4:
+              case 5:
                 txReceipt = _context.sent;
                 return _context.abrupt("return", txReceipt);
 
-              case 6:
+              case 7:
               case "end":
                 return _context.stop();
             }
@@ -81794,7 +81785,7 @@ function () {
         }, _callee, this);
       }));
 
-      function createUserWallet(_x, _x2, _x3, _x4, _x5, _x6, _x7, _x8) {
+      function createUserWallet(_x, _x2, _x3, _x4, _x5, _x6, _x7, _x8, _x9) {
         return _createUserWallet.apply(this, arguments);
       }
 
@@ -81841,7 +81832,7 @@ function () {
         }, _callee2, this);
       }));
 
-      function createCompanyWallet(_x9, _x10, _x11, _x12, _x13, _x14) {
+      function createCompanyWallet(_x10, _x11, _x12, _x13, _x14, _x15) {
         return _createCompanyWallet.apply(this, arguments);
       }
 
@@ -81853,8 +81844,6 @@ function () {
      *
      * @param owners List of owners of the multisig.
      * @param threshold Number of required confirmations for a Safe transaction.
-     * @param to Contract address for optional delegate call.
-     * @param data Data payload for optional delegate call.
      * @param sessionKeys Session key addresses to authorize.
      * @param sessionKeysSpendingLimits Session key's spending limits.
      * @param sessionKeysExpirationHeights Session key's expiration heights.
@@ -81863,9 +81852,9 @@ function () {
 
   }, {
     key: "_createUserWalletRawTx",
-    value: function _createUserWalletRawTx(owners, threshold, to, data, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights) {
+    value: function _createUserWalletRawTx(owners, threshold, recoveryOwnerAddress, recoveryControllerAddress, recoveryBlockDelay, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights) {
       var oThis = this;
-      var gnosisSafeData = oThis.getGnosisSafeData(owners, threshold, to, data);
+      var gnosisSafeData = oThis.getGnosisSafeData(owners, threshold, recoveryOwnerAddress, recoveryControllerAddress, recoveryBlockDelay);
       var jsonInterface = oThis.abiBinProvider.getABI(UserWalletFactoryContractName);
       var contract = new oThis.auxiliaryWeb3.eth.Contract(jsonInterface, oThis.userWalletFactory);
       return contract.methods.createUserWallet(oThis.gnosisSafeMasterCopy, gnosisSafeData, oThis.tokenHolderMasterCopy, oThis.eip20Token, oThis.tokenRules, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights);

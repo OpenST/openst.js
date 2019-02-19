@@ -48,25 +48,19 @@ class TxSender {
   async execute() {
     const oThis = this;
 
-    let receipt = null,
-      transactionHash = null;
+    let transactionHash = '';
 
-    await oThis.txObject
+    return oThis.txObject
       .send(oThis.txOptions)
-      .on('receipt', function(value) {
-        receipt = value;
+      .on('transactionHash', function(transactionHash) {
+        console.log('transactionHash = ' + transactionHash);
       })
-      .on('transactionHash', function(value) {
-        console.log('transaction hash: ' + value);
-        transactionHash = value;
+      .on('receipt', function(receipt) {
+        console.log(`Transaction (${transactionHash}) consumed ${receipt.gasUsed} gas.`);
       })
-      .on('error', function(error) {
-        return Promise.reject(error);
+      .on('error', (error) => {
+        console.log(`Transaction (${transactionHash}) failed: ${error}`);
       });
-
-    console.log('Gas used : ', receipt.gasUsed);
-
-    return receipt;
   }
 }
 

@@ -52,6 +52,8 @@ let wallets,
   thMasterCopyAddress,
   gnosisSafeMasterCopyAddress,
   tokenRulesAddress,
+  delayedRecoveryModuleMasterCopyAddress,
+  createAndAddModulesAddress,
   worker,
   organization,
   beneficiary,
@@ -116,6 +118,25 @@ describe('Wallet operations', async function() {
     );
   });
 
+  it('Deploys DelayedRecoveryModule master copy.', async function() {
+    const userSetup = new UserSetup(auxiliaryWeb3);
+    const txResponse = await userSetup.deployDelayedRecoveryModuleMasterCopy(txOptions);
+    delayedRecoveryModuleMasterCopyAddress = txResponse.receipt.contractAddress;
+    assert.strictEqual(txResponse.receipt.status, true);
+    assert.isNotNull(
+      delayedRecoveryModuleMasterCopyAddress,
+      "DelayedRecoveryModule master copy contract's address is null."
+    );
+  });
+
+  it('Deploys CreateAndAddModules.', async function() {
+    const userSetup = new UserSetup(auxiliaryWeb3);
+    const txResponse = await userSetup.deployCreateAndAddModules(txOptions);
+    createAndAddModulesAddress = txResponse.receipt.contractAddress;
+    assert.strictEqual(txResponse.receipt.status, true);
+    assert.isNotNull(createAndAddModulesAddress, "createAndAddModules contract's address is null.");
+  });
+
   it('Should deploy Gnosis MultiSig MasterCopy contract', async function() {
     const userSetup = new UserSetup(auxiliaryWeb3);
     const multiSigTxResponse = await userSetup.deployMultiSigMasterCopy(txOptions);
@@ -137,14 +158,24 @@ describe('Wallet operations', async function() {
     assert.strictEqual(userWalletFactoryResponse.receipt.status, true);
   });
 
+  it('Should deploy ProxyFactory contract', async function() {
+    const userSetup = new UserSetup(auxiliaryWeb3);
+    const proxyFactoryResponse = await userSetup.deployProxyFactory(txOptions);
+    proxyFactoryAddress = proxyFactoryResponse.receipt.contractAddress;
+    assert.strictEqual(proxyFactoryResponse.receipt.status, true);
+  });
+
   // wallet3, wallet9 are the owners.
   it('Should create a user wallet', async function() {
     const userInstance = new User(
-      gnosisSafeMasterCopyAddress,
       thMasterCopyAddress,
+      gnosisSafeMasterCopyAddress,
+      delayedRecoveryModuleMasterCopyAddress,
+      createAndAddModulesAddress,
       mockToken,
       tokenRulesAddress,
       userWalletFactoryAddress,
+      proxyFactoryAddress,
       auxiliaryWeb3
     );
 
@@ -155,11 +186,16 @@ describe('Wallet operations', async function() {
       sessionKeysSpendingLimits = [config.sessionKeySpendingLimit],
       sessionKeysExpirationHeights = [config.sessionKeyExpirationHeight];
 
+    const recoveryOwnerAddress = wallets[7].address;
+    const recoveryControllerAddress = wallets[8].address;
+    const recoveryBlockDelay = 10;
+
     const response = await userInstance.createUserWallet(
       owners,
       threshold,
-      config.NULL_ADDRESS,
-      config.ZERO_BYTES,
+      recoveryOwnerAddress,
+      recoveryControllerAddress,
+      recoveryBlockDelay,
       sessionKeys,
       sessionKeysSpendingLimits,
       sessionKeysExpirationHeights,
