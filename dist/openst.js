@@ -12424,15 +12424,17 @@ function () {
    * Constructor of TxSender.
    *
    * @param txObject Transaction object.
+   * @param web3 Web3 object.
    * @param txOptions Tx options.
    * @constructor
    */
-  function TxSender(txObject, txOptions) {
+  function TxSender(txObject, web3, txOptions) {
     _classCallCheck(this, TxSender);
 
     var oThis = this;
     oThis.txObject = txObject;
     oThis.txOptions = txOptions;
+    oThis.web3 = web3;
   }
   /**
    * It executes a transaction.
