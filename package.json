@@ -22,7 +22,8 @@
     "url": "https://github.com/OpenSTFoundation/openst.js/issues"
   },
   "scripts": {
-    "test": "mocha --recursive --timeout 120000 test --exit",
+    "test": "mocha --recursive --timeout 120000 test/unit --exit",
+    "test:integration": "mocha --recursive --timeout 120000 test/integration --exit",
     "pre-commit": "lint-staged"
   },
   "dependencies": {
@@ -50,6 +51,7 @@
     "webpack-uglify-js-plugin": "1.1.9",
     "package-json-cleanup-loader": "1.0.3",
     "abi-decoder": "1.2.0",
+    "sinon": "7.2.3",
     "wait-port": "0.2.2"
   },
   "pre-commit": {
