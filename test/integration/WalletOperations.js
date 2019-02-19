@@ -127,9 +127,7 @@ describe('Wallet operations', async function() {
   // // wallet3, wallet9 are the owners.
   // wallet1 and wallet2 are the owners.
   it('Should create a user wallet', async function() {
-    await auxiliaryWeb3.eth.accounts.wallet.create(1);
-    await auxiliaryWeb3.eth.accounts.wallet.create(1);
-    await auxiliaryWeb3.eth.accounts.wallet.create(1);
+    await auxiliaryWeb3.eth.accounts.wallet.create(3);
 
     ephemeralKey = auxiliaryWeb3.eth.accounts.wallet[0];
 
