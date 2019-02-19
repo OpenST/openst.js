@@ -28,16 +28,14 @@ class TxSender {
    * Constructor of TxSender.
    *
    * @param txObject Transaction object.
-   * @param web3 Web3 object.
    * @param txOptions Tx options.
    * @constructor
    */
-  constructor(txObject, web3, txOptions) {
+  constructor(txObject, txOptions) {
     const oThis = this;
 
     oThis.txObject = txObject;
     oThis.txOptions = txOptions;
-    oThis.web3 = web3;
   }
 
   /**
