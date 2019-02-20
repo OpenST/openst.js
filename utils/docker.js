@@ -6,7 +6,6 @@ const waitPort = require('wait-port');
 const config = require('./../test/utils/configReader');
 
 const composeFilePath = path.join(__dirname, './docker-compose.yml');
-console.log('compose file path :- ', composeFilePath);
 const asyncSleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // docker-compose is expected to be available in the test environment
