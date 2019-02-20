@@ -1,7 +1,7 @@
 const chai = require('chai'),
   Web3 = require('web3'),
   Package = require('../../index'),
-  Mosaic = require('@openstfoundation/mosaic-tbd');
+  Mosaic = require('@openstfoundation/mosaic.js');
 
 const TokenRulesSetup = Package.Setup.TokenRules,
   UserSetup = Package.Setup.User,
@@ -16,7 +16,6 @@ const TokenRulesSetup = Package.Setup.TokenRules,
   { dockerSetup, dockerTeardown } = require('./../../utils/docker');
 
 const assert = chai.assert,
-  OrganizationHelper = Mosaic.ChainSetup.OrganizationHelper,
   abiBinProvider = new AbiBinProvider();
 
 let txOptions,
@@ -57,17 +56,16 @@ describe('Direct transfers between TH contracts', async function() {
   });
 
   it('Deploys Organization contract', async function() {
-    let orgHelper = new OrganizationHelper(auxiliaryWeb3, null);
+    const { Organization } = Mosaic.ContractInteract;
     const orgConfig = {
       deployer: deployerAddress,
-      owner: owner,
-      workers: worker,
-      workerExpirationHeight: '20000000'
+      owner,
+      admin: worker,
+      workers: [worker],
+      workerExpirationHeight: config.workerExpirationHeight
     };
-
-    await orgHelper.setup(orgConfig);
-    organization = orgHelper.address;
-
+    const organizationContractInstance = await Organization.setup(auxiliaryWeb3, orgConfig);
+    organization = organizationContractInstance.address;
     assert.isNotNull(organization, 'Organization contract address should not be null.');
   });
 
@@ -300,19 +298,23 @@ describe('Direct transfers between TH contracts', async function() {
   });
 
   it('Performs direct transfer of tokens', async function() {
-    const tokenHolder = new TokenHolder(auxiliaryWeb3, tokenHolderSender),
-      mockTokenAbi = mockTokenDeployerInstance.abiBinProvider.getABI('MockToken'),
-      contract = new auxiliaryWeb3.eth.Contract(mockTokenAbi, mockToken, txOptions);
+    const tokenHolder = new TokenHolder(auxiliaryWeb3, tokenHolderSender);
+    // MockToken instance is needed because for transfer. Transfer is not available in Mosaic.ContractInteract.EIP20Token
+    // Please update after transfer is exposed in Mosaic.js
+    const mockTokenAbi = mockTokenDeployerInstance.abiBinProvider.getABI('MockToken');
+    const mockContractInstance = new auxiliaryWeb3.eth.Contract(mockTokenAbi, mockToken, txOptions);
+
+    const eip20Instance = new Mosaic.ContractInteract.EIP20Token(auxiliaryWeb3, mockToken);
 
     // Funding TH proxy with tokens.
     const amount = config.tokenHolderBalance,
-      txObject = contract.methods.transfer(tokenHolderSender, amount);
+      txObject = mockContractInstance.methods.transfer(tokenHolderSender, amount);
     await txObject.send(txOptions);
 
-    const initialTHProxyBalance = await contract.methods.balanceOf(tokenHolderSender).call(),
+    const initialTHProxyBalance = await eip20Instance.balanceOf(tokenHolderSender),
       transferTos = [tokenHolderFirstReceiver, tokenHolderSecondReceiver],
-      firstReceiverInitialBalance = await contract.methods.balanceOf(tokenHolderFirstReceiver).call(),
-      secondReceiverInitialBalance = await contract.methods.balanceOf(tokenHolderSecondReceiver).call(),
+      firstReceiverInitialBalance = await eip20Instance.balanceOf(tokenHolderFirstReceiver),
+      secondReceiverInitialBalance = await eip20Instance.balanceOf(tokenHolderSecondReceiver),
       transferAmounts = [20, 10];
 
     const directTransferExecutable = tokenRulesObject.getDirectTransferExecutableData(transferTos, transferAmounts),
@@ -333,9 +335,9 @@ describe('Direct transfers between TH contracts', async function() {
 
     await tokenHolder.executeRule(tokenRulesAddress, directTransferExecutable, nonce, vrs.r, vrs.s, vrs.v, txOptions);
 
-    const finalTHProxyBalance = await contract.methods.balanceOf(tokenHolderSender).call(),
-      firstReceiverFinalBalance = await contract.methods.balanceOf(tokenHolderFirstReceiver).call(),
-      secondReceiverFinalBalance = await contract.methods.balanceOf(tokenHolderSecondReceiver).call(),
+    const finalTHProxyBalance = await eip20Instance.balanceOf(tokenHolderSender),
+      firstReceiverFinalBalance = await eip20Instance.balanceOf(tokenHolderFirstReceiver),
+      secondReceiverFinalBalance = await eip20Instance.balanceOf(tokenHolderSecondReceiver),
       firstReceiverExpectedBalance = parseInt(firstReceiverInitialBalance) + transferAmounts[0],
       secondReceiverExpectedBalance = parseInt(secondReceiverInitialBalance) + transferAmounts[1];
 
