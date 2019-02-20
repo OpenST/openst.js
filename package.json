@@ -28,7 +28,7 @@
     "pre-commit": "lint-staged"
   },
   "dependencies": {
-    "@openstfoundation/mosaic-tbd": "https://github.com/OpenSTFoundation/mosaic-tbd.git"
+    "@openstfoundation/mosaic.js": "0.10.0-beta.2"
   },
   "devDependencies": {
     "@babel/core": "7.1.0",
@@ -58,7 +58,9 @@
     "wait-port": "0.2.2",
     "assert": "^1.4.1",
     "ethereumjs-util": "^6.1.0",
-    "sinon": "7.2.3"
+    "sinon": "7.2.3",
+    "web3": "1.0.0-beta.37",
+    "web3-eth-accounts": "1.0.0-beta.37"
   },
   "pre-commit": {
     "run": [

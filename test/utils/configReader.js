@@ -15,7 +15,8 @@ ConfigReader.prototype = {
   requiredPriceOracleDecimals: 18,
   sessionKeySpendingLimit: 1000000,
   sessionKeyExpirationHeight: 100000000000,
-  auxiliaryPort: 8546
+  auxiliaryPort: 8546,
+  workerExpirationHeight: '20000000'
 };
 
 module.exports = new ConfigReader();

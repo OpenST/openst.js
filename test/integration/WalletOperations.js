@@ -3,7 +3,7 @@ const chai = require('chai'),
   Package = require('../../index'),
   abiDecoder = require('abi-decoder'),
   MockContractsDeployer = require('../utils/MockContractsDeployer'),
-  Mosaic = require('@openstfoundation/mosaic-tbd'),
+  Mosaic = require('@openstfoundation/mosaic.js'),
   config = require('../utils/configReader');
 
 const TokenRulesSetup = Package.Setup.TokenRules,
@@ -14,8 +14,7 @@ const TokenRulesSetup = Package.Setup.TokenRules,
   TokenHolder = Package.Helpers.TokenHolder,
   GnosisSafe = Package.Helpers.GnosisSafe;
 
-const assert = chai.assert,
-  OrganizationHelper = Mosaic.ChainSetup.OrganizationHelper,
+const { assert } = chai,
   abiBinProvider = new AbiBinProvider();
 
 const { dockerSetup, dockerTeardown } = require('./../../utils/docker');
@@ -64,17 +63,16 @@ describe('Wallet operations', async function() {
   });
 
   it('Should deploy Organization contract', async function() {
-    let orgHelper = new OrganizationHelper(auxiliaryWeb3, null);
+    const { Organization } = Mosaic.ContractInteract;
     const orgConfig = {
       deployer: deployerAddress,
-      owner: owner,
-      workers: worker,
-      workerExpirationHeight: '20000000'
+      owner,
+      admin: worker,
+      workers: [worker],
+      workerExpirationHeight: config.workerExpirationHeight
     };
-
-    await orgHelper.setup(orgConfig);
-    organization = orgHelper.address;
-
+    const organizationContractInstance = await Organization.setup(auxiliaryWeb3, orgConfig);
+    organization = organizationContractInstance.address;
     assert.isNotNull(organization, 'Organization contract address should not be null.');
   });
 
