@@ -1,23 +1,3 @@
-// Copyright 2019 OpenST Ltd.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//    http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// ----------------------------------------------------------------------------
-//
-// http://www.simpletoken.org/
-//
-// ----------------------------------------------------------------------------
-
 const chai = require('chai'),
   Web3 = require('web3'),
   Package = require('../../index'),
@@ -28,27 +8,19 @@ const TokenRulesSetup = Package.Setup.TokenRules,
   RulesSetup = Package.Setup.Rules,
   MockContractsDeployer = require('./../utils/MockContractsDeployer'),
   config = require('../utils/configReader'),
-  Web3WalletHelper = require('../utils/Web3WalletHelper'),
   Contracts = Package.Contracts,
   User = Package.Helpers.User,
   TokenRules = Package.Helpers.TokenRules,
   AbiBinProvider = Package.AbiBinProvider,
-  TokenHolder = Package.Helpers.TokenHolder;
+  TokenHolder = Package.Helpers.TokenHolder,
+  { dockerSetup, dockerTeardown } = require('./../../utils/docker');
 
-const auxiliaryWeb3 = new Web3(config.gethRpcEndPoint),
-  ContractsInstance = new Contracts(auxiliaryWeb3),
-  web3WalletHelper = new Web3WalletHelper(auxiliaryWeb3),
-  assert = chai.assert,
+const assert = chai.assert,
   OrganizationHelper = Mosaic.ChainSetup.OrganizationHelper,
   abiBinProvider = new AbiBinProvider();
 
-let txOptions = {
-  from: config.deployerAddress,
-  gasPrice: config.gasPrice,
-  gas: config.gas
-};
-
-let wallets,
+let txOptions,
+  ContractsInstance,
   userWalletFactoryAddress,
   thMasterCopyAddress,
   gnosisSafeMasterCopyAddress,
@@ -59,8 +31,6 @@ let wallets,
   pricerRuleAddress,
   worker,
   organization,
-  beneficiary,
-  facilitator,
   mockToken,
   owner = config.deployerAddress,
   tokenHolderSender,
@@ -69,21 +39,29 @@ let wallets,
   gnosisSafeProxy,
   ephemeralKey,
   mockTokenDeployerInstance,
-  tokenRulesObject;
+  tokenRulesObject,
+  deployerAddress,
+  auxiliaryWeb3;
 
 describe('Direct transfers between TH contracts', async function() {
   before(async function() {
-    await web3WalletHelper.init(auxiliaryWeb3);
-    wallets = web3WalletHelper.web3Object.eth.accounts.wallet;
-    worker = wallets[1].address;
-    beneficiary = wallets[2].address;
-    facilitator = wallets[3].address;
+    const { rpcEndpointOrigin } = await dockerSetup();
+    auxiliaryWeb3 = new Web3(rpcEndpointOrigin);
+    ContractsInstance = new Contracts(auxiliaryWeb3);
+    const accountsOrigin = await auxiliaryWeb3.eth.getAccounts();
+    deployerAddress = accountsOrigin[0];
+    worker = accountsOrigin[1];
+    owner = accountsOrigin[2];
+  });
+
+  after(() => {
+    dockerTeardown();
   });
 
   it('Deploys Organization contract', async function() {
     let orgHelper = new OrganizationHelper(auxiliaryWeb3, null);
     const orgConfig = {
-      deployer: config.deployerAddress,
+      deployer: deployerAddress,
       owner: owner,
       workers: worker,
       workerExpirationHeight: '20000000'
@@ -96,7 +74,7 @@ describe('Direct transfers between TH contracts', async function() {
   });
 
   it('Deploys EIP20Token contract', async function() {
-    mockTokenDeployerInstance = new MockContractsDeployer(config.deployerAddress, auxiliaryWeb3);
+    mockTokenDeployerInstance = new MockContractsDeployer(deployerAddress, auxiliaryWeb3);
 
     await mockTokenDeployerInstance.deployMockToken();
 
@@ -105,6 +83,12 @@ describe('Direct transfers between TH contracts', async function() {
   });
 
   it('Deploys TokenRules contract', async function() {
+    txOptions = {
+      from: deployerAddress,
+      gasPrice: config.gasPrice,
+      gas: config.gas
+    };
+
     const tokenRulesSetupInstance = new TokenRulesSetup(auxiliaryWeb3);
 
     const response = await tokenRulesSetupInstance.deploy(organization, mockToken, txOptions);
@@ -199,11 +183,7 @@ describe('Direct transfers between TH contracts', async function() {
 
   it('Registers PricerRule rule', async function() {
     // Only worker can registerRule.
-    const txOptions = {
-      from: worker,
-      gasPrice: config.gasPrice,
-      gas: config.gas
-    };
+    txOptions.from = worker;
 
     tokenRulesObject = new TokenRules(tokenRulesAddress, auxiliaryWeb3);
     const pricerRuleName = 'PricerRule',
@@ -230,12 +210,7 @@ describe('Direct transfers between TH contracts', async function() {
   });
 
   it('Creates first user wallet', async function() {
-    let txOptions = {
-      from: config.deployerAddress,
-      gasPrice: config.gasPrice,
-      gas: config.gas
-    };
-
+    txOptions.from = deployerAddress;
     const userInstance = new User(
       thMasterCopyAddress,
       gnosisSafeMasterCopyAddress,
@@ -248,8 +223,10 @@ describe('Direct transfers between TH contracts', async function() {
       auxiliaryWeb3
     );
 
-    ephemeralKey = wallets[5];
-    const owners = [wallets[3].address],
+    await auxiliaryWeb3.eth.accounts.wallet.create(1);
+    ephemeralKey = auxiliaryWeb3.eth.accounts.wallet[0];
+
+    const owners = [owner],
       threshold = 1,
       sessionKeys = [ephemeralKey.address];
 
@@ -292,8 +269,10 @@ describe('Direct transfers between TH contracts', async function() {
       auxiliaryWeb3
     );
 
-    ephemeralKey = wallets[5];
-    const owners = [wallets[3].address],
+    await auxiliaryWeb3.eth.accounts.wallet.create(1);
+    ephemeralKey = auxiliaryWeb3.eth.accounts.wallet[0];
+
+    const owners = [owner],
       threshold = 1,
       sessionKeys = [ephemeralKey.address];
 
@@ -336,7 +315,10 @@ describe('Direct transfers between TH contracts', async function() {
       auxiliaryWeb3
     );
 
-    const sessionKeys = [wallets[5].address];
+    await auxiliaryWeb3.eth.accounts.wallet.create(1);
+    const sessionKey = auxiliaryWeb3.eth.accounts.wallet[0].address;
+
+    const sessionKeys = [sessionKey];
 
     const response = await userInstance.createCompanyWallet(
       proxyFactoryAddress,
