@@ -1,7 +1,12 @@
 {
   "name": "@openstfoundation/openst.js",
-  "version": "0.10.0",
+  "version": "0.10.0-alpha.1",
   "description": "OpenST is a framework for building token economies.",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OpenSTFoundation/openst.js.git"
+  },
   "keywords": [
     "OpenST",
     "OST",
@@ -12,12 +17,8 @@
     "EIP20"
   ],
   "homepage": "https://openst.org",
-  "author": "OpenST Ltd.",
-  "license": "LGPL-3.0",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/OpenSTFoundation/openst.js.git"
-  },
+  "author": "OpenST Limited.",
+  "license": "LGPL-3.0-only",
   "bugs": {
     "url": "https://github.com/OpenSTFoundation/openst.js/issues"
   },
