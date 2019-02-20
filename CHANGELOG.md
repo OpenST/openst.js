@@ -2,6 +2,7 @@
 
 ## Version 0.10.0
 
+Integration with mosaic.js npm ([109](https://github.com/OpenSTFoundation/openst.js/pull/109))
 Docker Geth Integration: Using docker geth([108](https://github.com/OpenSTFoundation/openst.js/pull/108))
 MultiSig Operation: Logout all sessions([104](https://github.com/OpenSTFoundation/openst.js/pull/104))
 Rule setup: Pricer rule setup and interaction([66](https://github.com/OpenSTFoundation/openst.js/pull/66))
