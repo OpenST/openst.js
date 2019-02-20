@@ -311,7 +311,7 @@ describe('Direct transfers between TH contracts', async function() {
       mockToken,
       tokenRulesAddress,
       userWalletFactoryAddress,
-      null, // proxy factory address
+      proxyFactoryAddress, // proxy factory address
       auxiliaryWeb3
     );
 
@@ -321,7 +321,6 @@ describe('Direct transfers between TH contracts', async function() {
     const sessionKeys = [sessionKey];
 
     const response = await userInstance.createCompanyWallet(
-      proxyFactoryAddress,
       thMasterCopyAddress,
       sessionKeys,
       [config.sessionKeySpendingLimit],
