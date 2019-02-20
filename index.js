@@ -6,10 +6,11 @@ const TokenRules = require('./lib/setup/TokenRules');
 const User = require('./lib/setup/User');
 const UserHelper = require('./lib/helper/User');
 const TokenRulesHelper = require('./lib/helper/TokenRules');
-const TokenHolderHelper = require('./lib/helper/TokenHolder');
+const TokenHolder = require('./lib/helper/TokenHolder');
 const Rules = require('./lib/setup/Rules');
 const PricerRule = require('./lib/helper/rules/PricerRule');
-const GnosisSafeHelper = require('./lib/helper/GnosisSafe');
+const GnosisSafe = require('./lib/helper/GnosisSafe');
+const Recovery = require('./lib/ContractInteract/Recovery');
 
 const SignEIP1077Extension = require('./utils/SignEIP1077Extension');
 new SignEIP1077Extension();
@@ -25,8 +26,9 @@ module.exports = {
   Helpers: {
     User: UserHelper,
     TokenRules: TokenRulesHelper,
-    TokenHolder: TokenHolderHelper,
-    GnosisSafe: GnosisSafeHelper,
+    TokenHolder: TokenHolder,
+    GnosisSafe: GnosisSafe,
+    Recovery: Recovery,
     Rules: {
       PricerRule: PricerRule
     }
