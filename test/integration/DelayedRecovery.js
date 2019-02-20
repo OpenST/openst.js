@@ -14,7 +14,7 @@
 
 'use strict';
 
-const assert = require('chai').assert;
+const { assert } = require('chai');
 const EthUtils = require('ethereumjs-util');
 const Web3 = require('web3');
 
@@ -38,10 +38,6 @@ const RECOERY_MODULE_DOMAIN_SEPARATOR_TYPEHASH = auxiliaryWeb3.utils.keccak256(
 
 const INITIATE_RECOVERY_STRUCT_TYPEHASH = auxiliaryWeb3.utils.keccak256(
   'InitiateRecoveryStruct(address prevOwner,address oldOwner,address newOwner)'
-);
-
-const EXECUTE_RECOVERY_STRUCT_TYPEHASH = auxiliaryWeb3.utils.keccak256(
-  'ExecuteRecoveryStruct(address prevOwner,address oldOwner,address newOwner)'
 );
 
 const GNOSIS_SAFE_CONTRACT_NAME = 'GnosisSafe';
@@ -175,38 +171,6 @@ function signInitiateRecovery(recoveryModuleAddress, prevOwner, oldOwner, newOwn
   );
 }
 
-function signExecuteRecovery(recoveryModuleAddress, prevOwner, oldOwner, newOwner, recoveryOwnerPrivateKey) {
-  return signRecovery(
-    recoveryModuleAddress,
-    EXECUTE_RECOVERY_STRUCT_TYPEHASH,
-    prevOwner,
-    oldOwner,
-    newOwner,
-    recoveryOwnerPrivateKey
-  );
-}
-
-function advanceBlock() {
-  return new Promise((resolve, reject) => {
-    auxiliaryWeb3.currentProvider.send(
-      {
-        jsonrpc: '2.0',
-        method: 'evm_mine',
-        id: new Date().getTime()
-      },
-      (err) => {
-        if (err) {
-          return reject(err);
-        }
-
-        const newBlockHash = auxiliaryWeb3.eth.getBlock('latest').hash;
-
-        return resolve(newBlockHash);
-      }
-    );
-  });
-}
-
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -215,7 +179,8 @@ async function waitBlockNumber(blockNumber) {
   let currentBlockNumber = await auxiliaryWeb3.eth.getBlockNumber();
 
   while (currentBlockNumber < blockNumber) {
-    await sleep(2000);
+    // eslint-disable-next-line no-await-in-loop
+    await sleep(200);
     currentBlockNumber = await auxiliaryWeb3.eth.getBlockNumber();
   }
 }
@@ -376,7 +341,7 @@ describe('Delayed Recovery', async () => {
     const threshold = 1;
 
     const recoveryOwner = walletProvider.get();
-    const recoveryControllerAddress = ConfigReader.recoveryControllerAddress;
+    const { recoveryControllerAddress } = ConfigReader;
     const recoveryBlockDelay = 5;
 
     const newOwnerAddress = walletProvider.getAddress();

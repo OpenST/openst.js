@@ -81178,7 +81178,13 @@ function () {
     oThis.auxiliaryWeb3 = auxiliaryWeb3;
     oThis.abiBinProvider = new AbiBinProvider();
   }
-  /** Deploys DelayedRecoveryModule master copy. */
+  /**
+   * Deploys DelayedRecoveryModule master copy.
+   * 
+   * @param {Object} txOptions Transaction's options used for deploying.
+   * 
+   * @returns {Object} Transaction receipt of the deployment.
+   */
 
 
   _createClass(User, [{
@@ -81215,7 +81221,13 @@ function () {
 
       return deployDelayedRecoveryModuleMasterCopy;
     }()
-    /** Deploys Gnosis CreateAndAddModules contract. */
+    /**
+     * Deploys Gnosis CreateAndAddModules contract.
+     * 
+     * @param {Object} txOptions Transaction's options used for deploying.
+     * 
+     * @returns {Object} Transaction receipt of the deployment.
+     */
 
   }, {
     key: "deployCreateAndAddModules",
@@ -81419,7 +81431,12 @@ function () {
 
       return deployProxyFactory;
     }()
-    /** Creates and returns transaction object for DelayedRecoveryModule master copy. */
+    /**
+     * Creates and returns a transaction object to deploy DelayedRecoveryModule
+     * master copy.
+     * 
+     * @returns {Object} Transaction object to deploy.
+     */
 
   }, {
     key: "_deployDelayedRecoveryModuleMasterCopyRawTx",
@@ -81434,7 +81451,11 @@ function () {
         arguments: []
       });
     }
-    /** Creates and returns transaction object for CreateAndAddModules contract */
+    /**
+     * Creates and returns a transaction object to deploy CreateAndAddModules.
+     * 
+    * @returns {Object} Transaction object to deploy.
+     */
 
   }, {
     key: "_deployCreateAndAddModulesRawTx",
@@ -81580,25 +81601,25 @@ var UserWalletFactoryContractName = 'UserWalletFactory';
 var ProxyFactoryContractName = 'ProxyFactory';
 var THMasterCopyContractName = 'TokenHolder';
 /**
- * This is used to create wallet of an user and configure it.
+ * Class is used to create a wallet of an user and configure it.
  */
 
 var User =
 /*#__PURE__*/
 function () {
   /**
-   * Constructor of User.
+   * @constructor
    *
-   * @param gnosisSafeMasterCopy The address of a master copy of gnosis safe contract.
-   * @param tokenHolderMasterCopy The address of a master copy of token holder contract.
-   * @param createAndAddModules The address of a CreateAndAddModules contract.
+   * @param tokenHolderMasterCopy The address of a master copy of TokenHolder contract.
+   * @param gnosisSafeMasterCopy The address of a master copy of GnosisSafe contract.
+   * @param createAndAddModules The address of CreateAndAddModules contract.
    * @param delayedRecoveryModuleMasterCopy The address of a master copy of
-   *                                        recovery module contract.
-   * @param eip20Token The address of an EIP20Token of an economy.
-   * @param tokenRules The address of the token rules.
-   * @param userWalletFactory Address of UserWalletFactory contract.
-   * @param proxyFactory Address of ProxyFactory contract.
-   * @param auxiliaryWeb3 Auxiliary chain web3 object.
+   *                                        DelayedRecoveryModule contract.
+   * @param eip20Token The address of EIP20Token contract of the economy.
+   * @param tokenRules The address of TokenRules contract.
+   * @param userWalletFactory The address of UserWalletFactory contract.
+   * @param proxyFactory The address of ProxyFactory contract.
+   * @param auxiliaryWeb3 Auxiliary chain's web3 object.
    */
   function User(tokenHolderMasterCopy, gnosisSafeMasterCopy, delayedRecoveryModuleMasterCopy, createAndAddModules, eip20Token, tokenRules, userWalletFactory, proxyFactory, auxiliaryWeb3) {
     _classCallCheck(this, User);
@@ -81615,7 +81636,19 @@ function () {
     oThis.auxiliaryWeb3 = auxiliaryWeb3;
     oThis.abiBinProvider = new AbiBinProvider();
   }
-  /** Generates DelayedRecoveryModule::setup() function data. */
+  /**
+   * Generates DelayedRecoveryModule::setup() function's executable data.
+   * 
+   * @param recoveryOwnerAddress  An address that signs the "recovery
+   *                              initiation/abortion" and "reset recovery owner"
+   *                              requests.
+   * @param recoveryControllerAddress An address that relays signed requests of
+   *                                  different types.
+   * @param recoveryBlockDelay A required number of blocks to pass to
+   *                           be able to execute a recovery request.
+   * 
+   * @returns {String} Executable data of the function.
+   */
 
 
   _createClass(User, [{
@@ -81638,8 +81671,13 @@ function () {
       }, [recoveryOwnerAddress, recoveryControllerAddress, recoveryBlockDelay]);
     }
     /**
-     * Generates ProxyFactory::createProxy() function data for
-     * DelayedRecoveryModule proxy's creation.
+     * Generates ProxyFactory::createProxy() function's executable data to
+     * create DelayedRecoveryModule proxy.
+     * 
+     * @param  delayedRecoverySetupData Executable data of the DelayedRecoveryModule::setup()
+     *                                  function.
+     * 
+     * @returns {String} Executable data of the function.
      */
 
   }, {
@@ -81658,6 +81696,16 @@ function () {
         }]
       }, [oThis.delayedRecoveryModuleMasterCopy, delayedRecoverySetupData]);
     }
+    /**
+     * Generates CreateAndAddModules::createAndAddModules() function's executable
+     * data to create and enable modules in GnosisSafe.
+     * 
+     * @param {String{}} modulesCreationData An array of an executable data to create and enable
+     *                                       modules within GnosisSafe during construction.
+     * 
+     * @returns {String} Executable data of the function.
+     */
+
   }, {
     key: "getCreateAndAddModulesData",
     value: function getCreateAndAddModulesData(modulesCreationData) {
@@ -81692,7 +81740,13 @@ function () {
      *
      * @param owners List of owners of the multisig contract for a user.
      * @param threshold Number of required confirmations for a Safe transaction.
-     *
+     * @param recoveryOwnerAddress  An address that signs the "recovery
+     *                              initiation/abortion" and "reset recovery owner"
+     *                              requests.
+     * @param recoveryControllerAddress An address that relays signed requests of
+     *                                  different types.
+     * @param recoveryBlockDelay A required number of blocks to pass to
+     *                           be able to execute a recovery request.
      * @returns {String}
      */
 
@@ -81746,8 +81800,13 @@ function () {
      *
      * @param owners List of owners of the multisig.
      * @param threshold Number of required confirmations for a Safe transaction.
-     * @param to Contract address for optional delegate call.
-     * @param data Data payload for optional delegate call.
+     * @param recoveryOwnerAddress  An address that signs the "recovery
+     *                              initiation/abortion" and "reset recovery owner"
+     *                              requests.
+     * @param recoveryControllerAddress An address that relays signed requests of
+     *                                  different types.
+     * @param recoveryBlockDelay A required number of blocks to pass to
+     *                           be able to execute a recovery request.
      * @param sessionKeys Session key addresses to authorize.
      * @param sessionKeysSpendingLimits Session key's spending limits.
      * @param sessionKeysExpirationHeights Session key's expiration heights.
@@ -81762,16 +81821,16 @@ function () {
       var _createUserWallet = _asyncToGenerator(
       /*#__PURE__*/
       regeneratorRuntime.mark(function _callee(owners, threshold, recoveryOwnerAddress, recoveryControllerAddress, recoveryBlockDelay, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights, txOptions) {
-        var oThis, txObject, txSender1, txReceipt;
+        var oThis, txObject, txSender, txReceipt;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
                 oThis = this;
                 txObject = oThis._createUserWalletRawTx(owners, threshold, recoveryOwnerAddress, recoveryControllerAddress, recoveryBlockDelay, sessionKeys, sessionKeysSpendingLimits, sessionKeysExpirationHeights);
-                txSender1 = new TxSender(txObject, oThis.auxiliaryWeb3, txOptions);
+                txSender = new TxSender(txObject, oThis.auxiliaryWeb3, txOptions);
                 _context.next = 5;
-                return txSender1.execute();
+                return txSender.execute();
 
               case 5:
                 txReceipt = _context.sent;
@@ -81844,6 +81903,13 @@ function () {
      *
      * @param owners List of owners of the multisig.
      * @param threshold Number of required confirmations for a Safe transaction.
+     * @param recoveryOwnerAddress  An address that signs the "recovery
+     *                              initiation/abortion" and "reset recovery owner"
+     *                              requests.
+     * @param recoveryControllerAddress An address that relays signed requests of
+     *                                  different types.
+     * @param recoveryBlockDelay A required number of blocks to pass to
+     *                           be able to execute a recovery request.
      * @param sessionKeys Session key addresses to authorize.
      * @param sessionKeysSpendingLimits Session key's spending limits.
      * @param sessionKeysExpirationHeights Session key's expiration heights.

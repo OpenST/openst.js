@@ -8,7 +8,7 @@
     "byzantiumBlock": 4
   },
   "gasLimit": "0x989680",
-  "difficulty": "0x1",
+  "difficulty": "0x0",
   "alloc": {
   },
   "number": "0x0",
