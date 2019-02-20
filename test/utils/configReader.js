@@ -3,7 +3,6 @@
 const ConfigReader = function() {};
 
 ConfigReader.prototype = {
-  recoveryControllerAddress: devEnvConfig.recoveryControllerAddress,
   passphrase: 'testtest',
   gasPrice: '0x3B9ACA00',
   gas: 7500000,

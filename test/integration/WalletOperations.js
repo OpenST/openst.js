@@ -154,7 +154,7 @@ describe('Wallet operations', async function() {
 
   // wallet3, wallet9 are the owners.
   it('Should create a user wallet', async function() {
-    await auxiliaryWeb3.eth.accounts.wallet.create(3);
+    await auxiliaryWeb3.eth.accounts.wallet.create(10);
 
     ephemeralKey = auxiliaryWeb3.eth.accounts.wallet[0];
 
@@ -176,8 +176,8 @@ describe('Wallet operations', async function() {
       sessionKeysSpendingLimits = [config.sessionKeySpendingLimit],
       sessionKeysExpirationHeights = [config.sessionKeyExpirationHeight];
 
-    const recoveryOwnerAddress = wallets[7].address;
-    const recoveryControllerAddress = wallets[8].address;
+    const recoveryOwnerAddress = auxiliaryWeb3.eth.accounts.wallet[7].address;
+    const recoveryControllerAddress = auxiliaryWeb3.eth.accounts.wallet[8].address;
     const recoveryBlockDelay = 10;
 
     const response = await userInstance.createUserWallet(

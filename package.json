@@ -53,9 +53,7 @@
     "webpack": "4.19.1",
     "webpack-cli": "3.1.0",
     "webpack-uglify-js-plugin": "1.1.9",
-    "package-json-cleanup-loader": "1.0.3",
-    "abi-decoder": "1.2.0",
-    "wait-port": "0.2.2"
+    "wait-port": "0.2.2",
     "assert": "^1.4.1",
     "ethereumjs-util": "^6.1.0"
   },

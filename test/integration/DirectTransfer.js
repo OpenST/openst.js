@@ -223,15 +223,15 @@ describe('Direct transfers between TH contracts', async function() {
       auxiliaryWeb3
     );
 
-    await auxiliaryWeb3.eth.accounts.wallet.create(1);
+    await auxiliaryWeb3.eth.accounts.wallet.create(10);
     ephemeralKey = auxiliaryWeb3.eth.accounts.wallet[0];
 
     const owners = [owner],
       threshold = 1,
       sessionKeys = [ephemeralKey.address];
 
-    const recoveryOwnerAddress = wallets[7].address;
-    const recoveryControllerAddress = wallets[8].address;
+    const recoveryOwnerAddress = auxiliaryWeb3.eth.accounts.wallet[7].address;
+    const recoveryControllerAddress = auxiliaryWeb3.eth.accounts.wallet[8].address;
     const recoveryBlockDelay = 10;
 
     const response = await userInstance.createUserWallet(
@@ -269,15 +269,15 @@ describe('Direct transfers between TH contracts', async function() {
       auxiliaryWeb3
     );
 
-    await auxiliaryWeb3.eth.accounts.wallet.create(1);
+    await auxiliaryWeb3.eth.accounts.wallet.create(10);
     ephemeralKey = auxiliaryWeb3.eth.accounts.wallet[0];
 
     const owners = [owner],
       threshold = 1,
       sessionKeys = [ephemeralKey.address];
 
-    const recoveryOwnerAddress = wallets[7].address;
-    const recoveryControllerAddress = wallets[8].address;
+    const recoveryOwnerAddress = auxiliaryWeb3.eth.accounts.wallet[7].address;
+    const recoveryControllerAddress = auxiliaryWeb3.eth.accounts.wallet[8].address;
     const recoveryBlockDelay = 10;
 
     const response = await userInstance.createUserWallet(
