@@ -20,15 +20,15 @@ const Web3 = require('web3');
 
 const { dockerSetup, dockerTeardown } = require('./../../utils/docker');
 
-const Mosaic = require('@openstfoundation/mosaic-tbd');
+const config = require('../utils/configReader');
+
+const Mosaic = require('@openstfoundation/mosaic.js');
 const ConfigReader = require('../utils/configReader');
 const UserSetup = require('../../lib/setup/User.js');
 const User = require('../../lib/helper/User.js');
 const MockContractsDeployer = require('../utils/MockContractsDeployer.js');
 const TokenRulesSetup = require('../../lib/setup/TokenRules.js');
 const AbiBinProvider = require('../../lib/AbiBinProvider.js');
-
-const { OrganizationHelper } = Mosaic.ChainSetup;
 
 const abiBinProvider = new AbiBinProvider();
 
@@ -313,15 +313,17 @@ describe('Delayed Recovery', async () => {
     const mockToken = mockTokenDeployerInstance.addresses.MockToken;
 
     const organizationOwnerAddress = deployerAddress;
-    const orgHelper = new OrganizationHelper(auxiliaryWeb3, null);
+    const { Organization } = Mosaic.ContractInteract;
     const orgConfig = {
       deployer: deployerAddress,
       owner: organizationOwnerAddress,
-      workers: organizationWorkerAddress,
-      workerExpirationHeight: '20000000'
+      admin: organizationWorkerAddress,
+      workers: [organizationWorkerAddress],
+      workerExpirationHeight: config.workerExpirationHeight
     };
-    await orgHelper.setup(orgConfig);
-    const organizationAddress = orgHelper.address;
+    const organizationContractInstance = await Organization.setup(auxiliaryWeb3, orgConfig);
+    const organizationAddress = organizationContractInstance.address;
+    assert.isNotNull(organizationAddress, 'Organization contract address should not be null.');
 
     const tokenRulesSetup = await new TokenRulesSetup(auxiliaryWeb3);
     const tokenRulesDeployTxResponse = await tokenRulesSetup.deploy(organizationAddress, mockToken, txOptions);
