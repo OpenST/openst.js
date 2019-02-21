@@ -1,65 +1,35 @@
-// Copyright 2019 OpenST Ltd.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//    http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// ----------------------------------------------------------------------------
-//
-// http://www.simpletoken.org/
-//
-// ----------------------------------------------------------------------------
-
 const chai = require('chai'),
   Web3 = require('web3'),
   Package = require('../../index'),
-  Mosaic = require('@openstfoundation/mosaic-tbd'),
-  TxSender = require('../../utils/TxSender'),
-  MockContractsDeployer = require('./../utils/MockContractsDeployer'),
-  config = require('../utils/configReader'),
-  Web3WalletHelper = require('../utils/Web3WalletHelper');
+  Mosaic = require('@openstfoundation/mosaic.js');
 
 const TokenRulesSetup = Package.Setup.TokenRules,
   UserSetup = Package.Setup.User,
   RulesSetup = Package.Setup.Rules,
+  MockContractsDeployer = require('./../utils/MockContractsDeployer'),
+  config = require('../utils/configReader'),
   Contracts = Package.Contracts,
   User = Package.Helpers.User,
   TokenRules = Package.Helpers.TokenRules,
   AbiBinProvider = Package.AbiBinProvider,
-  TokenHolder = Package.Helpers.TokenHolder;
+  TokenHolder = Package.Helpers.TokenHolder,
+  { dockerSetup, dockerTeardown } = require('./../../utils/docker');
 
-const auxiliaryWeb3 = new Web3(config.gethRpcEndPoint),
-  ContractsInstance = new Contracts(auxiliaryWeb3),
-  web3WalletHelper = new Web3WalletHelper(auxiliaryWeb3),
-  assert = chai.assert,
-  OrganizationHelper = Mosaic.ChainSetup.OrganizationHelper,
+const assert = chai.assert,
   abiBinProvider = new AbiBinProvider();
 
-let txOptions = {
-  from: config.deployerAddress,
-  gasPrice: config.gasPrice,
-  gas: config.gas
-};
-
-let wallets,
+let txOptions,
+  ContractsInstance,
   userWalletFactoryAddress,
   thMasterCopyAddress,
   gnosisSafeMasterCopyAddress,
   proxyFactoryAddress,
   tokenRulesAddress,
+  delayedRecoveryModuleMasterCopyAddress,
+  createAndAddModulesAddress,
   pricerRuleAddress,
   worker,
   organization,
-  beneficiary,
-  facilitator,
   mockToken,
   owner = config.deployerAddress,
   tokenHolderSender,
@@ -68,34 +38,41 @@ let wallets,
   gnosisSafeProxy,
   ephemeralKey,
   mockTokenDeployerInstance,
-  tokenRulesObject;
+  tokenRulesObject,
+  deployerAddress,
+  auxiliaryWeb3;
 
 describe('Direct transfers between TH contracts', async function() {
   before(async function() {
-    await web3WalletHelper.init(auxiliaryWeb3);
-    wallets = web3WalletHelper.web3Object.eth.accounts.wallet;
-    worker = wallets[1].address;
-    beneficiary = wallets[2].address;
-    facilitator = wallets[3].address;
+    const { rpcEndpointOrigin } = await dockerSetup();
+    auxiliaryWeb3 = new Web3(rpcEndpointOrigin);
+    ContractsInstance = new Contracts(auxiliaryWeb3);
+    const accountsOrigin = await auxiliaryWeb3.eth.getAccounts();
+    deployerAddress = accountsOrigin[0];
+    worker = accountsOrigin[1];
+    owner = accountsOrigin[2];
+  });
+
+  after(() => {
+    dockerTeardown();
   });
 
   it('Deploys Organization contract', async function() {
-    let orgHelper = new OrganizationHelper(auxiliaryWeb3, null);
+    const { Organization } = Mosaic.ContractInteract;
     const orgConfig = {
-      deployer: config.deployerAddress,
-      owner: owner,
-      workers: worker,
-      workerExpirationHeight: '20000000'
+      deployer: deployerAddress,
+      owner,
+      admin: worker,
+      workers: [worker],
+      workerExpirationHeight: config.workerExpirationHeight
     };
-
-    await orgHelper.setup(orgConfig);
-    organization = orgHelper.address;
-
+    const organizationContractInstance = await Organization.setup(auxiliaryWeb3, orgConfig);
+    organization = organizationContractInstance.address;
     assert.isNotNull(organization, 'Organization contract address should not be null.');
   });
 
   it('Deploys EIP20Token contract', async function() {
-    mockTokenDeployerInstance = new MockContractsDeployer(config.deployerAddress, auxiliaryWeb3);
+    mockTokenDeployerInstance = new MockContractsDeployer(deployerAddress, auxiliaryWeb3);
 
     await mockTokenDeployerInstance.deployMockToken();
 
@@ -104,6 +81,12 @@ describe('Direct transfers between TH contracts', async function() {
   });
 
   it('Deploys TokenRules contract', async function() {
+    txOptions = {
+      from: deployerAddress,
+      gasPrice: config.gasPrice,
+      gas: config.gas
+    };
+
     const tokenRulesSetupInstance = new TokenRulesSetup(auxiliaryWeb3);
 
     const response = await tokenRulesSetupInstance.deploy(organization, mockToken, txOptions);
@@ -123,6 +106,25 @@ describe('Direct transfers between TH contracts', async function() {
       await tokenRulesContractInstance.methods.organization().call(),
       'Organization address is incorrect'
     );
+  });
+
+  it('Deploys DelayedRecoveryModule master copy.', async function() {
+    const userSetup = new UserSetup(auxiliaryWeb3);
+    const txResponse = await userSetup.deployDelayedRecoveryModuleMasterCopy(txOptions);
+    delayedRecoveryModuleMasterCopyAddress = txResponse.receipt.contractAddress;
+    assert.strictEqual(txResponse.receipt.status, true);
+    assert.isNotNull(
+      delayedRecoveryModuleMasterCopyAddress,
+      "DelayedRecoveryModule master copy contract's address is null."
+    );
+  });
+
+  it('Deploys CreateAndAddModules.', async function() {
+    const userSetup = new UserSetup(auxiliaryWeb3);
+    const txResponse = await userSetup.deployCreateAndAddModules(txOptions);
+    createAndAddModulesAddress = txResponse.receipt.contractAddress;
+    assert.strictEqual(txResponse.receipt.status, true);
+    assert.isNotNull(createAndAddModulesAddress, "createAndAddModules contract's address is null.");
   });
 
   it('Deploys Gnosis MultiSig MasterCopy contract', async function() {
@@ -179,11 +181,7 @@ describe('Direct transfers between TH contracts', async function() {
 
   it('Registers PricerRule rule', async function() {
     // Only worker can registerRule.
-    const txOptions = {
-      from: worker,
-      gasPrice: config.gasPrice,
-      gas: config.gas
-    };
+    txOptions.from = worker;
 
     tokenRulesObject = new TokenRules(tokenRulesAddress, auxiliaryWeb3);
     const pricerRuleName = 'PricerRule',
@@ -210,25 +208,36 @@ describe('Direct transfers between TH contracts', async function() {
   });
 
   it('Creates first user wallet', async function() {
+    txOptions.from = deployerAddress;
     const userInstance = new User(
-      gnosisSafeMasterCopyAddress,
       thMasterCopyAddress,
+      gnosisSafeMasterCopyAddress,
+      delayedRecoveryModuleMasterCopyAddress,
+      createAndAddModulesAddress,
       mockToken,
       tokenRulesAddress,
       userWalletFactoryAddress,
+      proxyFactoryAddress,
       auxiliaryWeb3
     );
 
-    ephemeralKey = wallets[5];
-    const owners = [wallets[3].address],
+    await auxiliaryWeb3.eth.accounts.wallet.create(10);
+    ephemeralKey = auxiliaryWeb3.eth.accounts.wallet[0];
+
+    const owners = [owner],
       threshold = 1,
       sessionKeys = [ephemeralKey.address];
+
+    const recoveryOwnerAddress = auxiliaryWeb3.eth.accounts.wallet[7].address;
+    const recoveryControllerAddress = auxiliaryWeb3.eth.accounts.wallet[8].address;
+    const recoveryBlockDelay = 10;
 
     const response = await userInstance.createUserWallet(
       owners,
       threshold,
-      config.NULL_ADDRESS,
-      config.ZERO_BYTES,
+      recoveryOwnerAddress,
+      recoveryControllerAddress,
+      recoveryBlockDelay,
       sessionKeys,
       [config.sessionKeySpendingLimit],
       [config.sessionKeyExpirationHeight],
@@ -247,24 +256,34 @@ describe('Direct transfers between TH contracts', async function() {
 
   it('Should create second user wallet', async function() {
     const userInstance = new User(
-      gnosisSafeMasterCopyAddress,
       thMasterCopyAddress,
+      gnosisSafeMasterCopyAddress,
+      delayedRecoveryModuleMasterCopyAddress,
+      createAndAddModulesAddress,
       mockToken,
       tokenRulesAddress,
       userWalletFactoryAddress,
+      proxyFactoryAddress,
       auxiliaryWeb3
     );
 
-    ephemeralKey = wallets[5];
-    const owners = [wallets[3].address],
+    await auxiliaryWeb3.eth.accounts.wallet.create(10);
+    ephemeralKey = auxiliaryWeb3.eth.accounts.wallet[0];
+
+    const owners = [owner],
       threshold = 1,
       sessionKeys = [ephemeralKey.address];
+
+    const recoveryOwnerAddress = auxiliaryWeb3.eth.accounts.wallet[7].address;
+    const recoveryControllerAddress = auxiliaryWeb3.eth.accounts.wallet[8].address;
+    const recoveryBlockDelay = 10;
 
     const response = await userInstance.createUserWallet(
       owners,
       threshold,
-      config.NULL_ADDRESS,
-      config.ZERO_BYTES,
+      recoveryOwnerAddress,
+      recoveryControllerAddress,
+      recoveryBlockDelay,
       sessionKeys,
       [config.sessionKeySpendingLimit],
       [config.sessionKeyExpirationHeight],
@@ -283,18 +302,23 @@ describe('Direct transfers between TH contracts', async function() {
 
   it('Creates a company wallet', async function() {
     const userInstance = new User(
-      null,
       thMasterCopyAddress,
+      null, // gnosis safe master copy address
+      null, // delayed recovery module master copy address
+      null, // create and add modules contract address
       mockToken,
       tokenRulesAddress,
       userWalletFactoryAddress,
+      proxyFactoryAddress, // proxy factory address
       auxiliaryWeb3
     );
 
-    const sessionKeys = [wallets[5].address];
+    await auxiliaryWeb3.eth.accounts.wallet.create(1);
+    const sessionKey = auxiliaryWeb3.eth.accounts.wallet[0].address;
+
+    const sessionKeys = [sessionKey];
 
     const response = await userInstance.createCompanyWallet(
-      proxyFactoryAddress,
       thMasterCopyAddress,
       sessionKeys,
       [config.sessionKeySpendingLimit],
@@ -313,23 +337,27 @@ describe('Direct transfers between TH contracts', async function() {
   });
 
   it('Performs direct transfer of tokens', async function() {
-    const tokenHolder = new TokenHolder(auxiliaryWeb3, tokenHolderSender),
-      mockTokenAbi = mockTokenDeployerInstance.abiBinProvider.getABI('MockToken'),
-      contract = new auxiliaryWeb3.eth.Contract(mockTokenAbi, mockToken, txOptions);
+    const tokenHolder = new TokenHolder(auxiliaryWeb3, tokenHolderSender);
+    // MockToken instance is needed because for transfer. Transfer is not available in Mosaic.ContractInteract.EIP20Token
+    // Please update after transfer is exposed in Mosaic.js
+    const mockTokenAbi = mockTokenDeployerInstance.abiBinProvider.getABI('MockToken');
+    const mockContractInstance = new auxiliaryWeb3.eth.Contract(mockTokenAbi, mockToken, txOptions);
+
+    const eip20Instance = new Mosaic.ContractInteract.EIP20Token(auxiliaryWeb3, mockToken);
 
     // Funding TH proxy with tokens.
-    const amount = config.senderTokenHolderBalance,
-      transferTxObject = contract.methods.transfer(tokenHolderSender, amount),
-      transferReceipt = await new TxSender(transferTxObject, auxiliaryWeb3, txOptions).execute();
+    const amount = config.tokenHolderBalance;
+    const txObject = mockContractInstance.methods.transfer(tokenHolderSender, amount);
+    await txObject.send(txOptions);
 
-    const initialTHProxyBalance = await contract.methods.balanceOf(tokenHolderSender).call(),
-      transferTos = [tokenHolderFirstReceiver, tokenHolderSecondReceiver],
-      firstReceiverInitialBalance = await contract.methods.balanceOf(tokenHolderFirstReceiver).call(),
-      secondReceiverInitialBalance = await contract.methods.balanceOf(tokenHolderSecondReceiver).call(),
-      transferAmounts = [20, 10];
+    const initialTHProxyBalance = await eip20Instance.balanceOf(tokenHolderSender);
+    const transferTos = [tokenHolderFirstReceiver, tokenHolderSecondReceiver];
+    const firstReceiverInitialBalance = await eip20Instance.balanceOf(tokenHolderFirstReceiver);
+    const secondReceiverInitialBalance = await eip20Instance.balanceOf(tokenHolderSecondReceiver);
+    const transferAmounts = [20, 10];
 
-    const directTransferExecutable = tokenRulesObject.getDirectTransferExecutableData(transferTos, transferAmounts),
-      nonce = 0;
+    const directTransferExecutable = tokenRulesObject.getDirectTransferExecutableData(transferTos, transferAmounts);
+    const nonce = 0;
 
     let transaction = {
       from: tokenHolderSender,
@@ -346,9 +374,9 @@ describe('Direct transfers between TH contracts', async function() {
 
     await tokenHolder.executeRule(tokenRulesAddress, directTransferExecutable, nonce, vrs.r, vrs.s, vrs.v, txOptions);
 
-    const finalTHProxyBalance = await contract.methods.balanceOf(tokenHolderSender).call(),
-      firstReceiverFinalBalance = await contract.methods.balanceOf(tokenHolderFirstReceiver).call(),
-      secondReceiverFinalBalance = await contract.methods.balanceOf(tokenHolderSecondReceiver).call(),
+    const finalTHProxyBalance = await eip20Instance.balanceOf(tokenHolderSender),
+      firstReceiverFinalBalance = await eip20Instance.balanceOf(tokenHolderFirstReceiver),
+      secondReceiverFinalBalance = await eip20Instance.balanceOf(tokenHolderSecondReceiver),
       firstReceiverExpectedBalance = parseInt(firstReceiverInitialBalance) + transferAmounts[0],
       secondReceiverExpectedBalance = parseInt(secondReceiverInitialBalance) + transferAmounts[1];
 

@@ -16,3 +16,5 @@ openst-setup/
 
 tmp/*
 !tmp/.gitkeep
+
+dist/*

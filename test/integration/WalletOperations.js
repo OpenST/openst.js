@@ -1,31 +1,10 @@
-// Copyright 2019 OpenST Ltd.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//    http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// ----------------------------------------------------------------------------
-//
-// http://www.simpletoken.org/
-//
-// ----------------------------------------------------------------------------
-
 const chai = require('chai'),
   Web3 = require('web3'),
   Package = require('../../index'),
   abiDecoder = require('abi-decoder'),
   MockContractsDeployer = require('../utils/MockContractsDeployer'),
-  Mosaic = require('@openstfoundation/mosaic-tbd'),
-  config = require('../utils/configReader'),
-  Web3WalletHelper = require('../utils/Web3WalletHelper');
+  Mosaic = require('@openstfoundation/mosaic.js'),
+  config = require('../utils/configReader');
 
 const TokenRulesSetup = Package.Setup.TokenRules,
   UserSetup = Package.Setup.User,
@@ -35,62 +14,70 @@ const TokenRulesSetup = Package.Setup.TokenRules,
   TokenHolder = Package.Helpers.TokenHolder,
   GnosisSafe = Package.Helpers.GnosisSafe;
 
-const auxiliaryWeb3 = new Web3(config.gethRpcEndPoint),
-  web3WalletHelperInstance = new Web3WalletHelper(auxiliaryWeb3),
-  assert = chai.assert,
-  OrganizationHelper = Mosaic.ChainSetup.OrganizationHelper,
+const { assert } = chai,
   abiBinProvider = new AbiBinProvider();
 
-let txOptions = {
-  from: config.deployerAddress,
-  gasPrice: config.gasPrice,
-  gas: config.gas
-};
+const { dockerSetup, dockerTeardown } = require('./../../utils/docker');
 
-let wallets,
+let auxiliaryWeb3,
+  ContractsInstance,
+  deployerAddress,
   userWalletFactoryAddress,
   thMasterCopyAddress,
   gnosisSafeMasterCopyAddress,
   tokenRulesAddress,
+  delayedRecoveryModuleMasterCopyAddress,
+  createAndAddModulesAddress,
   worker,
   organization,
-  beneficiary,
-  facilitator,
   mockToken,
-  owner = config.deployerAddress,
+  owner,
   tokenHolderProxy,
   gnosisSafeProxy,
   ephemeralKey,
   deployerInstance,
   tokenRules,
-  gnosisSafeProxyInstance;
+  gnosisSafeProxyInstance,
+  txOptions,
+  tokenHolderInstance;
 
 describe('Wallet operations', async function() {
   before(async function() {
-    await web3WalletHelperInstance.init(auxiliaryWeb3);
-    wallets = web3WalletHelperInstance.web3Object.eth.accounts.wallet;
-    worker = wallets[1].address;
-    beneficiary = wallets[2].address;
-    facilitator = wallets[3].address;
+    const { rpcEndpointOrigin } = await dockerSetup();
+    auxiliaryWeb3 = new Web3(rpcEndpointOrigin);
+    ContractsInstance = new Contracts(auxiliaryWeb3);
+    const accountsOrigin = await auxiliaryWeb3.eth.getAccounts();
+    deployerAddress = accountsOrigin[0];
+    worker = accountsOrigin[1];
+    owner = accountsOrigin[2];
+
+    txOptions = {
+      from: deployerAddress,
+      gasPrice: config.gasPrice,
+      gas: config.gas
+    };
+  });
+
+  after(() => {
+    dockerTeardown();
   });
 
   it('Should deploy Organization contract', async function() {
-    let orgHelper = new OrganizationHelper(auxiliaryWeb3, null);
+    const { Organization } = Mosaic.ContractInteract;
     const orgConfig = {
-      deployer: config.deployerAddress,
-      owner: owner,
-      workers: worker,
-      workerExpirationHeight: '20000000'
+      deployer: deployerAddress,
+      owner,
+      admin: worker,
+      workers: [worker],
+      workerExpirationHeight: config.workerExpirationHeight
     };
-
-    await orgHelper.setup(orgConfig);
-    organization = orgHelper.address;
-
+    const organizationContractInstance = await Organization.setup(auxiliaryWeb3, orgConfig);
+    organization = organizationContractInstance.address;
     assert.isNotNull(organization, 'Organization contract address should not be null.');
   });
 
   it('Deploys EIP20Token contract', async function() {
-    deployerInstance = new MockContractsDeployer(config.deployerAddress, auxiliaryWeb3);
+    deployerInstance = new MockContractsDeployer(deployerAddress, auxiliaryWeb3);
 
     await deployerInstance.deployMockToken();
 
@@ -116,6 +103,25 @@ describe('Wallet operations', async function() {
     );
   });
 
+  it('Deploys DelayedRecoveryModule master copy.', async function() {
+    const userSetup = new UserSetup(auxiliaryWeb3);
+    const txResponse = await userSetup.deployDelayedRecoveryModuleMasterCopy(txOptions);
+    delayedRecoveryModuleMasterCopyAddress = txResponse.receipt.contractAddress;
+    assert.strictEqual(txResponse.receipt.status, true);
+    assert.isNotNull(
+      delayedRecoveryModuleMasterCopyAddress,
+      "DelayedRecoveryModule master copy contract's address is null."
+    );
+  });
+
+  it('Deploys CreateAndAddModules.', async function() {
+    const userSetup = new UserSetup(auxiliaryWeb3);
+    const txResponse = await userSetup.deployCreateAndAddModules(txOptions);
+    createAndAddModulesAddress = txResponse.receipt.contractAddress;
+    assert.strictEqual(txResponse.receipt.status, true);
+    assert.isNotNull(createAndAddModulesAddress, "createAndAddModules contract's address is null.");
+  });
+
   it('Should deploy Gnosis MultiSig MasterCopy contract', async function() {
     const userSetup = new UserSetup(auxiliaryWeb3);
     const multiSigTxResponse = await userSetup.deployMultiSigMasterCopy(txOptions);
@@ -137,29 +143,47 @@ describe('Wallet operations', async function() {
     assert.strictEqual(userWalletFactoryResponse.receipt.status, true);
   });
 
+  it('Should deploy ProxyFactory contract', async function() {
+    const userSetup = new UserSetup(auxiliaryWeb3);
+    const proxyFactoryResponse = await userSetup.deployProxyFactory(txOptions);
+    proxyFactoryAddress = proxyFactoryResponse.receipt.contractAddress;
+    assert.strictEqual(proxyFactoryResponse.receipt.status, true);
+  });
+
   // wallet3, wallet9 are the owners.
   it('Should create a user wallet', async function() {
+    await auxiliaryWeb3.eth.accounts.wallet.create(10);
+
+    ephemeralKey = auxiliaryWeb3.eth.accounts.wallet[0];
+
     const userInstance = new User(
-      gnosisSafeMasterCopyAddress,
       thMasterCopyAddress,
+      gnosisSafeMasterCopyAddress,
+      delayedRecoveryModuleMasterCopyAddress,
+      createAndAddModulesAddress,
       mockToken,
       tokenRulesAddress,
       userWalletFactoryAddress,
+      proxyFactoryAddress,
       auxiliaryWeb3
     );
 
-    ephemeralKey = wallets[5];
-    const owners = [wallets[3].address, wallets[9].address],
+    const owners = [auxiliaryWeb3.eth.accounts.wallet[1].address, auxiliaryWeb3.eth.accounts.wallet[2].address],
       threshold = 1,
       sessionKeys = [ephemeralKey.address],
       sessionKeysSpendingLimits = [config.sessionKeySpendingLimit],
       sessionKeysExpirationHeights = [config.sessionKeyExpirationHeight];
 
+    const recoveryOwnerAddress = auxiliaryWeb3.eth.accounts.wallet[7].address;
+    const recoveryControllerAddress = auxiliaryWeb3.eth.accounts.wallet[8].address;
+    const recoveryBlockDelay = 10;
+
     const response = await userInstance.createUserWallet(
       owners,
       threshold,
-      config.NULL_ADDRESS,
-      config.ZERO_BYTES,
+      recoveryOwnerAddress,
+      recoveryControllerAddress,
+      recoveryBlockDelay,
       sessionKeys,
       sessionKeysSpendingLimits,
       sessionKeysExpirationHeights,
@@ -176,13 +200,15 @@ describe('Wallet operations', async function() {
     tokenHolderProxy = userWalletEvent._tokenHolderProxy;
   });
 
-  // wallet3, wallet9 are current owners.
-  // After AddWallet wallet3, wallet9, wallet7 are the owners.
+  // wallet1 and wallet2 are the owners.
+  // // After AddWallet wallet1, wallet2, wallet3 are the owners.
   it('Should add wallet', async function() {
+    await auxiliaryWeb3.eth.accounts.wallet.create(1);
+
     gnosisSafeProxyInstance = new GnosisSafe(gnosisSafeProxy, auxiliaryWeb3);
 
-    const ownerToAdd = wallets[7],
-      currentOwner = wallets[3],
+    const ownerToAdd = auxiliaryWeb3.eth.accounts.wallet[3],
+      currentOwner = auxiliaryWeb3.eth.accounts.wallet[1],
       threshold = 1,
       ownerToAddWithThresholdExData = gnosisSafeProxyInstance.getAddOwnerWithThresholdExecutableData(
         ownerToAdd.address,
@@ -227,13 +253,13 @@ describe('Wallet operations', async function() {
     assert.strictEqual(addedOwnerEvent.owner, ownerToAdd.address, 'Incorrect owner added');
   });
 
-  // wallet3, wallet9, wallet7 are the owners.
-  // After ReplaceWallet wallet9, wallet7, wallet8 are the owners.
+  // wallet1, wallet2, wallet3 are the owners.
+  // After ReplaceWallet wallet2, wallet3, wallet4 are the owners.
   it('Should replace wallet', async function() {
     const owners = await gnosisSafeProxyInstance.getOwners();
-
-    const newOwner = wallets[8],
-      currentOwner = wallets[3],
+    await auxiliaryWeb3.eth.accounts.wallet.create(1);
+    const newOwner = auxiliaryWeb3.eth.accounts.wallet[4],
+      currentOwner = auxiliaryWeb3.eth.accounts.wallet[1],
       previousOwner = gnosisSafeProxyInstance.findPreviousOwner(owners, currentOwner.address),
       swapOwnerExData = gnosisSafeProxyInstance.getSwapOwnerExecutableData(
         previousOwner, // previous owner.
@@ -281,11 +307,11 @@ describe('Wallet operations', async function() {
     assert.strictEqual(removedOwnerEvent.owner, currentOwner.address, 'Incorrect owner removed');
   });
 
-  // wallet9, wallet7, wallet8 are the owners.
-  // After RemoveWallet wallet9, wallet8 are the owners.
+  // // wallet2, wallet3, wallet4 are the owners.
+  // After RemoveWallet wallet2, wallet4 are the owners.
   it('Should remove wallet', async function() {
-    const removeOwner = wallets[7],
-      prevOwner = wallets[7];
+    const removeOwner = auxiliaryWeb3.eth.accounts.wallet[3],
+      owner = auxiliaryWeb3.eth.accounts.wallet[2];
 
     const owners = await gnosisSafeProxyInstance.getOwners();
     const previousOwner = gnosisSafeProxyInstance.findPreviousOwner(owners, removeOwner.address);
@@ -311,7 +337,7 @@ describe('Wallet operations', async function() {
     );
 
     // 2. Generate EIP712 Signature.
-    const ownerSig1 = await prevOwner.signEIP712TypedData(safeTxData);
+    const ownerSig1 = await owner.signEIP712TypedData(safeTxData);
     const result = await gnosisSafeProxyInstance.execTransaction(
       gnosisSafeProxy,
       0,
@@ -332,13 +358,14 @@ describe('Wallet operations', async function() {
     assert.strictEqual(removedOwnerEvent.owner, removeOwner.address, 'Incorrect removed owner address');
   });
 
-  // wallet9, wallet8 are the owners.
+  // wallet2, wallet4 are the owners.
   it('Should authorize session', async function() {
-    const tokenHolderInstance = new TokenHolder(auxiliaryWeb3, tokenHolderProxy);
-    const sessionKey = wallets[7].address;
+    await auxiliaryWeb3.eth.accounts.wallet.create(1);
+    tokenHolderInstance = new TokenHolder(auxiliaryWeb3, tokenRulesAddress, tokenHolderProxy);
+    const sessionKey = auxiliaryWeb3.eth.accounts.wallet[5].address;
     const spendingLimit = config.sessionKeySpendingLimit;
     const expirationHeight = config.sessionKeyExpirationHeight;
-    const currentOwner = wallets[8];
+    const currentOwner = auxiliaryWeb3.eth.accounts.wallet[2];
     const authorizeSessionExData = tokenHolderInstance.getAuthorizeSessionExecutableData(
       sessionKey,
       spendingLimit,
@@ -391,11 +418,10 @@ describe('Wallet operations', async function() {
     );
   });
 
-  // wallet9, wallet8 are the owners.
+  // wallet2, wallet4 are the owners.
   it('Should revoke session', async function() {
-    const tokenHolderInstance = new TokenHolder(auxiliaryWeb3, tokenHolderProxy);
-    const sessionKey = wallets[7].address;
-    const currentOwner = wallets[8];
+    const sessionKey = auxiliaryWeb3.eth.accounts.wallet[5].address;
+    const currentOwner = auxiliaryWeb3.eth.accounts.wallet[2];
     const revokeSessionExData = tokenHolderInstance.getRevokeSessionExecutableData(sessionKey);
 
     const nonce = await gnosisSafeProxyInstance.getNonce();
@@ -444,11 +470,60 @@ describe('Wallet operations', async function() {
     );
   });
 
-  // wallet9, wallet8 are the owners.
+  // wallet2, wallet4 are the owners.
+  it('Should logout all authorized sessions', async function() {
+    const tokenHolderInstance = new TokenHolder(auxiliaryWeb3, tokenHolderProxy);
+    const currentOwner = auxiliaryWeb3.eth.accounts.wallet[2];
+    const logoutExData = tokenHolderInstance.getLogoutExecutableData();
+
+    const nonce = await gnosisSafeProxyInstance.getNonce();
+
+    const safeTxData = await gnosisSafeProxyInstance.getSafeTxData(
+      tokenHolderProxy,
+      0,
+      logoutExData,
+      0,
+      0,
+      0,
+      0,
+      config.NULL_ADDRESS,
+      config.NULL_ADDRESS,
+      nonce
+    );
+
+    const ownerSignature = await currentOwner.signEIP712TypedData(safeTxData);
+    const result = await gnosisSafeProxyInstance.execTransaction(
+      tokenHolderProxy,
+      0,
+      logoutExData,
+      0,
+      0,
+      0,
+      0,
+      config.NULL_ADDRESS,
+      config.NULL_ADDRESS,
+      ownerSignature.signature,
+      txOptions
+    );
+
+    const txReceipt = await auxiliaryWeb3.eth.getTransactionReceipt(result.transactionHash);
+
+    abiDecoder.addABI(abiBinProvider.getABI('GnosisSafe'));
+    abiDecoder.addABI(abiBinProvider.getABI('TokenHolder'));
+
+    const decodedResult = abiDecoder.decodeLogs(txReceipt.logs);
+
+    const sessionsLoggedOutEvent = JSON.parse(JSON.stringify(decodedResult));
+
+    assert.strictEqual(sessionsLoggedOutEvent[0].name, 'SessionsLoggedOut', 'Incorrect event emitted');
+    assert.strictEqual(sessionsLoggedOutEvent[0].events[0].value, '2', 'Incorrect sessionwindow value');
+  });
+
+  // wallet2, wallet4 are the owners.
   it('Should change required threshold', async function() {
-    // Owners already added should be equal or less than the threshold limit. Here, we have 2-owners in the gnosisSafe proxy.
+    // Owners already added should be equal or less than the threshold limit.
     const newThreshold = 2;
-    const currentOwner = wallets[8];
+    const currentOwner = auxiliaryWeb3.eth.accounts.wallet[2];
     const changeThresholdExecutableData = gnosisSafeProxyInstance.getChangeThresholdExecutableData(newThreshold);
 
     const nonce = await gnosisSafeProxyInstance.getNonce();
