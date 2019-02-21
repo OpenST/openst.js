@@ -1,60 +1,27 @@
-// Copyright 2019 OpenST Ltd.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//    http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// ----------------------------------------------------------------------------
-//
-// http://www.simpletoken.org/
-//
-// ----------------------------------------------------------------------------
+const { assert } = require('chai');
+const Web3 = require('web3');
+const Package = require('../../index');
+const Mosaic = require('@openstfoundation/mosaic.js');
+const MockContractsDeployer = require('./../utils/MockContractsDeployer'); // TODO Remove
+const config = require('../utils/configReader');
+const BN = require('bn.js');
 
-const chai = require('chai'),
-  Web3 = require('web3'),
-  Package = require('../../index'),
-  Mosaic = require('@openstfoundation/mosaic-tbd'),
-  MockContractsDeployer = require('./../utils/MockContractsDeployer'),
-  config = require('../utils/configReader'),
-  Web3WalletHelper = require('../utils/Web3WalletHelper'),
-  PricerRule = require('../../lib/helper/rules/PricerRule'),
-  TxSender = require('../../utils/TxSender'),
-  BN = require('bn.js');
+const TokenRulesSetup = Package.Setup.TokenRules;
+const UserSetup = Package.Setup.User;
+const RulesSetup = Package.Setup.Rules;
+const Contracts = Package.Contracts;
+const UserHelper = Package.Helpers.User;
+const TokenRulesHelper = Package.Helpers.TokenRules;
+const { AbiBinProvider } = Package;
+const TokenHolderHelper = Package.Helpers.TokenHolder;
+const PricerRuleHelper = Package.Helpers.Rules.PricerRule;
+const { dockerSetup, dockerTeardown } = require('./../../utils/docker');
+const Utils = require('../../utils/Utils');
 
-const TokenRulesSetup = Package.Setup.TokenRules,
-  UserSetup = Package.Setup.User,
-  RulesSetup = Package.Setup.Rules,
-  OpenSTContracts = Package.Contracts,
-  User = Package.Helpers.User,
-  TokenRules = Package.Helpers.TokenRules,
-  AbiBinProvider = Package.AbiBinProvider,
-  TokenHolder = Package.Helpers.TokenHolder,
-  PricerRuleHelper = Package.Helpers.Rules.PricerRule;
+const abiBinProvider = new AbiBinProvider();
 
-const auxiliaryWeb3 = new Web3(config.gethRpcEndPoint),
-  openSTContractsInstance = new OpenSTContracts(auxiliaryWeb3),
-  web3WalletHelper = new Web3WalletHelper(auxiliaryWeb3),
-  assert = chai.assert,
-  OrganizationHelper = Mosaic.ChainSetup.OrganizationHelper,
-  abiBinProvider = new AbiBinProvider(),
-  bytesBaseCurrencyCode = auxiliaryWeb3.utils.stringToHex(config.baseCurrencyCode.toString()),
-  bytesPayCurrencyCode = auxiliaryWeb3.utils.stringToHex(config.payCurrencyCode.toString());
-
-let txOptions = {
-  from: config.deployerAddress,
-  gasPrice: config.gasPrice,
-  gas: config.gas
-};
-
-let wallets,
+let auxiliaryWeb3,
+  txOptions,
   userWalletFactoryAddress,
   thMasterCopyAddress,
   gnosisSafeMasterCopyAddress,
@@ -62,118 +29,103 @@ let wallets,
   pricerRuleAddress,
   worker,
   organization,
-  beneficiary,
-  facilitator,
-  relayer,
-  mockToken,
-  owner = config.deployerAddress,
+  eip20Token,
   tokenHolderSender,
-  firstReceiver,
-  secondReceiver,
-  gnosisSafeProxy,
-  ephemeralKey,
   mockTokenDeployerInstance,
-  tokenRulesObject,
+  deployerAddress,
   priceOracleAddress,
-  priceOracleOwner = config.deployerAddress,
+  priceOracleOwner,
   priceOracleOpsAddress,
   pricerRuleHelperObject,
-  priceOracleContractInstance,
-  pricerRuleInstance;
+  accountsOrigin,
+  bytesBaseCurrencyCode,
+  bytesPayCurrencyCode,
+  delayedRecoveryModuleMasterCopyAddress,
+  createAndAddModulesAddress,
+  proxyFactoryAddress,
+  ephemeralKey;
 
 describe('TH transfers through PricerRule Pay', async function() {
   before(async function() {
-    await web3WalletHelper.init(auxiliaryWeb3);
-    wallets = web3WalletHelper.web3Object.eth.accounts.wallet;
-    worker = wallets[1].address;
-    beneficiary = wallets[2].address;
-    facilitator = wallets[3].address;
-    relayer = facilitator;
-    priceOracleOpsAddress = wallets[4].address;
-    firstReceiver = wallets[5].address;
-    secondReceiver = wallets[6].address;
+    const { rpcEndpointOrigin } = await dockerSetup();
+    auxiliaryWeb3 = new Web3(rpcEndpointOrigin);
+    accountsOrigin = await auxiliaryWeb3.eth.getAccounts();
+    deployerAddress = accountsOrigin[0];
+    priceOracleOwner = accountsOrigin[0];
+    worker = accountsOrigin[0];
+    priceOracleOpsAddress = accountsOrigin[1];
+    txOptions = {
+      from: deployerAddress,
+      gasPrice: config.gasPrice,
+      gas: config.gas
+    };
+    await auxiliaryWeb3.eth.accounts.wallet.create(10);
+  });
+
+  after(() => {
+    dockerTeardown();
   });
 
   it('Deploys Organization contract', async function() {
-    let orgHelper = new OrganizationHelper(auxiliaryWeb3, null);
+    const { Organization } = Mosaic.ContractInteract;
     const orgConfig = {
-      deployer: config.deployerAddress,
-      owner: owner,
-      workers: worker,
-      workerExpirationHeight: '20000000'
+      deployer: deployerAddress,
+      admin: deployerAddress,
+      owner: accountsOrigin[0],
+      workers: [worker],
+      workerExpirationHeight: config.workerExpirationHeight
     };
-
-    await orgHelper.setup(orgConfig);
-    organization = orgHelper.address;
-
+    const organizationContractInstance = await Organization.setup(auxiliaryWeb3, orgConfig);
+    organization = organizationContractInstance.address;
     assert.isNotNull(organization, 'Organization contract address should not be null.');
   });
 
   // TODO Update to EIP20Token
   it('Deploys EIP20Token contract', async function() {
-    mockTokenDeployerInstance = new MockContractsDeployer(config.deployerAddress, auxiliaryWeb3);
+    mockTokenDeployerInstance = new MockContractsDeployer(deployerAddress, auxiliaryWeb3);
 
     await mockTokenDeployerInstance.deployMockToken();
 
-    mockToken = mockTokenDeployerInstance.addresses.MockToken;
-    assert.isNotNull(mockToken, 'EIP20Token contract address should not be null.');
+    eip20Token = mockTokenDeployerInstance.addresses.MockToken;
+    assert.isNotNull(eip20Token, 'EIP20Token contract address should not be null.');
   });
 
-  it('Deploys TokenRules contract', async function() {
-    const tokenRulesSetupInstance = new TokenRulesSetup(auxiliaryWeb3);
-
-    const response = await tokenRulesSetupInstance.deploy(organization, mockToken, txOptions);
-    tokenRulesAddress = response.receipt.contractAddress;
-    assert.isNotNull(tokenRulesAddress, 'tokenRules contract address should not be null.');
-
-    const tokenRulesContractInstance = openSTContractsInstance.TokenRules(tokenRulesAddress, txOptions);
-
-    // Verifying stored organization and token address.
-    assert.strictEqual(
-      mockToken,
-      await tokenRulesContractInstance.methods.token().call(),
-      'Token address is incorrect'
-    );
-    assert.strictEqual(
-      organization,
-      await tokenRulesContractInstance.methods.organization().call(),
-      'Organization address is incorrect'
-    );
-  });
-
-  it('Deploys Gnosis MultiSig MasterCopy contract', async function() {
-    const userSetup = new UserSetup(auxiliaryWeb3);
-    const multiSigTxResponse = await userSetup.deployMultiSigMasterCopy(txOptions);
-    gnosisSafeMasterCopyAddress = multiSigTxResponse.receipt.contractAddress;
-    assert.strictEqual(multiSigTxResponse.receipt.status, true);
-    assert.isNotNull(gnosisSafeMasterCopyAddress, 'gnosis safe master copy contract address should not be null.');
-  });
-
-  it('Deploys TokenHolder MasterCopy contract', async function() {
+  it('Performs Setup of TokenHolder, MultiSig, DelayedRecoveryModule master copies', async function() {
     const userSetup = new UserSetup(auxiliaryWeb3);
     const tokenHolderTxResponse = await userSetup.deployTokenHolderMasterCopy(txOptions);
     thMasterCopyAddress = tokenHolderTxResponse.receipt.contractAddress;
-    assert.strictEqual(tokenHolderTxResponse.receipt.status, true);
     assert.isNotNull(thMasterCopyAddress, 'TH master copy contract address should not be null.');
+
+    const multiSigTxResponse = await userSetup.deployMultiSigMasterCopy(txOptions);
+    gnosisSafeMasterCopyAddress = multiSigTxResponse.receipt.contractAddress;
+    assert.isNotNull(gnosisSafeMasterCopyAddress, 'gnosis safe master copy contract address should not be null.');
+
+    const txResponse = await userSetup.deployDelayedRecoveryModuleMasterCopy(txOptions);
+    delayedRecoveryModuleMasterCopyAddress = txResponse.receipt.contractAddress;
+    assert.isNotNull(
+      delayedRecoveryModuleMasterCopyAddress,
+      "DelayedRecoveryModule master copy contract's address is null."
+    );
   });
 
-  it('Deploys UserWalletFactory contract', async function() {
+  it('Performs setup of CreateAndAddModules, UserWalletFactory, ProxyFactory contracts', async function() {
     const userSetup = new UserSetup(auxiliaryWeb3);
+    const txResponse = await userSetup.deployCreateAndAddModules(txOptions);
+    createAndAddModulesAddress = txResponse.receipt.contractAddress;
+    assert.isNotNull(createAndAddModulesAddress, "createAndAddModules contract's address is null.");
+
     const userWalletFactoryResponse = await userSetup.deployUserWalletFactory(txOptions);
     userWalletFactoryAddress = userWalletFactoryResponse.receipt.contractAddress;
-    assert.strictEqual(userWalletFactoryResponse.receipt.status, true);
     assert.isNotNull(userWalletFactoryAddress, 'UserWalletFactory contract address should not be null.');
-  });
 
-  it('Deploys ProxyFactory contract', async function() {
-    const userSetup = new UserSetup(auxiliaryWeb3);
     const proxyFactoryResponse = await userSetup.deployProxyFactory(txOptions);
     proxyFactoryAddress = proxyFactoryResponse.receipt.contractAddress;
-    assert.strictEqual(proxyFactoryResponse.receipt.status, true);
     assert.isNotNull(proxyFactoryAddress, 'Proxy contract address should not be null.');
   });
 
-  it('Deploys PriceOracle contract', async function() {
+  it('Performs setup of PriceOracle', async function() {
+    bytesBaseCurrencyCode = auxiliaryWeb3.utils.stringToHex(config.baseCurrencyCode);
+    bytesPayCurrencyCode = auxiliaryWeb3.utils.stringToHex(config.payCurrencyCode);
     const pricerOracleArgs = [bytesBaseCurrencyCode, bytesPayCurrencyCode];
     const priceOracleTxOptions = {
       from: priceOracleOwner,
@@ -185,40 +137,51 @@ describe('TH transfers through PricerRule Pay', async function() {
       pricerOracleArgs,
       priceOracleTxOptions
     );
-    assert.strictEqual(priceOracleDeployResponse.status, true);
     priceOracleAddress = mockTokenDeployerInstance.addresses.PriceOracle;
     assert.isNotNull(priceOracleAddress, 'PriceOracle contract address should not be null.');
-  });
 
-  it('Sets Ops address in PriceOracle contract', async function() {
-    const setOpsOptions = {
+    const setOpsTxOptions = {
       from: priceOracleOwner,
       gasPrice: config.gasPrice,
       gas: config.gas
     };
     const jsonInterface = mockTokenDeployerInstance.abiBinProvider.getABI('PriceOracle');
-    priceOracleContractInstance = new auxiliaryWeb3.eth.Contract(jsonInterface, priceOracleAddress);
+    const priceOracleContractInstance = new auxiliaryWeb3.eth.Contract(jsonInterface, priceOracleAddress);
     const setOpsTxObject = priceOracleContractInstance.methods.setOpsAddress(priceOracleOpsAddress);
-    const setOpsReceipt = await new TxSender(setOpsTxObject, auxiliaryWeb3, setOpsOptions).execute();
+    await Utils.sendTransaction(setOpsTxObject, setOpsTxOptions);
     assert.strictEqual(await priceOracleContractInstance.methods.opsAddress().call(), priceOracleOpsAddress);
-  });
 
-  it('Sets price in PriceOracle contract', async function() {
     const setPriceOptions = {
       from: priceOracleOpsAddress,
       gasPrice: config.gasPrice,
       gas: config.gas
     };
     const setPriceTxObject = priceOracleContractInstance.methods.setPrice(config.price);
-    const setPriceReceipt = await new TxSender(setPriceTxObject, auxiliaryWeb3, setPriceOptions).execute();
-    assert.strictEqual(setPriceReceipt.status, true);
-
-    const setPriceValueFromContract = await priceOracleContractInstance.methods.getPrice().call();
-    assert.strictEqual(setPriceValueFromContract, config.price);
+    await Utils.sendTransaction(setPriceTxObject, setPriceOptions);
+    assert.strictEqual(await priceOracleContractInstance.methods.getPrice().call(), config.price);
   });
 
-  it('Deploys PricerRule contract', async function() {
-    const rulesSetup = new RulesSetup(auxiliaryWeb3, organization, mockToken, tokenRulesAddress);
+  it('Performs setup of PricerRule', async function() {
+    const tokenRulesSetupInstance = new TokenRulesSetup(auxiliaryWeb3);
+    const tokenRulesDeployresponse = await tokenRulesSetupInstance.deploy(organization, eip20Token, txOptions);
+    tokenRulesAddress = tokenRulesDeployresponse.receipt.contractAddress;
+    assert.isNotNull(tokenRulesAddress, 'tokenRules contract address should not be null.');
+
+    const tokenRulesContractInstance = Contracts.getTokenRules(auxiliaryWeb3, tokenRulesAddress, txOptions);
+
+    // Verifying stored organization and token address.
+    assert.strictEqual(
+      eip20Token,
+      await tokenRulesContractInstance.methods.token().call(),
+      'Token address is incorrect'
+    );
+    assert.strictEqual(
+      organization,
+      await tokenRulesContractInstance.methods.organization().call(),
+      'Organization address is incorrect'
+    );
+
+    const rulesSetup = new RulesSetup(auxiliaryWeb3, organization, eip20Token, tokenRulesAddress);
     const pricerRulesDeployResponse = await rulesSetup.deployPricerRule(
       config.baseCurrencyCode,
       config.conversionRate,
@@ -227,42 +190,30 @@ describe('TH transfers through PricerRule Pay', async function() {
       txOptions
     );
     pricerRuleAddress = pricerRulesDeployResponse.receipt.contractAddress;
-    pricerRuleInstance = openSTContractsInstance.PricerRule(pricerRuleAddress, txOptions);
+    const pricerRuleInstance = Contracts.getPricerRule(auxiliaryWeb3, pricerRuleAddress, txOptions);
     // Sanity check
     assert.strictEqual(
       await pricerRuleInstance.methods.tokenRules().call(),
       tokenRulesAddress,
       'TokenRules address is incorrect!'
     );
-  });
 
-  it('Adds PriceOracle contract in PricerRule', async function() {
-    const addPriceOracleTxOptions = {
+    const priceOracleTxOptions = {
       from: worker,
       gasPrice: config.gasPrice,
       gas: config.gas
     };
-    pricerRuleHelperObject = new PricerRule(auxiliaryWeb3, pricerRuleAddress);
-    const addPriceOracleReceipt = await pricerRuleHelperObject.addPriceOracle(
-      priceOracleAddress,
-      addPriceOracleTxOptions
-    );
+    pricerRuleHelperObject = new PricerRuleHelper(auxiliaryWeb3, pricerRuleAddress);
+    await pricerRuleHelperObject.addPriceOracle(priceOracleAddress, priceOracleTxOptions);
     assert.strictEqual(
       await pricerRuleInstance.methods.baseCurrencyPriceOracles(bytesPayCurrencyCode).call(),
       priceOracleAddress
     );
-  });
 
-  it('Sets AcceptanceMargin in PricerRule', async function() {
-    const setAcceptanceMarginTxOptions = {
-      from: worker,
-      gasPrice: config.gasPrice,
-      gas: config.gas
-    };
     const setAcceptanceMarginReceipt = await pricerRuleHelperObject.setAcceptanceMargin(
       config.payCurrencyCode,
       config.acceptanceMargin,
-      setAcceptanceMarginTxOptions
+      priceOracleTxOptions
     );
     const contractAcceptanceMargin = await pricerRuleInstance.methods
       .baseCurrencyPriceAcceptanceMargins(bytesPayCurrencyCode)
@@ -270,58 +221,66 @@ describe('TH transfers through PricerRule Pay', async function() {
     assert.strictEqual(contractAcceptanceMargin, config.acceptanceMargin);
   });
 
-  it('Registers PricerRule rule', async function() {
+  it('Perform registration of PricerRule in TokenRules', async function() {
     // Only worker can registerRule.
-    const txOptions = {
+    const registerRuleTxOptions = {
       from: worker,
       gasPrice: config.gasPrice,
       gas: config.gas
     };
 
-    tokenRulesObject = new TokenRules(tokenRulesAddress, auxiliaryWeb3);
-    const pricerRuleName = 'PricerRule',
-      pricerRuleAbi = abiBinProvider.getABI('PricerRule'),
-      response = await tokenRulesObject.registerRule(
-        pricerRuleName,
-        pricerRuleAddress,
-        pricerRuleAbi.toString(),
-        txOptions
-      );
+    const tokenRulesHelperObject = new TokenRulesHelper(tokenRulesAddress, auxiliaryWeb3);
+    const pricerRuleName = 'PricerRule';
+    const pricerRuleAbi = abiBinProvider.getABI('PricerRule');
+    const response = await tokenRulesHelperObject.registerRule(
+      pricerRuleName,
+      pricerRuleAddress,
+      pricerRuleAbi.toString(),
+      registerRuleTxOptions
+    );
 
     assert.strictEqual(response.events.RuleRegistered['returnValues']._ruleName, pricerRuleName);
     assert.strictEqual(response.events.RuleRegistered['returnValues']._ruleAddress, pricerRuleAddress);
 
     // Verify the rule data using rule name.
-    const ruleByNameData = await tokenRulesObject.getRuleByName(pricerRuleName, txOptions);
+    const ruleByNameData = await tokenRulesHelperObject.getRuleByName(pricerRuleName, registerRuleTxOptions);
     assert.strictEqual(ruleByNameData.ruleName, pricerRuleName, 'Incorrect rule name was registered');
     assert.strictEqual(ruleByNameData.ruleAddress, pricerRuleAddress, pricerRuleAddress, 'Incorrect rule address');
 
     // Verify the rule data using rule address.
-    const ruleByAddressData = await tokenRulesObject.getRuleByAddress(pricerRuleAddress, txOptions);
+    const ruleByAddressData = await tokenRulesHelperObject.getRuleByAddress(pricerRuleAddress, registerRuleTxOptions);
     assert.strictEqual(ruleByAddressData.ruleName, pricerRuleName, 'Incorrect rule name was registered');
     assert.strictEqual(ruleByAddressData.ruleAddress, pricerRuleAddress, pricerRuleAddress, 'Incorrect rule address');
   });
 
   it('Creates sender user wallet', async function() {
-    const userInstance = new User(
-      gnosisSafeMasterCopyAddress,
+    const userInstance = new UserHelper(
       thMasterCopyAddress,
-      mockToken,
+      gnosisSafeMasterCopyAddress,
+      delayedRecoveryModuleMasterCopyAddress,
+      createAndAddModulesAddress,
+      eip20Token,
       tokenRulesAddress,
       userWalletFactoryAddress,
+      proxyFactoryAddress,
       auxiliaryWeb3
     );
 
-    ephemeralKey = wallets[5];
-    const owners = [wallets[3].address],
-      threshold = 1,
-      sessionKeys = [ephemeralKey.address];
+    ephemeralKey = auxiliaryWeb3.eth.accounts.wallet[0];
+    const owners = [auxiliaryWeb3.eth.accounts.wallet[1].address];
+    const threshold = 1;
+    const sessionKeys = [ephemeralKey.address];
+
+    const recoveryOwnerAddress = auxiliaryWeb3.eth.accounts.wallet[3].address;
+    const recoveryControllerAddress = auxiliaryWeb3.eth.accounts.wallet[4].address;
+    const recoveryBlockDelay = 10;
 
     const response = await userInstance.createUserWallet(
       owners,
       threshold,
-      config.NULL_ADDRESS,
-      config.ZERO_BYTES,
+      recoveryOwnerAddress,
+      recoveryControllerAddress,
+      recoveryBlockDelay,
       sessionKeys,
       [config.sessionKeySpendingLimit],
       [config.sessionKeyExpirationHeight],
@@ -334,10 +293,9 @@ describe('TH transfers through PricerRule Pay', async function() {
     let returnValues = response.events.UserWalletCreated.returnValues;
     let userWalletEvent = JSON.parse(JSON.stringify(returnValues));
 
-    gnosisSafeProxy = userWalletEvent._gnosisSafeProxy;
     tokenHolderSender = userWalletEvent._tokenHolderProxy;
 
-    const senderTokenHolderInstance = await OpenSTContracts.getTokenHolder(auxiliaryWeb3, tokenHolderSender, txOptions);
+    const senderTokenHolderInstance = await Contracts.getTokenHolder(auxiliaryWeb3, tokenHolderSender, txOptions);
     const sessionKeyData = await senderTokenHolderInstance.methods.sessionKeys(ephemeralKey.address).call();
     const sessionWindow = await senderTokenHolderInstance.methods.sessionWindow().call();
     assert.strictEqual(
@@ -355,9 +313,9 @@ describe('TH transfers through PricerRule Pay', async function() {
   });
 
   it('Performs transfer through PricerRule.pay', async function() {
-    const tokenHolder = new TokenHolder(auxiliaryWeb3, tokenHolderSender),
+    const tokenHolder = new TokenHolderHelper(auxiliaryWeb3, tokenHolderSender),
       mockTokenAbi = mockTokenDeployerInstance.abiBinProvider.getABI('MockToken'),
-      eip20TokenContractInstance = new auxiliaryWeb3.eth.Contract(mockTokenAbi, mockToken, txOptions);
+      eip20TokenContractInstance = new auxiliaryWeb3.eth.Contract(mockTokenAbi, eip20Token, txOptions);
 
     // Funding TH proxy with tokens.
     const txObject = eip20TokenContractInstance.methods.transfer(tokenHolderSender, config.senderTokenHolderBalance);
@@ -365,6 +323,8 @@ describe('TH transfers through PricerRule Pay', async function() {
     const initialSenderBalance = await eip20TokenContractInstance.methods.balanceOf(tokenHolderSender).call();
     assert.strictEqual(initialSenderBalance, config.senderTokenHolderBalance, 'Initial sender TH balance mismatch!');
 
+    const firstReceiver = accountsOrigin[1];
+    const secondReceiver = accountsOrigin[2];
     const transferTos = [firstReceiver, secondReceiver],
       firstReceiverInitialBalance = await eip20TokenContractInstance.methods.balanceOf(firstReceiver).call(),
       secondReceiverInitialBalance = await eip20TokenContractInstance.methods.balanceOf(secondReceiver).call(),
@@ -421,7 +381,7 @@ describe('TH transfers through PricerRule Pay', async function() {
     );
 
     const firstReceiverExpectedBalance = new BN(firstReceiverInitialBalance).add(firstReceiverBTAmount);
-    const secondReceiverExpectedBalance = new BN(firstReceiverInitialBalance).add(secondReceiverBTAmount);
+    const secondReceiverExpectedBalance = new BN(secondReceiverInitialBalance).add(secondReceiverBTAmount);
     const expectedSenderBalance = new BN(initialSenderBalance).sub(firstReceiverBTAmount).sub(secondReceiverBTAmount);
 
     assert.strictEqual(

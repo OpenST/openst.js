@@ -38,7 +38,7 @@ class MockContractsDeployer {
    */
   deployMockToken(web3, txOptions) {
     const oThis = this;
-    return oThis.deploy('MockToken', web3, txOptions);
+    return oThis.deploy('MockToken', web3, [], txOptions);
   }
 
   deployPriceOracle(web3, args, txOptions) {
@@ -72,7 +72,6 @@ class MockContractsDeployer {
       Object.assign(defaultOptions, txOptions);
     }
     txOptions = defaultOptions;
-
     const contract = new web3.eth.Contract(abi, null, txOptions);
     let tx = contract.deploy(
       {

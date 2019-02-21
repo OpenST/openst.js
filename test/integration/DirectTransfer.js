@@ -346,7 +346,7 @@ describe('Direct transfers between TH contracts', async function() {
     const eip20Instance = new Mosaic.ContractInteract.EIP20Token(auxiliaryWeb3, mockToken);
 
     // Funding TH proxy with tokens.
-    const amount = config.tokenHolderBalance;
+    const amount = config.senderTokenHolderBalance;
     const txObject = mockContractInstance.methods.transfer(tokenHolderSender, amount);
     await txObject.send(txOptions);
 
