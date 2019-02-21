@@ -2,7 +2,7 @@ const { assert } = require('chai');
 const Web3 = require('web3');
 const Package = require('../../index');
 const Mosaic = require('@openstfoundation/mosaic.js');
-const MockContractsDeployer = require('./../utils/MockContractsDeployer'); // TODO Remove
+const MockContractsDeployer = require('./../utils/MockContractsDeployer');
 const config = require('../utils/configReader');
 const BN = require('bn.js');
 
@@ -28,7 +28,7 @@ let auxiliaryWeb3,
   tokenRulesAddress,
   pricerRuleAddress,
   worker,
-  organization,
+  organizationAddress,
   eip20Token,
   tokenHolderSender,
   mockTokenDeployerInstance,
@@ -66,28 +66,51 @@ describe('TH transfers through PricerRule Pay', async function() {
     dockerTeardown();
   });
 
-  it('Deploys Organization contract', async function() {
+  it('Performs initial setup for economy', async function() {
     const { Organization } = Mosaic.ContractInteract;
     const orgConfig = {
       deployer: deployerAddress,
-      admin: deployerAddress,
-      owner: accountsOrigin[0],
+      owner: deployerAddress,
+      admin: worker,
       workers: [worker],
       workerExpirationHeight: config.workerExpirationHeight
     };
     const organizationContractInstance = await Organization.setup(auxiliaryWeb3, orgConfig);
-    organization = organizationContractInstance.address;
-    assert.isNotNull(organization, 'Organization contract address should not be null.');
-  });
+    organizationAddress = organizationContractInstance.address;
+    assert.isNotNull(organizationAddress, 'Organization contract address should not be null.');
 
-  // TODO Update to EIP20Token
-  it('Deploys EIP20Token contract', async function() {
     mockTokenDeployerInstance = new MockContractsDeployer(deployerAddress, auxiliaryWeb3);
-
     await mockTokenDeployerInstance.deployMockToken();
 
     eip20Token = mockTokenDeployerInstance.addresses.MockToken;
     assert.isNotNull(eip20Token, 'EIP20Token contract address should not be null.');
+
+    const tokenRules = new Package.Setup.TokenRules(auxiliaryWeb3);
+
+    const response = await tokenRules.deploy(organizationAddress, eip20Token, txOptions, auxiliaryWeb3);
+    tokenRulesAddress = response.receipt.contractAddress;
+
+    const tokenRulesContractInstance = Contracts.getTokenRules(
+      auxiliaryWeb3,
+      response.receipt.contractAddress,
+      txOptions
+    );
+    // Verifying stored organization and token address.
+    assert.strictEqual(
+      eip20Token,
+      await tokenRulesContractInstance.methods.token().call(),
+      'Token address is incorrect'
+    );
+    assert.strictEqual(
+      eip20Token,
+      await tokenRulesContractInstance.methods.token().call(),
+      'Token address is incorrect'
+    );
+    assert.strictEqual(
+      organizationAddress,
+      await tokenRulesContractInstance.methods.organization().call(),
+      'Organization address is incorrect'
+    );
   });
 
   it('Performs Setup of TokenHolder, MultiSig, DelayedRecoveryModule master copies', async function() {
@@ -162,26 +185,7 @@ describe('TH transfers through PricerRule Pay', async function() {
   });
 
   it('Performs setup of PricerRule', async function() {
-    const tokenRulesSetupInstance = new TokenRulesSetup(auxiliaryWeb3);
-    const tokenRulesDeployresponse = await tokenRulesSetupInstance.deploy(organization, eip20Token, txOptions);
-    tokenRulesAddress = tokenRulesDeployresponse.receipt.contractAddress;
-    assert.isNotNull(tokenRulesAddress, 'tokenRules contract address should not be null.');
-
-    const tokenRulesContractInstance = Contracts.getTokenRules(auxiliaryWeb3, tokenRulesAddress, txOptions);
-
-    // Verifying stored organization and token address.
-    assert.strictEqual(
-      eip20Token,
-      await tokenRulesContractInstance.methods.token().call(),
-      'Token address is incorrect'
-    );
-    assert.strictEqual(
-      organization,
-      await tokenRulesContractInstance.methods.organization().call(),
-      'Organization address is incorrect'
-    );
-
-    const rulesSetup = new RulesSetup(auxiliaryWeb3, organization, eip20Token, tokenRulesAddress);
+    const rulesSetup = new RulesSetup(auxiliaryWeb3, organizationAddress, eip20Token, tokenRulesAddress);
     const pricerRulesDeployResponse = await rulesSetup.deployPricerRule(
       config.baseCurrencyCode,
       config.conversionRate,

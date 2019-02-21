@@ -1,25 +1,19 @@
-const chai = require('chai'),
-  Web3 = require('web3'),
-  Package = require('../../index'),
-  Mosaic = require('@openstfoundation/mosaic.js');
+const { assert } = require('chai');
+const Web3 = require('web3');
+const Package = require('../../index');
+const Mosaic = require('@openstfoundation/mosaic.js');
+const MockContractsDeployer = require('./../utils/MockContractsDeployer');
+const config = require('../utils/configReader');
 
-const TokenRulesSetup = Package.Setup.TokenRules,
-  UserSetup = Package.Setup.User,
-  RulesSetup = Package.Setup.Rules,
-  MockContractsDeployer = require('./../utils/MockContractsDeployer'),
-  config = require('../utils/configReader'),
-  Contracts = Package.Contracts,
-  User = Package.Helpers.User,
-  TokenRules = Package.Helpers.TokenRules,
-  AbiBinProvider = Package.AbiBinProvider,
-  TokenHolder = Package.Helpers.TokenHolder,
-  { dockerSetup, dockerTeardown } = require('./../../utils/docker');
-
-const assert = chai.assert,
-  abiBinProvider = new AbiBinProvider();
+const TokenRulesSetup = Package.Setup.TokenRules;
+const UserSetup = Package.Setup.User;
+const { Contracts } = Package;
+const UserHelper = Package.Helpers.User;
+const TokenHolderHelper = Package.Helpers.TokenHolder;
+const { dockerSetup, dockerTeardown } = require('./../../utils/docker');
+const TokenRulesHelper = Package.Helpers.TokenRules;
 
 let txOptions,
-  ContractsInstance,
   userWalletFactoryAddress,
   thMasterCopyAddress,
   gnosisSafeMasterCopyAddress,
@@ -27,30 +21,28 @@ let txOptions,
   tokenRulesAddress,
   delayedRecoveryModuleMasterCopyAddress,
   createAndAddModulesAddress,
-  pricerRuleAddress,
-  worker,
-  organization,
-  mockToken,
-  owner = config.deployerAddress,
+  organizationAddress,
+  eip20Token,
   tokenHolderSender,
-  tokenHolderFirstReceiver,
   tokenHolderSecondReceiver,
-  gnosisSafeProxy,
   ephemeralKey,
   mockTokenDeployerInstance,
-  tokenRulesObject,
   deployerAddress,
-  auxiliaryWeb3;
+  auxiliaryWeb3,
+  accountsOrigin;
 
 describe('Direct transfers between TH contracts', async function() {
   before(async function() {
     const { rpcEndpointOrigin } = await dockerSetup();
     auxiliaryWeb3 = new Web3(rpcEndpointOrigin);
-    ContractsInstance = new Contracts(auxiliaryWeb3);
-    const accountsOrigin = await auxiliaryWeb3.eth.getAccounts();
+    accountsOrigin = await auxiliaryWeb3.eth.getAccounts();
     deployerAddress = accountsOrigin[0];
-    worker = accountsOrigin[1];
-    owner = accountsOrigin[2];
+    txOptions = {
+      from: deployerAddress,
+      gasPrice: config.gasPrice,
+      gas: config.gas
+    };
+    await auxiliaryWeb3.eth.accounts.wallet.create(10);
   });
 
   after(() => {
@@ -61,14 +53,14 @@ describe('Direct transfers between TH contracts', async function() {
     const { Organization } = Mosaic.ContractInteract;
     const orgConfig = {
       deployer: deployerAddress,
-      owner,
-      admin: worker,
-      workers: [worker],
+      owner: deployerAddress,
+      admin: accountsOrigin[1],
+      workers: [accountsOrigin[1]],
       workerExpirationHeight: config.workerExpirationHeight
     };
     const organizationContractInstance = await Organization.setup(auxiliaryWeb3, orgConfig);
-    organization = organizationContractInstance.address;
-    assert.isNotNull(organization, 'Organization contract address should not be null.');
+    organizationAddress = organizationContractInstance.address;
+    assert.isNotNull(organizationAddress, 'Organization contract address should not be null.');
   });
 
   it('Deploys EIP20Token contract', async function() {
@@ -76,8 +68,41 @@ describe('Direct transfers between TH contracts', async function() {
 
     await mockTokenDeployerInstance.deployMockToken();
 
-    mockToken = mockTokenDeployerInstance.addresses.MockToken;
-    assert.isNotNull(mockToken, 'EIP20Token contract address should not be null.');
+    eip20Token = mockTokenDeployerInstance.addresses.MockToken;
+    assert.isNotNull(eip20Token, 'EIP20Token contract address should not be null.');
+  });
+
+  it('Performs Setup of TokenHolder, MultiSig, DelayedRecoveryModule master copies', async function() {
+    const userSetup = new UserSetup(auxiliaryWeb3);
+    const tokenHolderTxResponse = await userSetup.deployTokenHolderMasterCopy(txOptions);
+    thMasterCopyAddress = tokenHolderTxResponse.receipt.contractAddress;
+    assert.isNotNull(thMasterCopyAddress, 'TH master copy contract address should not be null.');
+
+    const multiSigTxResponse = await userSetup.deployMultiSigMasterCopy(txOptions);
+    gnosisSafeMasterCopyAddress = multiSigTxResponse.receipt.contractAddress;
+    assert.isNotNull(gnosisSafeMasterCopyAddress, 'gnosis safe master copy contract address should not be null.');
+
+    const txResponse = await userSetup.deployDelayedRecoveryModuleMasterCopy(txOptions);
+    delayedRecoveryModuleMasterCopyAddress = txResponse.receipt.contractAddress;
+    assert.isNotNull(
+      delayedRecoveryModuleMasterCopyAddress,
+      "DelayedRecoveryModule master copy contract's address is null."
+    );
+  });
+
+  it('Performs setup of CreateAndAddModules, UserWalletFactory, ProxyFactory contracts', async function() {
+    const userSetup = new UserSetup(auxiliaryWeb3);
+    const txResponse = await userSetup.deployCreateAndAddModules(txOptions);
+    createAndAddModulesAddress = txResponse.receipt.contractAddress;
+    assert.isNotNull(createAndAddModulesAddress, "createAndAddModules contract's address is null.");
+
+    const userWalletFactoryResponse = await userSetup.deployUserWalletFactory(txOptions);
+    userWalletFactoryAddress = userWalletFactoryResponse.receipt.contractAddress;
+    assert.isNotNull(userWalletFactoryAddress, 'UserWalletFactory contract address should not be null.');
+
+    const proxyFactoryResponse = await userSetup.deployProxyFactory(txOptions);
+    proxyFactoryAddress = proxyFactoryResponse.receipt.contractAddress;
+    assert.isNotNull(proxyFactoryAddress, 'Proxy contract address should not be null.');
   });
 
   it('Deploys TokenRules contract', async function() {
@@ -89,132 +114,33 @@ describe('Direct transfers between TH contracts', async function() {
 
     const tokenRulesSetupInstance = new TokenRulesSetup(auxiliaryWeb3);
 
-    const response = await tokenRulesSetupInstance.deploy(organization, mockToken, txOptions);
+    const response = await tokenRulesSetupInstance.deploy(organizationAddress, eip20Token, txOptions);
     tokenRulesAddress = response.receipt.contractAddress;
     assert.isNotNull(tokenRulesAddress, 'tokenRules contract address should not be null.');
 
-    const tokenRulesContractInstance = ContractsInstance.TokenRules(tokenRulesAddress, txOptions);
+    const tokenRulesContractInstance = Contracts.getTokenRules(auxiliaryWeb3, tokenRulesAddress, txOptions);
 
     // Verifying stored organization and token address.
     assert.strictEqual(
-      mockToken,
+      eip20Token,
       await tokenRulesContractInstance.methods.token().call(),
       'Token address is incorrect'
     );
     assert.strictEqual(
-      organization,
+      organizationAddress,
       await tokenRulesContractInstance.methods.organization().call(),
       'Organization address is incorrect'
     );
   });
 
-  it('Deploys DelayedRecoveryModule master copy.', async function() {
-    const userSetup = new UserSetup(auxiliaryWeb3);
-    const txResponse = await userSetup.deployDelayedRecoveryModuleMasterCopy(txOptions);
-    delayedRecoveryModuleMasterCopyAddress = txResponse.receipt.contractAddress;
-    assert.strictEqual(txResponse.receipt.status, true);
-    assert.isNotNull(
-      delayedRecoveryModuleMasterCopyAddress,
-      "DelayedRecoveryModule master copy contract's address is null."
-    );
-  });
-
-  it('Deploys CreateAndAddModules.', async function() {
-    const userSetup = new UserSetup(auxiliaryWeb3);
-    const txResponse = await userSetup.deployCreateAndAddModules(txOptions);
-    createAndAddModulesAddress = txResponse.receipt.contractAddress;
-    assert.strictEqual(txResponse.receipt.status, true);
-    assert.isNotNull(createAndAddModulesAddress, "createAndAddModules contract's address is null.");
-  });
-
-  it('Deploys Gnosis MultiSig MasterCopy contract', async function() {
-    const userSetup = new UserSetup(auxiliaryWeb3);
-    const multiSigTxResponse = await userSetup.deployMultiSigMasterCopy(txOptions);
-    gnosisSafeMasterCopyAddress = multiSigTxResponse.receipt.contractAddress;
-    assert.strictEqual(multiSigTxResponse.receipt.status, true);
-    assert.isNotNull(gnosisSafeMasterCopyAddress, 'gnosis safe master copy contract address should not be null.');
-  });
-
-  it('Deploys TokenHolder MasterCopy contract', async function() {
-    const userSetup = new UserSetup(auxiliaryWeb3);
-    const tokenHolderTxResponse = await userSetup.deployTokenHolderMasterCopy(txOptions);
-    thMasterCopyAddress = tokenHolderTxResponse.receipt.contractAddress;
-    assert.strictEqual(tokenHolderTxResponse.receipt.status, true);
-    assert.isNotNull(thMasterCopyAddress, 'TH master copy contract address should not be null.');
-  });
-
-  it('Deploys UserWalletFactory contract', async function() {
-    const userSetup = new UserSetup(auxiliaryWeb3);
-    const userWalletFactoryResponse = await userSetup.deployUserWalletFactory(txOptions);
-    userWalletFactoryAddress = userWalletFactoryResponse.receipt.contractAddress;
-    assert.strictEqual(userWalletFactoryResponse.receipt.status, true);
-    assert.isNotNull(userWalletFactoryAddress, 'UserWalletFactory contract address should not be null.');
-  });
-
-  it('Deploys ProxyFactory contract', async function() {
-    const userSetup = new UserSetup(auxiliaryWeb3);
-    const proxyFactoryResponse = await userSetup.deployProxyFactory(txOptions);
-    proxyFactoryAddress = proxyFactoryResponse.receipt.contractAddress;
-    assert.strictEqual(proxyFactoryResponse.receipt.status, true);
-    assert.isNotNull(proxyFactoryAddress, 'Proxy contract address should not be null.');
-  });
-
-  it('Deploys PricerRule contract', async function() {
-    const rulesSetup = new RulesSetup(auxiliaryWeb3, organization, mockToken, tokenRulesAddress);
-    const pricerRulesDeployResponse = await rulesSetup.deployPricerRule(
-      config.baseCurrencyCode,
-      config.conversionRate,
-      config.conversionRateDecimals,
-      config.requiredPriceOracleDecimals,
-      txOptions
-    );
-    assert.strictEqual(pricerRulesDeployResponse.receipt.status, true);
-    pricerRuleAddress = pricerRulesDeployResponse.receipt.contractAddress;
-    const pricerRuleInstance = ContractsInstance.PricerRule(pricerRuleAddress, txOptions);
-    // Sanity check
-    assert.strictEqual(
-      await pricerRuleInstance.methods.tokenRules().call(),
-      tokenRulesAddress,
-      'TokenRules address is incorrect!'
-    );
-  });
-
-  it('Registers PricerRule rule', async function() {
-    // Only worker can registerRule.
-    txOptions.from = worker;
-
-    tokenRulesObject = new TokenRules(tokenRulesAddress, auxiliaryWeb3);
-    const pricerRuleName = 'PricerRule',
-      pricerRuleAbi = abiBinProvider.getABI('PricerRule'),
-      response = await tokenRulesObject.registerRule(
-        pricerRuleName,
-        pricerRuleAddress,
-        pricerRuleAbi.toString(),
-        txOptions
-      );
-
-    assert.strictEqual(response.events.RuleRegistered['returnValues']._ruleName, pricerRuleName);
-    assert.strictEqual(response.events.RuleRegistered['returnValues']._ruleAddress, pricerRuleAddress);
-
-    // Verify the rule data using rule name.
-    const ruleByNameData = await tokenRulesObject.getRuleByName(pricerRuleName, txOptions);
-    assert.strictEqual(ruleByNameData.ruleName, pricerRuleName, 'Incorrect rule name was registered');
-    assert.strictEqual(ruleByNameData.ruleAddress, pricerRuleAddress, pricerRuleAddress, 'Incorrect rule address');
-
-    // Verify the rule data using rule address.
-    const ruleByAddressData = await tokenRulesObject.getRuleByAddress(pricerRuleAddress, txOptions);
-    assert.strictEqual(ruleByAddressData.ruleName, pricerRuleName, 'Incorrect rule name was registered');
-    assert.strictEqual(ruleByAddressData.ruleAddress, pricerRuleAddress, pricerRuleAddress, 'Incorrect rule address');
-  });
-
-  it('Creates first user wallet', async function() {
+  it('Creates sender user wallet', async function() {
     txOptions.from = deployerAddress;
-    const userInstance = new User(
+    const userInstance = new UserHelper(
       thMasterCopyAddress,
       gnosisSafeMasterCopyAddress,
       delayedRecoveryModuleMasterCopyAddress,
       createAndAddModulesAddress,
-      mockToken,
+      eip20Token,
       tokenRulesAddress,
       userWalletFactoryAddress,
       proxyFactoryAddress,
@@ -224,7 +150,7 @@ describe('Direct transfers between TH contracts', async function() {
     await auxiliaryWeb3.eth.accounts.wallet.create(10);
     ephemeralKey = auxiliaryWeb3.eth.accounts.wallet[0];
 
-    const owners = [owner],
+    const owners = [accountsOrigin[2]],
       threshold = 1,
       sessionKeys = [ephemeralKey.address];
 
@@ -244,69 +170,20 @@ describe('Direct transfers between TH contracts', async function() {
       txOptions
     );
 
-    assert.strictEqual(response.status, true, 'User wallet creation failed.');
-
     // Fetching the gnosisSafe and tokenholder proxy address for the user.
     let returnValues = response.events.UserWalletCreated.returnValues;
     let userWalletEvent = JSON.parse(JSON.stringify(returnValues));
 
-    gnosisSafeProxy = userWalletEvent._gnosisSafeProxy;
     tokenHolderSender = userWalletEvent._tokenHolderProxy;
   });
 
-  it('Should create second user wallet', async function() {
-    const userInstance = new User(
-      thMasterCopyAddress,
-      gnosisSafeMasterCopyAddress,
-      delayedRecoveryModuleMasterCopyAddress,
-      createAndAddModulesAddress,
-      mockToken,
-      tokenRulesAddress,
-      userWalletFactoryAddress,
-      proxyFactoryAddress,
-      auxiliaryWeb3
-    );
-
-    await auxiliaryWeb3.eth.accounts.wallet.create(10);
-    ephemeralKey = auxiliaryWeb3.eth.accounts.wallet[0];
-
-    const owners = [owner],
-      threshold = 1,
-      sessionKeys = [ephemeralKey.address];
-
-    const recoveryOwnerAddress = auxiliaryWeb3.eth.accounts.wallet[7].address;
-    const recoveryControllerAddress = auxiliaryWeb3.eth.accounts.wallet[8].address;
-    const recoveryBlockDelay = 10;
-
-    const response = await userInstance.createUserWallet(
-      owners,
-      threshold,
-      recoveryOwnerAddress,
-      recoveryControllerAddress,
-      recoveryBlockDelay,
-      sessionKeys,
-      [config.sessionKeySpendingLimit],
-      [config.sessionKeyExpirationHeight],
-      txOptions
-    );
-
-    assert.strictEqual(response.status, true, 'User wallet creation failed.');
-
-    // Fetching the gnosisSafe and tokenholder proxy address for the user.
-    let returnValues = response.events.UserWalletCreated.returnValues;
-    let userWalletEvent = JSON.parse(JSON.stringify(returnValues));
-
-    gnosisSafeProxy = userWalletEvent._gnosisSafeProxy;
-    tokenHolderFirstReceiver = userWalletEvent._tokenHolderProxy;
-  });
-
-  it('Creates a company wallet', async function() {
-    const userInstance = new User(
+  it('Creates company wallet as second receiver', async function() {
+    const userInstance = new UserHelper(
       thMasterCopyAddress,
       null, // gnosis safe master copy address
       null, // delayed recovery module master copy address
       null, // create and add modules contract address
-      mockToken,
+      eip20Token,
       tokenRulesAddress,
       userWalletFactoryAddress,
       proxyFactoryAddress, // proxy factory address
@@ -326,8 +203,6 @@ describe('Direct transfers between TH contracts', async function() {
       txOptions
     );
 
-    assert.strictEqual(response.status, true, 'Company wallet creation failed.');
-
     // Fetching the company tokenholder proxy address for the user.
     const returnValues = response.events.ProxyCreated.returnValues;
     const proxyEvent = JSON.parse(JSON.stringify(returnValues));
@@ -337,13 +212,13 @@ describe('Direct transfers between TH contracts', async function() {
   });
 
   it('Performs direct transfer of tokens', async function() {
-    const tokenHolder = new TokenHolder(auxiliaryWeb3, tokenHolderSender);
+    const tokenHolder = new TokenHolderHelper(auxiliaryWeb3, tokenHolderSender);
     // MockToken instance is needed because for transfer. Transfer is not available in Mosaic.ContractInteract.EIP20Token
     // Please update after transfer is exposed in Mosaic.js
     const mockTokenAbi = mockTokenDeployerInstance.abiBinProvider.getABI('MockToken');
-    const mockContractInstance = new auxiliaryWeb3.eth.Contract(mockTokenAbi, mockToken, txOptions);
+    const mockContractInstance = new auxiliaryWeb3.eth.Contract(mockTokenAbi, eip20Token, txOptions);
 
-    const eip20Instance = new Mosaic.ContractInteract.EIP20Token(auxiliaryWeb3, mockToken);
+    const eip20Instance = new Mosaic.ContractInteract.EIP20Token(auxiliaryWeb3, eip20Token);
 
     // Funding TH proxy with tokens.
     const amount = config.senderTokenHolderBalance;
@@ -351,12 +226,17 @@ describe('Direct transfers between TH contracts', async function() {
     await txObject.send(txOptions);
 
     const initialTHProxyBalance = await eip20Instance.balanceOf(tokenHolderSender);
-    const transferTos = [tokenHolderFirstReceiver, tokenHolderSecondReceiver];
-    const firstReceiverInitialBalance = await eip20Instance.balanceOf(tokenHolderFirstReceiver);
+    const firstReceiver = auxiliaryWeb3.eth.accounts.wallet[0].address;
+    const transferTos = [firstReceiver, tokenHolderSecondReceiver];
+    const firstReceiverInitialBalance = await eip20Instance.balanceOf(firstReceiver);
     const secondReceiverInitialBalance = await eip20Instance.balanceOf(tokenHolderSecondReceiver);
     const transferAmounts = [20, 10];
 
-    const directTransferExecutable = tokenRulesObject.getDirectTransferExecutableData(transferTos, transferAmounts);
+    const tokenRulesHelperObject = new TokenRulesHelper(tokenRulesAddress, auxiliaryWeb3);
+    const directTransferExecutable = tokenRulesHelperObject.getDirectTransferExecutableData(
+      transferTos,
+      transferAmounts
+    );
     const nonce = 0;
 
     let transaction = {
@@ -374,16 +254,16 @@ describe('Direct transfers between TH contracts', async function() {
 
     await tokenHolder.executeRule(tokenRulesAddress, directTransferExecutable, nonce, vrs.r, vrs.s, vrs.v, txOptions);
 
-    const finalTHProxyBalance = await eip20Instance.balanceOf(tokenHolderSender),
-      firstReceiverFinalBalance = await eip20Instance.balanceOf(tokenHolderFirstReceiver),
+    const finalTHSenderBalance = await eip20Instance.balanceOf(tokenHolderSender),
+      firstReceiverFinalBalance = await eip20Instance.balanceOf(firstReceiver),
       secondReceiverFinalBalance = await eip20Instance.balanceOf(tokenHolderSecondReceiver),
       firstReceiverExpectedBalance = parseInt(firstReceiverInitialBalance) + transferAmounts[0],
       secondReceiverExpectedBalance = parseInt(secondReceiverInitialBalance) + transferAmounts[1];
 
     assert.strictEqual(
       initialTHProxyBalance - transferAmounts[0] - transferAmounts[1],
-      parseInt(finalTHProxyBalance),
-      `TokenHolder sender balance is ${finalTHProxyBalance} and expected balance is ${initialTHProxyBalance -
+      parseInt(finalTHSenderBalance),
+      `TokenHolder sender balance is ${finalTHSenderBalance} and expected balance is ${initialTHProxyBalance -
         transferAmounts[0] -
         transferAmounts[1]}`
     );
