@@ -1,24 +1,17 @@
-const { assert } = require('chai');
 const Web3 = require('web3');
+const { assert } = require('chai');
+const BN = require('bn.js');
 const Package = require('../../index');
 const Mosaic = require('@openstfoundation/mosaic.js');
 const MockContractsDeployer = require('./../utils/MockContractsDeployer');
 const config = require('../utils/configReader');
-const BN = require('bn.js');
-
-const TokenRulesSetup = Package.Setup.TokenRules;
-const UserSetup = Package.Setup.User;
-const RulesSetup = Package.Setup.Rules;
-const Contracts = Package.Contracts;
-const UserHelper = Package.Helpers.User;
-const TokenRulesHelper = Package.Helpers.TokenRules;
-const { AbiBinProvider } = Package;
-const TokenHolderHelper = Package.Helpers.TokenHolder;
-const PricerRuleHelper = Package.Helpers.Rules.PricerRule;
 const { dockerSetup, dockerTeardown } = require('./../../utils/docker');
 const Utils = require('../../utils/Utils');
 
-const abiBinProvider = new AbiBinProvider();
+const UserSetup = Package.Setup.User;
+const Contracts = Package.Contracts;
+const { AbiBinProvider } = Package;
+const PricerRuleHelper = Package.Helpers.Rules.PricerRule;
 
 let auxiliaryWeb3,
   txOptions,
@@ -185,7 +178,7 @@ describe('TH transfers through PricerRule Pay', async function() {
   });
 
   it('Performs setup of PricerRule', async function() {
-    const rulesSetup = new RulesSetup(auxiliaryWeb3, organizationAddress, eip20Token, tokenRulesAddress);
+    const rulesSetup = new Package.Setup.Rules(auxiliaryWeb3, organizationAddress, eip20Token, tokenRulesAddress);
     const pricerRulesDeployResponse = await rulesSetup.deployPricerRule(
       config.baseCurrencyCode,
       config.conversionRate,
@@ -233,8 +226,9 @@ describe('TH transfers through PricerRule Pay', async function() {
       gas: config.gas
     };
 
-    const tokenRulesHelperObject = new TokenRulesHelper(tokenRulesAddress, auxiliaryWeb3);
+    const tokenRulesHelperObject = new Package.Helpers.TokenRules(tokenRulesAddress, auxiliaryWeb3);
     const pricerRuleName = 'PricerRule';
+    const abiBinProvider = new AbiBinProvider();
     const pricerRuleAbi = abiBinProvider.getABI('PricerRule');
     const response = await tokenRulesHelperObject.registerRule(
       pricerRuleName,
@@ -258,7 +252,7 @@ describe('TH transfers through PricerRule Pay', async function() {
   });
 
   it('Creates sender user wallet', async function() {
-    const userInstance = new UserHelper(
+    const userInstance = new Package.Helpers.User(
       thMasterCopyAddress,
       gnosisSafeMasterCopyAddress,
       delayedRecoveryModuleMasterCopyAddress,
@@ -317,7 +311,7 @@ describe('TH transfers through PricerRule Pay', async function() {
   });
 
   it('Performs transfer through PricerRule.pay', async function() {
-    const tokenHolder = new TokenHolderHelper(auxiliaryWeb3, tokenHolderSender),
+    const tokenHolder = new Package.Helpers.TokenHolder(auxiliaryWeb3, tokenHolderSender),
       mockTokenAbi = mockTokenDeployerInstance.abiBinProvider.getABI('MockToken'),
       eip20TokenContractInstance = new auxiliaryWeb3.eth.Contract(mockTokenAbi, eip20Token, txOptions);
 

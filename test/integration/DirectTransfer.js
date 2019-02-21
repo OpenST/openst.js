@@ -1,17 +1,14 @@
-const { assert } = require('chai');
 const Web3 = require('web3');
-const Package = require('../../index');
 const Mosaic = require('@openstfoundation/mosaic.js');
+const { assert } = require('chai');
+const Package = require('../../index');
 const MockContractsDeployer = require('./../utils/MockContractsDeployer');
 const config = require('../utils/configReader');
+const { dockerSetup, dockerTeardown } = require('./../../utils/docker');
 
-const TokenRulesSetup = Package.Setup.TokenRules;
 const UserSetup = Package.Setup.User;
 const { Contracts } = Package;
 const UserHelper = Package.Helpers.User;
-const TokenHolderHelper = Package.Helpers.TokenHolder;
-const { dockerSetup, dockerTeardown } = require('./../../utils/docker');
-const TokenRulesHelper = Package.Helpers.TokenRules;
 
 let txOptions,
   userWalletFactoryAddress,
@@ -112,7 +109,7 @@ describe('Direct transfers between TH contracts', async function() {
       gas: config.gas
     };
 
-    const tokenRulesSetupInstance = new TokenRulesSetup(auxiliaryWeb3);
+    const tokenRulesSetupInstance = new Package.Setup.TokenRules(auxiliaryWeb3);
 
     const response = await tokenRulesSetupInstance.deploy(organizationAddress, eip20Token, txOptions);
     tokenRulesAddress = response.receipt.contractAddress;
@@ -212,7 +209,7 @@ describe('Direct transfers between TH contracts', async function() {
   });
 
   it('Performs direct transfer of tokens', async function() {
-    const tokenHolder = new TokenHolderHelper(auxiliaryWeb3, tokenHolderSender);
+    const tokenHolder = new Package.Helpers.TokenHolder(auxiliaryWeb3, tokenHolderSender);
     // MockToken instance is needed because for transfer. Transfer is not available in Mosaic.ContractInteract.EIP20Token
     // Please update after transfer is exposed in Mosaic.js
     const mockTokenAbi = mockTokenDeployerInstance.abiBinProvider.getABI('MockToken');
@@ -232,7 +229,7 @@ describe('Direct transfers between TH contracts', async function() {
     const secondReceiverInitialBalance = await eip20Instance.balanceOf(tokenHolderSecondReceiver);
     const transferAmounts = [20, 10];
 
-    const tokenRulesHelperObject = new TokenRulesHelper(tokenRulesAddress, auxiliaryWeb3);
+    const tokenRulesHelperObject = new Package.Helpers.TokenRules(tokenRulesAddress, auxiliaryWeb3);
     const directTransferExecutable = tokenRulesHelperObject.getDirectTransferExecutableData(
       transferTos,
       transferAmounts

@@ -9,10 +9,8 @@ const { dockerSetup, dockerTeardown } = require('./../../utils/docker');
 
 const UserSetup = Package.Setup.User;
 const { Contracts } = Package;
-const AbiBinProvider = Package.AbiBinProvider;
 const TokenHolderHelper = Package.Helpers.TokenHolder;
-
-const abiBinProvider = new AbiBinProvider();
+const abiBinProvider = new Package.AbiBinProvider();
 
 let auxiliaryWeb3,
   deployerAddress,
