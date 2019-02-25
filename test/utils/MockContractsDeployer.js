@@ -38,30 +38,24 @@ class MockContractsDeployer {
    */
   deployMockToken(web3, txOptions) {
     const oThis = this;
-    return oThis.deploy('MockToken', web3, txOptions);
+    return oThis.deploy('MockToken', web3, [], txOptions);
   }
 
-  /**
-   * It deploys mock gateway contract.
-   *
-   * @param web3 Auxiliary chain web3 object.
-   * @param txOptions Tx options.
-   * @returns Promise object.
-   */
-  deployMockGatewayPass(web3, txOptions) {
+  deployPriceOracle(web3, args, txOptions) {
     const oThis = this;
-    return oThis.deploy('MockGatewayPass', web3, txOptions);
+    return oThis.deploy('PriceOracle', web3, args, txOptions);
   }
 
   /**
-   * It deploys the contract.
+   * It deploys the mock contract.
    *
    * @param contractName Name for the contract to deploy.
    * @param web3 Auxiliary chain web3.
+   * @param args Deployment arguments.
    * @param txOptions Tx options.
    * @returns Promise object.
    */
-  deploy(contractName, web3, txOptions) {
+  deploy(contractName, web3, args = [], txOptions) {
     const oThis = this;
     web3 = web3 || oThis.web3;
     const abiBinProvider = oThis.abiBinProvider;
@@ -78,8 +72,6 @@ class MockContractsDeployer {
       Object.assign(defaultOptions, txOptions);
     }
     txOptions = defaultOptions;
-
-    let args = [];
     const contract = new web3.eth.Contract(abi, null, txOptions);
     let tx = contract.deploy(
       {
@@ -89,24 +81,18 @@ class MockContractsDeployer {
       txOptions
     );
 
-    console.log(`* Deploying ${contractName} Contract`);
     let txReceipt;
     return tx
       .send(txOptions)
-      .on('transactionHash', function(transactionHash) {
-        console.log('\t - transaction hash:', transactionHash);
-      })
+      .on('transactionHash', function(transactionHash) {})
       .on('error', function(error) {
-        console.log('\t !! Error !!', error, '\n\t !! ERROR !!\n');
         return Promise.reject(error);
       })
       .on('receipt', function(receipt) {
         txReceipt = receipt;
-        console.log('\t - Receipt:\n\x1b[2m', JSON.stringify(receipt), '\x1b[0m\n');
       })
       .then(function(instance) {
         oThis.addresses[contractName] = instance.options.address;
-        console.log(`\t - ${contractName} Contract Address:`, instance.options.address);
         return txReceipt;
       });
   }
