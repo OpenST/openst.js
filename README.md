@@ -112,7 +112,7 @@ Organization.setup(web3Provider, orgConfig).then(function(instance){
 To perform economy setup, you will need an EIP20Token. You can either use an existing EIP20Token contract or deploy a new one.
 
 ### Deploy TokenRules contract
-<tbd>
+One TokenRules contract is deployed per Organization. Only the Organization whitelisted workers can register rule contracts in the TokenRules contract.
 
 ```js
 txOptions = {
@@ -129,7 +129,6 @@ tokenRulesSetupObject.deploy(organization, eip20Token, txOptions).then(function(
 ```   
 
 ### Deploy TokenHolder MasterCopy
-<tbd>
 
 ```js
 txOptions = {
@@ -146,7 +145,6 @@ userSetup.deployTokenHolderMasterCopy(txOptions).then(function(response){
 ```  
 
 ### Deploy Gnosis MasterCopy
-<tbd>
 
 ```js
 txOptions = {
@@ -164,7 +162,6 @@ userSetup.deployMultiSigMasterCopy(txOptions).then(function(response){
 ```  
 
 ### Deploy DelayedRecoveryModule MasterCopy
-<tbd>
 
 ```js
 txOptions = {
@@ -182,7 +179,6 @@ userSetup.deployDelayedRecoveryModuleMasterCopy(txOptions).then(function(respons
 ```  
 
 ### Deploy CreateAndAddModules Contract
-<tbd>
 
 ```js
 txOptions = {
@@ -200,7 +196,6 @@ userSetup.deployCreateAndAddModules(txOptions).then(function(response){
 ```  
 
 ### Deploy UserWalletFactory Contract
-<tbd>
 
 ```js
 txOptions = {
@@ -218,7 +213,6 @@ userSetup.deployUserWalletFactory(txOptions).then(function(response){
 ```
 
 ### Deploy ProxyFactory Contract
-<tbd>
 
 ```js
 txOptions = {
@@ -236,7 +230,6 @@ userSetup.deployProxyFactory(txOptions).then(function(response){
 ``` 
 
 ### Deploy PricerRule Contract
-<tbd>
 
 ```js
 txOptions = {
@@ -257,8 +250,7 @@ rulesSetup.deployPricerRule(baseCurrencyCode, conversionRate, conversionRateDeci
 
 ``` 
 
-### Registration of Rule to TokenRules
-<tbd>
+## Registration of Rule to TokenRules
 
 ```js
 txOptions = {
@@ -276,8 +268,7 @@ tokenRules.registerRule(pricerRule, pricerRuleAddress, pricerRuleAbi.toString(),
 
 ``` 
 
-### Creating a User Wallet
-<tbd>
+## Creating a User Wallet
 
 ```js
 txOptions = {
@@ -300,7 +291,6 @@ const owner = '0xaabb1122....................';
 const ephemeralKey = '0xaabb1122....................';
 const sessionKeySpendingLimit = 1000000;
 const sessionKeyExpirationHeight = 100000000000; 
-const owners = [owner];
 const threshold = 1;
 const recoveryOwnerAddress = '0xaabb1122....................';
 const recoveryControllerAddress = '0xaabb1122....................';
@@ -308,7 +298,7 @@ const recoveryBlockDelay = 10;
 let gnosisSafeProxy;
 let userTokenHolderProxy;
 User.createUserWallet(
-  owners, 
+  [owner], 
   threshold, 
   recoveryOwnerAddress, 
   recoveryControllerAddress, 
@@ -326,8 +316,7 @@ User.createUserWallet(
 
 ``` 
 
-### Creating a Company Wallet
-<tbd>
+## Creating a Company Wallet
 
 ```js
 txOptions = {
@@ -343,7 +332,7 @@ const User = new OpenST.Helpers.User(
   eip20Token,
   tokenRulesAddress,
   userWalletFactoryAddress,
-  proxyFactoryAddress, // proxy factory address
+  proxyFactoryAddress,
   web3Provider
 );
 const owner = '0xaabb1122....................';
@@ -364,3 +353,46 @@ User.createCompanyWallet(
 });
 
 ``` 
+
+## Direct transfer of utility tokens
+
+```js
+txOptions = {
+  from: relayer,
+  gasPrice: gasPrice,
+  gas: gas
+};
+const tokenRules = new OpenST.Helpers.TokenRules(tokenRulesAddress, web3Provider);
+const receiver = '0xaabb1122....................'; 
+const directTransferCallData = tokenRules.getDirectTransferExecutableData([receiver], [100]);
+const nonce = 0; // Ephemeral key current nonce.
+const tokenHolder = new OpenST.Helpers.TokenHolder(web3Provider, userTokenHolderProxy);
+let transaction = {
+  from: userTokenHolderProxy,
+  to: tokenRulesAddress,
+  data: directTransferCallData,
+  nonce: nonce,
+  callPrefix: tokenHolder.getTokenHolderExecuteRuleCallPrefix(),
+  value: 0,
+  gasPrice: 0,
+  gas: 0
+};
+let ephemeralKeyAccountInstance; // Construct account instance of ephemeral key
+const vrs = ephemeralKeyAccountInstance.signEIP1077Transaction(transaction);
+tokenHolder.executeRule(tokenRulesAddress, directTransferCallData, nonce, vrs.r, vrs.s, vrs.v, txOptions).then(function(response){
+  console.log("Successful transfer done!");
+})
+
+```
+
+## Tests
+
+Tests require docker-compose. To run the tests, execute below command from root directory.
+
+```bash
+    // For unit tests.
+    npm run test
+    // For integration tests.
+    npm run test:integration
+
+```   
