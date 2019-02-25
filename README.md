@@ -1,13 +1,13 @@
 OpenST.js
 ============
 
+OpenST is a framework for building token economies. OpenST supports interactions with openst-contracts.
+
 ![Build master](https://img.shields.io/travis/OpenSTFoundation/openst.js/master.svg?label=build%20master&style=flat)
 ![Build develop](https://img.shields.io/travis/OpenSTFoundation/openst.js/develop.svg?label=build%20develop&style=flat)
 ![npm version](https://img.shields.io/npm/v/@openstfoundation/openst.js.svg?style=flat)
 ![Discuss on Discourse](https://img.shields.io/discourse/https/discuss.openst.org/topics.svg?style=flat)
 ![Chat on Gitter](https://img.shields.io/gitter/room/OpenSTFoundation/SimpleToken.svg?style=flat)
-
-OpenST.js supports interaction with openst-contracts.
 
 ##  Setup
 This library assumes that nodejs and geth are installed and running. To install OpenST.js in your project using npm:
@@ -16,10 +16,9 @@ This library assumes that nodejs and geth are installed and running. To install 
 $ npm install @openstfoundation/openst.js --save
 ```
 
-This code was tested with geth version: 1.7.3-stable. Other higher versions should also work.
+The code works for Ethereum Byzantium and Petersburg.
 
-## Creating a OpenST object
-The OpenST object is an entry point: using the OpenST object, a staking can be initiated.
+## Creating an OpenST object
 
 ```js
 // Creating OpenST.js object
@@ -27,26 +26,10 @@ const OpenST = require('@openstfoundation/openst.js');
 
 ```
 
-## ABI and BIN provider
-
-openst.js comes with an abi-bin provider for managing abi(s) and bin(s).
-
-The abiBinProvider provides abi(s) and bin(s) for the following contracts:
-
-* [TokenHolder](https://github.com/OpenSTFoundation/openst-contracts/blob/0.10.0-alpha.1/contracts/token/TokenHolder.sol) (TokenHolder contract deployed on UtilityChain)
-* [TokenRules](https://github.com/OpenSTFoundation/openst-contracts/blob/0.10.0-alpha.1/contracts/token/TokenRules.sol) (TokenRules contract deployed on UtilityChain)
-* [PricerRule](https://github.com/OpenSTFoundation/openst-contracts/blob/0.10.0-alpha.1/contracts/rules/PricerRule.sol) (PricerRule is a rule contract deployed on UtilityChain)
-* [GnosisSafe](https://github.com/gnosis/safe-contracts/blob/v0.1.0/contracts/GnosisSafe.sol) (MultiSignature wallet with support for confirmations using signed messages)
-* [DelayedRecoveryModule](https://github.com/OpenSTFoundation/openst-contracts/blob/0.10.0-alpha.1/contracts/gnosis_safe_modules/DelayedRecoveryModule.sol) (Allows to replace an owner without Safe confirmations) 
-* [CreateAndAddModules](https://github.com/gnosis/safe-contracts/blob/v0.1.0/contracts/libraries/CreateAndAddModules.sol) (Allows to create and add multiple module in one transaction)
-* [UserWalletFactory](https://github.com/OpenSTFoundation/openst-contracts/blob/0.10.0-alpha.1/contracts/proxies/UserWalletFactory.sol) (Creates proxy for GnosisSafe, TokenHolder and DelayedRecoveryModule)
-
+For deployment of Organization contract, Mosaic object is needed.
 ```js
-
-// Fetching ABI examples.
-let abiBinProvider = new OpenST.AbiBinProvider();
-const TokenHolderAbi = abiBinProvider.getABI('TokenHolder');
-
+// Create Mosaic object
+const Mosaic = require('@openstfoundation/mosaic.js');
 ```
 
 ## Deploying contracts
@@ -83,8 +66,6 @@ const gas = '7500000';
 An Organization contract serves as an on-chain access control mechanism by assigning roles to a set of addresses.
 
 ```js
-// Deploy Organization contract
-const Mosaic = require('@openstfoundation/mosaic.js');
 const { Organization } = Mosaic.ContractInteract;
 const organizationOwner = '0xaabb1122....................';
 const admin = '0xaabb1122....................';
@@ -479,6 +460,28 @@ authorizeSession();
 ```
 
 Similar above steps apply for revokeSession and logout operations.
+
+## ABI and BIN provider
+
+openst.js comes with an abi-bin provider for managing abi(s) and bin(s).
+
+The abiBinProvider provides abi(s) and bin(s) for the following contracts:
+
+* [TokenHolder](https://github.com/OpenSTFoundation/openst-contracts/blob/0.10.0-alpha.1/contracts/token/TokenHolder.sol) (TokenHolder contract deployed on UtilityChain)
+* [TokenRules](https://github.com/OpenSTFoundation/openst-contracts/blob/0.10.0-alpha.1/contracts/token/TokenRules.sol) (TokenRules contract deployed on UtilityChain)
+* [PricerRule](https://github.com/OpenSTFoundation/openst-contracts/blob/0.10.0-alpha.1/contracts/rules/PricerRule.sol) (PricerRule is a rule contract deployed on UtilityChain)
+* [GnosisSafe](https://github.com/gnosis/safe-contracts/blob/v0.1.0/contracts/GnosisSafe.sol) (MultiSignature wallet with support for confirmations using signed messages)
+* [DelayedRecoveryModule](https://github.com/OpenSTFoundation/openst-contracts/blob/0.10.0-alpha.1/contracts/gnosis_safe_modules/DelayedRecoveryModule.sol) (Allows to replace an owner without Safe confirmations) 
+* [CreateAndAddModules](https://github.com/gnosis/safe-contracts/blob/v0.1.0/contracts/libraries/CreateAndAddModules.sol) (Allows to create and add multiple module in one transaction)
+* [UserWalletFactory](https://github.com/OpenSTFoundation/openst-contracts/blob/0.10.0-alpha.1/contracts/proxies/UserWalletFactory.sol) (Creates proxy for GnosisSafe, TokenHolder and DelayedRecoveryModule)
+
+```js
+
+// Fetching ABI examples.
+let abiBinProvider = new OpenST.AbiBinProvider();
+const TokenHolderAbi = abiBinProvider.getABI('TokenHolder');
+
+```
 
 ## Tests
 
