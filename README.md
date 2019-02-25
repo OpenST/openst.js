@@ -79,7 +79,7 @@ const passphrase = 'some passphrase.....';
 
 // Other constants
 const gasPrice = '0x12A05F200';
-const gas = 7500000;
+const gas = '7500000';
 
 ```
 
@@ -153,7 +153,6 @@ txOptions = {
   gas: gas
 };
 const userSetup = new OpenST.Setup.User(web3Provider);
-
 let gnosisMasterCopyAddress;
 userSetup.deployMultiSigMasterCopy(txOptions).then(function(response){
   gnosisMasterCopyAddress = response.receipt.contractAddress;
@@ -170,7 +169,6 @@ txOptions = {
   gas: gas
 };
 const userSetup = new OpenST.Setup.User(web3Provider);
-
 let delayedRecoveryModuleMasterCopyAddress;
 userSetup.deployDelayedRecoveryModuleMasterCopy(txOptions).then(function(response){
   delayedRecoveryModuleMasterCopyAddress = response.receipt.contractAddress;
@@ -187,7 +185,6 @@ txOptions = {
   gas: gas
 };
 const userSetup = new OpenST.Setup.User(web3Provider);
-
 let createAndAddModulesAddress;
 userSetup.deployCreateAndAddModules(txOptions).then(function(response){
   createAndAddModulesAddress = response.receipt.contractAddress;
@@ -204,7 +201,6 @@ txOptions = {
   gas: gas
 };
 const userSetup = new OpenST.Setup.User(web3Provider);
-
 let userWalletFactoryAddress;
 userSetup.deployUserWalletFactory(txOptions).then(function(response){
   userWalletFactoryAddress = response.receipt.contractAddress;
@@ -221,7 +217,6 @@ txOptions = {
   gas: gas
 };
 const userSetup = new OpenST.Setup.User(web3Provider);
-
 let proxyFactoryAddress;
 userSetup.deployProxyFactory(txOptions).then(function(response){
   proxyFactoryAddress = response.receipt.contractAddress;
@@ -238,7 +233,6 @@ txOptions = {
   gas: gas
 };
 const rulesSetup = new OpenST.Setup.Rules(web3Provider);
-
 const baseCurrencyCode = 'OST';
 const conversionRate = 10;
 const conversionRateDecimals = 5;
@@ -258,7 +252,6 @@ txOptions = {
   gasPrice: gasPrice,
   gas: gas
 };
-
 const pricerRule = 'PricerRule';
 const tokenRules = new OpenST.Helpers.TokenRules(tokenRulesAddress, web3Provider);
 const pricerRuleAbi = abiBinProvider.getABI(pricerRule);
@@ -289,8 +282,8 @@ const User = new OpenST.Helpers.User(
 );
 const owner = '0xaabb1122....................';
 const ephemeralKey = '0xaabb1122....................';
-const sessionKeySpendingLimit = 1000000;
-const sessionKeyExpirationHeight = 100000000000; 
+const sessionKeySpendingLimit = '1000000';
+const sessionKeyExpirationHeight = '100000000000'; 
 const threshold = 1;
 const recoveryOwnerAddress = '0xaabb1122....................';
 const recoveryControllerAddress = '0xaabb1122....................';
@@ -337,8 +330,8 @@ const User = new OpenST.Helpers.User(
 );
 const owner = '0xaabb1122....................';
 const ephemeralKey = '0xaabb1122....................';
-const sessionKeySpendingLimit = 1000000;
-const sessionKeyExpirationHeight = 100000000000; 
+const sessionKeySpendingLimit = '1000000';
+const sessionKeyExpirationHeight = '100000000000'; 
 let companyTokenHolderProxy;
 User.createCompanyWallet(
   owner,
@@ -393,18 +386,18 @@ Make sure PriceOracle contract is already deployed. Refer [PriceOracle](https://
 
 ```js
 async function pay() {
+   let txOptions = {
+      from: worker,
+      gasPrice: gasPrice,
+      gas: gas
+   };
   const pricerRule = new OpenST.Helpers.Rules.PricerRule(web3Provider, pricerRuleAddress);
-  const workerTxOptions = {
-    from: worker,
-    gasPrice: gasPrice,
-    gas: gas
-  };
-  let priceOracleAddress; // Set PriceOracle address here.
-  const acceptanceMargin = '10000000000'; // set appropriate acceptance margin
-  await pricerRule.addPriceOracle(priceOracleAddress, workerTxOptions);
-  await pricerRule.setAcceptanceMargin('USD', acceptanceMargin, workerTxOptions);
-      
-  const txOptions = {
+  let priceOracleAddress;
+  const acceptanceMargin = '10000000000000000000';
+  await pricerRule.addPriceOracle(priceOracleAddress, txOptions); // Set PriceOracle address in PricerRule.
+  await pricerRule.setAcceptanceMargin('USD', acceptanceMargin, txOptions); // Set appropriate acceptance margin.
+       
+  txOptions = {
     from: relayer,
     gasPrice: gasPrice,
     gas: gas
@@ -412,8 +405,8 @@ async function pay() {
   const tokenHolder = new OpenST.Helpers.TokenHolder(web3Provider, userTokenHolderProxy);
   const receiver = '0xaabb1122....................'; 
   const nonce = 0; // Ephemeral key current nonce.
-  let baseCurrencyIntendedPrice; // Set current OST/USD price.
-  const pricerRulePayCallData = pricerRule.getPayExecutableData(userTokenHolderProxy, [receiver], [1000], 'USD', baseCurrencyIntendedPrice);
+  let baseCurrencyIntendedPrice; // Current OST/USD price.
+  const pricerRulePayCallData = pricerRule.getPayExecutableData(userTokenHolderProxy, [receiver], ['1000'], 'USD', baseCurrencyIntendedPrice);
   let transaction = {
     from: userTokenHolderProxy,
     to: pricerRuleAddress,
@@ -430,6 +423,7 @@ async function pay() {
     console.log("Successful transfer done!");
   })
 }
+pay();
 
 ```
 
@@ -439,53 +433,53 @@ async function pay() {
 
 ```js
 async function addWallet() {
-const txOptions = {
-  from: relayer,
-  gasPrice: gasPrice,
-  gas: gas
+    const txOptions = {
+      from: relayer,
+      gasPrice: gasPrice,
+      gas: gas
+    };
+    const gnosisSafe = new GnosisSafe(gnosisSafeProxy, web3Provider);
+    const threshold = 1;
+    const ownerToAdd = '0xaabb1122....................';
+    const ownerToAddWithThresholdCallData = gnosisSafe.getAddOwnerWithThresholdExecutableData(ownerToAdd, threshold);
+    const nullAddress = '0x0000000000000000000000000000000000000000';
+    const nonce = await gnosisSafe.getNonce();
+    const safeTxData = await gnosisSafe.getSafeTxData(gnosisSafeProxy, 0, ownerToAddWithThresholdCallData, 0, 0, 0, 0, nullAddress, nullAddress, nonce);
+    // 2. Generate EIP712 Signature.
+    const signatureObj = await owner.signEIP712TypedData(safeTxData);
+    await gnosisSafe.execTransaction(gnosisSafeProxy, 0, ownerToAddWithThresholdCallData, 0, 0, 0, 0, nullAddress, nullAddress, signatureObj.signature, txOptions);
 };
-const gnosisSafe = new GnosisSafe(gnosisSafeProxy, web3Provider);
-const threshold = 1;
-const ownerToAdd = '0xaabb1122....................';
-const ownerToAddWithThresholdCallData = gnosisSafe.getAddOwnerWithThresholdExecutableData(ownerToAdd, threshold);
-const nullAddress = '0x0000000000000000000000000000000000000000';
-const nonce = await gnosisSafe.getNonce();
-const safeTxData = await gnosisSafe.getSafeTxData(gnosisSafeProxy, 0, ownerToAddWithThresholdCallData, 0, 0, 0, 0, nullAddress, nullAddress, nonce);
-// 2. Generate EIP712 Signature.
-const signatureObj = await owner.signEIP712TypedData(safeTxData);
-await gnosisSafe.execTransaction(gnosisSafeProxy, 0, ownerToAddWithThresholdCallData, 0, 0, 0, 0, nullAddress, nullAddress, signatureObj.signature, txOptions);
-}
 addWallet();    
 
 ```
 
-Above similar steps apply for removeWallet and replaceWallet operations.
+Similar above steps apply for removeWallet and replaceWallet operations.
 
 ### Authorize Session
 
-```
+```js
 async function authorizeSession() {
-const txOptions = {
-  from: relayer,
-  gasPrice: gasPrice,
-  gas: gas
+    const txOptions = {
+      from: relayer,
+      gasPrice: gasPrice,
+      gas: gas
+    };
+    const tokenHolder = new TokenHolder(web3Provider, userTokenHolderProxy);
+    const sessionKeyToAuthorize = '0xaabb1122....................';
+    const spendingLimit = '1000000000000';
+    const expirationHeight = '100000000000';
+    const nullAddress = '0x0000000000000000000000000000000000000000';
+    const authorizeSessionCallData = tokenHolder.getAuthorizeSessionExecutableData(sessionKeyToAuthorize, spendingLimit, expirationHeight);
+    const gnosisSafe = new GnosisSafe(gnosisSafeProxy, web3Provider);
+    const nonce = await gnosisSafe.getNonce();
+    const safeTxData = gnosisSafe.getSafeTxData(userTokenHolderProxy, 0, authorizeSessionCallData, 0, 0, 0, 0, nullAddress, nullAddress, nonce);
+    const signatureObj = await owner.signEIP712TypedData(safeTxData);
+    await gnosisSafe.execTransaction(userTokenHolderProxy, 0, authorizeSessionCallData, 0, 0, 0, 0, nullAddress, nullAddress, signatureObj.signature, txOptions);
 };
-const tokenHolder = new TokenHolder(web3Provider, userTokenHolderProxy);
-const sessionKeyToAuthorize = '0xaabb1122....................';
-const spendingLimit = 1000000;
-const expirationHeight = 100000000000;
-const authorizeSessionCallData = tokenHolderInstance.getAuthorizeSessionExecutableData(sessionKey, spendingLimit, expirationHeight);
-const gnosisSafe = new GnosisSafe(gnosisSafeProxy, web3Provider);
-const nonce = await gnosisSafe.getNonce();
-const safeTxData = gnosisSafeProxyInstance.getSafeTxData(userTokenHolderProxy, 0, authorizeSessionCallData, 0, 0, 0, 0, nullAddress, nullAddress, nonce);
-const signatureObj = await owner.signEIP712TypedData(safeTxData);
-const result = await gnosisSafe.execTransaction(userTokenHolderProxy, 0, authorizeSessionCallData, 0, 0, 0, 0, nullAddress, nullAddress, signatureObj.signature, txOptions);
-}
 authorizeSession(); 
-
 ```
 
-Above similar above steps apply for revokeSession and logout operations.
+Similar above steps apply for revokeSession and logout operations.
 
 ## Tests
 
