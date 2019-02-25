@@ -357,7 +357,7 @@ User.createCompanyWallet(
 ## Direct transfer of utility tokens
 
 ```js
-txOptions = {
+const txOptions = {
   from: relayer,
   gasPrice: gasPrice,
   gas: gas
@@ -384,6 +384,108 @@ tokenHolder.executeRule(tokenRulesAddress, directTransferCallData, nonce, vrs.r,
 })
 
 ```
+
+## Setup of PriceOracle 
+
+Make sure PriceOracle contract is already deployed. Refer [PriceOracle](https://github.com/OpenSTFoundation/ost-price-oracle) npm for setup of PriceOracle contract.
+
+## Payment through PricerRule contract 
+
+```js
+async function pay() {
+  const pricerRule = new OpenST.Helpers.Rules.PricerRule(web3Provider, pricerRuleAddress);
+  const workerTxOptions = {
+    from: worker,
+    gasPrice: gasPrice,
+    gas: gas
+  };
+  let priceOracleAddress; // Set PriceOracle address here.
+  const acceptanceMargin = '10000000000'; // set appropriate acceptance margin
+  await pricerRule.addPriceOracle(priceOracleAddress, workerTxOptions);
+  await pricerRule.setAcceptanceMargin('USD', acceptanceMargin, workerTxOptions);
+      
+  const txOptions = {
+    from: relayer,
+    gasPrice: gasPrice,
+    gas: gas
+  };
+  const tokenHolder = new OpenST.Helpers.TokenHolder(web3Provider, userTokenHolderProxy);
+  const receiver = '0xaabb1122....................'; 
+  const nonce = 0; // Ephemeral key current nonce.
+  let baseCurrencyIntendedPrice; // Set current OST/USD price.
+  const pricerRulePayCallData = pricerRule.getPayExecutableData(userTokenHolderProxy, [receiver], [1000], 'USD', baseCurrencyIntendedPrice);
+  let transaction = {
+    from: userTokenHolderProxy,
+    to: pricerRuleAddress,
+    data: pricerRulePayCallData,
+    nonce: nonce,
+    callPrefix: tokenHolder.getTokenHolderExecuteRuleCallPrefix(),
+    value: 0,
+    gasPrice: 0,
+    gas: 0
+  };
+  let ephemeralKeyAccountInstance;
+  const signatureObj = ephemeralKeyAccountInstance.signEIP1077Transaction(transaction);
+  tokenHolder.executeRule(pricerRuleAddress, pricerRulePayCallData, nonce, signatureObj.r, signatureObj.s, signatureObj.v, txOptions).then( function() {
+    console.log("Successful transfer done!");
+  })
+}
+
+```
+
+## Perform Wallet Operations
+
+### Add Wallet
+
+```js
+async function addWallet() {
+const txOptions = {
+  from: relayer,
+  gasPrice: gasPrice,
+  gas: gas
+};
+const gnosisSafe = new GnosisSafe(gnosisSafeProxy, web3Provider);
+const threshold = 1;
+const ownerToAdd = '0xaabb1122....................';
+const ownerToAddWithThresholdCallData = gnosisSafe.getAddOwnerWithThresholdExecutableData(ownerToAdd, threshold);
+const nullAddress = '0x0000000000000000000000000000000000000000';
+const nonce = await gnosisSafe.getNonce();
+const safeTxData = await gnosisSafe.getSafeTxData(gnosisSafeProxy, 0, ownerToAddWithThresholdCallData, 0, 0, 0, 0, nullAddress, nullAddress, nonce);
+// 2. Generate EIP712 Signature.
+const signatureObj = await owner.signEIP712TypedData(safeTxData);
+await gnosisSafe.execTransaction(gnosisSafeProxy, 0, ownerToAddWithThresholdCallData, 0, 0, 0, 0, nullAddress, nullAddress, signatureObj.signature, txOptions);
+}
+addWallet();    
+
+```
+
+Above similar steps apply for removeWallet and replaceWallet operations.
+
+### Authorize Session
+
+```
+async function authorizeSession() {
+const txOptions = {
+  from: relayer,
+  gasPrice: gasPrice,
+  gas: gas
+};
+const tokenHolder = new TokenHolder(web3Provider, userTokenHolderProxy);
+const sessionKeyToAuthorize = '0xaabb1122....................';
+const spendingLimit = 1000000;
+const expirationHeight = 100000000000;
+const authorizeSessionCallData = tokenHolderInstance.getAuthorizeSessionExecutableData(sessionKey, spendingLimit, expirationHeight);
+const gnosisSafe = new GnosisSafe(gnosisSafeProxy, web3Provider);
+const nonce = await gnosisSafe.getNonce();
+const safeTxData = gnosisSafeProxyInstance.getSafeTxData(userTokenHolderProxy, 0, authorizeSessionCallData, 0, 0, 0, 0, nullAddress, nullAddress, nonce);
+const signatureObj = await owner.signEIP712TypedData(safeTxData);
+const result = await gnosisSafe.execTransaction(userTokenHolderProxy, 0, authorizeSessionCallData, 0, 0, 0, 0, nullAddress, nullAddress, signatureObj.signature, txOptions);
+}
+authorizeSession(); 
+
+```
+
+Above similar above steps apply for revokeSession and logout operations.
 
 ## Tests
 
