@@ -1,6 +1,6 @@
 {
   "name": "@openstfoundation/openst.js",
-  "version": "0.10.0-alpha.1",
+  "version": "0.10.0-alpha.3",
   "description": "OpenST is a framework for building token economies.",
   "main": "index.js",
   "repository": {
