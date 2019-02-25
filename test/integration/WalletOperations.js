@@ -1,26 +1,18 @@
-const chai = require('chai'),
-  Web3 = require('web3'),
-  Package = require('../../index'),
-  abiDecoder = require('abi-decoder'),
-  MockContractsDeployer = require('../utils/MockContractsDeployer'),
-  Mosaic = require('@openstfoundation/mosaic.js'),
-  config = require('../utils/configReader');
-
-const TokenRulesSetup = Package.Setup.TokenRules,
-  UserSetup = Package.Setup.User,
-  Contracts = Package.Contracts,
-  User = Package.Helpers.User,
-  AbiBinProvider = Package.AbiBinProvider,
-  TokenHolder = Package.Helpers.TokenHolder,
-  GnosisSafe = Package.Helpers.GnosisSafe;
-
-const { assert } = chai,
-  abiBinProvider = new AbiBinProvider();
-
+const Web3 = require('web3');
+const { assert } = require('chai');
+const Package = require('../../index');
+const abiDecoder = require('abi-decoder');
+const MockContractsDeployer = require('../utils/MockContractsDeployer');
+const Mosaic = require('@openstfoundation/mosaic.js');
+const config = require('../utils/configReader');
 const { dockerSetup, dockerTeardown } = require('./../../utils/docker');
 
+const UserSetup = Package.Setup.User;
+const { Contracts } = Package;
+const TokenHolderHelper = Package.Helpers.TokenHolder;
+const abiBinProvider = new Package.AbiBinProvider();
+
 let auxiliaryWeb3,
-  ContractsInstance,
   deployerAddress,
   userWalletFactoryAddress,
   thMasterCopyAddress,
@@ -29,27 +21,21 @@ let auxiliaryWeb3,
   delayedRecoveryModuleMasterCopyAddress,
   createAndAddModulesAddress,
   worker,
-  organization,
-  mockToken,
-  owner,
+  eip20Token,
   tokenHolderProxy,
   gnosisSafeProxy,
   ephemeralKey,
-  deployerInstance,
-  tokenRules,
   gnosisSafeProxyInstance,
   txOptions,
-  tokenHolderInstance;
+  tokenHolderHelperObject;
 
 describe('Wallet operations', async function() {
   before(async function() {
     const { rpcEndpointOrigin } = await dockerSetup();
     auxiliaryWeb3 = new Web3(rpcEndpointOrigin);
-    ContractsInstance = new Contracts(auxiliaryWeb3);
     const accountsOrigin = await auxiliaryWeb3.eth.getAccounts();
     deployerAddress = accountsOrigin[0];
     worker = accountsOrigin[1];
-    owner = accountsOrigin[2];
 
     txOptions = {
       from: deployerAddress,
@@ -62,40 +48,34 @@ describe('Wallet operations', async function() {
     dockerTeardown();
   });
 
-  it('Should deploy Organization contract', async function() {
+  it('Performs initial setup for economy', async function() {
     const { Organization } = Mosaic.ContractInteract;
     const orgConfig = {
       deployer: deployerAddress,
-      owner,
+      owner: deployerAddress,
       admin: worker,
       workers: [worker],
       workerExpirationHeight: config.workerExpirationHeight
     };
     const organizationContractInstance = await Organization.setup(auxiliaryWeb3, orgConfig);
-    organization = organizationContractInstance.address;
+    const organization = organizationContractInstance.address;
     assert.isNotNull(organization, 'Organization contract address should not be null.');
-  });
 
-  it('Deploys EIP20Token contract', async function() {
-    deployerInstance = new MockContractsDeployer(deployerAddress, auxiliaryWeb3);
-
+    const deployerInstance = new MockContractsDeployer(deployerAddress, auxiliaryWeb3);
     await deployerInstance.deployMockToken();
 
-    mockToken = deployerInstance.addresses.MockToken;
-    assert.isNotNull(mockToken, 'EIP20Token contract address should not be null.');
-  });
+    eip20Token = deployerInstance.addresses.MockToken;
+    assert.isNotNull(eip20Token, 'EIP20Token contract address should not be null.');
 
-  it('Should deploy TokenRules contract', async function() {
-    tokenRules = new TokenRulesSetup(auxiliaryWeb3);
+    const tokenRules = new Package.Setup.TokenRules(auxiliaryWeb3);
 
-    const response = await tokenRules.deploy(organization, mockToken, txOptions, auxiliaryWeb3);
+    const response = await tokenRules.deploy(organization, eip20Token, txOptions, auxiliaryWeb3);
     tokenRulesAddress = response.receipt.contractAddress;
-    const openstContracts = new Contracts(auxiliaryWeb3);
 
-    let contractInstance = openstContracts.TokenRules(response.receipt.contractAddress, txOptions);
+    const contractInstance = Contracts.getTokenRules(auxiliaryWeb3, response.receipt.contractAddress, txOptions);
 
     // Verifying stored organization and token address.
-    assert.strictEqual(mockToken, await contractInstance.methods.token().call(), 'Token address is incorrect');
+    assert.strictEqual(eip20Token, await contractInstance.methods.token().call(), 'Token address is incorrect');
     assert.strictEqual(
       organization,
       await contractInstance.methods.organization().call(),
@@ -103,65 +83,51 @@ describe('Wallet operations', async function() {
     );
   });
 
-  it('Deploys DelayedRecoveryModule master copy.', async function() {
+  it('Performs Setup of TokenHolder, MultiSig, DelayedRecoveryModule master copies', async function() {
     const userSetup = new UserSetup(auxiliaryWeb3);
+    const tokenHolderTxResponse = await userSetup.deployTokenHolderMasterCopy(txOptions);
+    thMasterCopyAddress = tokenHolderTxResponse.receipt.contractAddress;
+    assert.isNotNull(thMasterCopyAddress, 'TH master copy contract address should not be null.');
+
+    const multiSigTxResponse = await userSetup.deployMultiSigMasterCopy(txOptions);
+    gnosisSafeMasterCopyAddress = multiSigTxResponse.receipt.contractAddress;
+    assert.isNotNull(gnosisSafeMasterCopyAddress, 'gnosis safe master copy contract address should not be null.');
+
     const txResponse = await userSetup.deployDelayedRecoveryModuleMasterCopy(txOptions);
     delayedRecoveryModuleMasterCopyAddress = txResponse.receipt.contractAddress;
-    assert.strictEqual(txResponse.receipt.status, true);
     assert.isNotNull(
       delayedRecoveryModuleMasterCopyAddress,
       "DelayedRecoveryModule master copy contract's address is null."
     );
   });
 
-  it('Deploys CreateAndAddModules.', async function() {
+  it('Performs setup of CreateAndAddModules, UserWalletFactory, ProxyFactory contracts', async function() {
     const userSetup = new UserSetup(auxiliaryWeb3);
     const txResponse = await userSetup.deployCreateAndAddModules(txOptions);
     createAndAddModulesAddress = txResponse.receipt.contractAddress;
-    assert.strictEqual(txResponse.receipt.status, true);
     assert.isNotNull(createAndAddModulesAddress, "createAndAddModules contract's address is null.");
-  });
 
-  it('Should deploy Gnosis MultiSig MasterCopy contract', async function() {
-    const userSetup = new UserSetup(auxiliaryWeb3);
-    const multiSigTxResponse = await userSetup.deployMultiSigMasterCopy(txOptions);
-    gnosisSafeMasterCopyAddress = multiSigTxResponse.receipt.contractAddress;
-    assert.strictEqual(multiSigTxResponse.receipt.status, true);
-  });
-
-  it('Should deploy TokenHolder MasterCopy contract', async function() {
-    const userSetup = new UserSetup(auxiliaryWeb3);
-    const tokenHolderTxResponse = await userSetup.deployTokenHolderMasterCopy(txOptions);
-    thMasterCopyAddress = tokenHolderTxResponse.receipt.contractAddress;
-    assert.strictEqual(tokenHolderTxResponse.receipt.status, true);
-  });
-
-  it('Should deploy UserWalletFactory contract', async function() {
-    const userSetup = new UserSetup(auxiliaryWeb3);
     const userWalletFactoryResponse = await userSetup.deployUserWalletFactory(txOptions);
     userWalletFactoryAddress = userWalletFactoryResponse.receipt.contractAddress;
-    assert.strictEqual(userWalletFactoryResponse.receipt.status, true);
-  });
+    assert.isNotNull(userWalletFactoryAddress, 'UserWalletFactory contract address should not be null.');
 
-  it('Should deploy ProxyFactory contract', async function() {
-    const userSetup = new UserSetup(auxiliaryWeb3);
     const proxyFactoryResponse = await userSetup.deployProxyFactory(txOptions);
     proxyFactoryAddress = proxyFactoryResponse.receipt.contractAddress;
-    assert.strictEqual(proxyFactoryResponse.receipt.status, true);
+    assert.isNotNull(proxyFactoryAddress, 'Proxy contract address should not be null.');
   });
 
   // wallet3, wallet9 are the owners.
-  it('Should create a user wallet', async function() {
+  it('Creates user wallet', async function() {
     await auxiliaryWeb3.eth.accounts.wallet.create(10);
 
     ephemeralKey = auxiliaryWeb3.eth.accounts.wallet[0];
 
-    const userInstance = new User(
+    const userInstance = new Package.Helpers.User(
       thMasterCopyAddress,
       gnosisSafeMasterCopyAddress,
       delayedRecoveryModuleMasterCopyAddress,
       createAndAddModulesAddress,
-      mockToken,
+      eip20Token,
       tokenRulesAddress,
       userWalletFactoryAddress,
       proxyFactoryAddress,
@@ -202,10 +168,10 @@ describe('Wallet operations', async function() {
 
   // wallet1 and wallet2 are the owners.
   // // After AddWallet wallet1, wallet2, wallet3 are the owners.
-  it('Should add wallet', async function() {
+  it('Owner adds a wallet', async function() {
     await auxiliaryWeb3.eth.accounts.wallet.create(1);
 
-    gnosisSafeProxyInstance = new GnosisSafe(gnosisSafeProxy, auxiliaryWeb3);
+    gnosisSafeProxyInstance = new Package.Helpers.GnosisSafe(gnosisSafeProxy, auxiliaryWeb3);
 
     const ownerToAdd = auxiliaryWeb3.eth.accounts.wallet[3],
       currentOwner = auxiliaryWeb3.eth.accounts.wallet[1],
@@ -255,7 +221,7 @@ describe('Wallet operations', async function() {
 
   // wallet1, wallet2, wallet3 are the owners.
   // After ReplaceWallet wallet2, wallet3, wallet4 are the owners.
-  it('Should replace wallet', async function() {
+  it('Owner replaces a wallet', async function() {
     const owners = await gnosisSafeProxyInstance.getOwners();
     await auxiliaryWeb3.eth.accounts.wallet.create(1);
     const newOwner = auxiliaryWeb3.eth.accounts.wallet[4],
@@ -309,7 +275,7 @@ describe('Wallet operations', async function() {
 
   // // wallet2, wallet3, wallet4 are the owners.
   // After RemoveWallet wallet2, wallet4 are the owners.
-  it('Should remove wallet', async function() {
+  it('Owner removes a wallet', async function() {
     const removeOwner = auxiliaryWeb3.eth.accounts.wallet[3],
       owner = auxiliaryWeb3.eth.accounts.wallet[2];
 
@@ -359,14 +325,14 @@ describe('Wallet operations', async function() {
   });
 
   // wallet2, wallet4 are the owners.
-  it('Should authorize session', async function() {
+  it('Owner authorizes a session', async function() {
     await auxiliaryWeb3.eth.accounts.wallet.create(1);
-    tokenHolderInstance = new TokenHolder(auxiliaryWeb3, tokenRulesAddress, tokenHolderProxy);
+    tokenHolderHelperObject = new TokenHolderHelper(auxiliaryWeb3, tokenRulesAddress, tokenHolderProxy);
     const sessionKey = auxiliaryWeb3.eth.accounts.wallet[5].address;
     const spendingLimit = config.sessionKeySpendingLimit;
     const expirationHeight = config.sessionKeyExpirationHeight;
     const currentOwner = auxiliaryWeb3.eth.accounts.wallet[2];
-    const authorizeSessionExData = tokenHolderInstance.getAuthorizeSessionExecutableData(
+    const authorizeSessionExData = tokenHolderHelperObject.getAuthorizeSessionExecutableData(
       sessionKey,
       spendingLimit,
       expirationHeight
@@ -419,10 +385,10 @@ describe('Wallet operations', async function() {
   });
 
   // wallet2, wallet4 are the owners.
-  it('Should revoke session', async function() {
+  it('Owner revokes a session', async function() {
     const sessionKey = auxiliaryWeb3.eth.accounts.wallet[5].address;
     const currentOwner = auxiliaryWeb3.eth.accounts.wallet[2];
-    const revokeSessionExData = tokenHolderInstance.getRevokeSessionExecutableData(sessionKey);
+    const revokeSessionExData = tokenHolderHelperObject.getRevokeSessionExecutableData(sessionKey);
 
     const nonce = await gnosisSafeProxyInstance.getNonce();
     const safeTxData = gnosisSafeProxyInstance.getSafeTxData(
@@ -471,8 +437,8 @@ describe('Wallet operations', async function() {
   });
 
   // wallet2, wallet4 are the owners.
-  it('Should logout all authorized sessions', async function() {
-    const tokenHolderInstance = new TokenHolder(auxiliaryWeb3, tokenHolderProxy);
+  it('Owner logs out all sessions', async function() {
+    const tokenHolderInstance = new TokenHolderHelper(auxiliaryWeb3, tokenHolderProxy);
     const currentOwner = auxiliaryWeb3.eth.accounts.wallet[2];
     const logoutExData = tokenHolderInstance.getLogoutExecutableData();
 
@@ -520,7 +486,7 @@ describe('Wallet operations', async function() {
   });
 
   // wallet2, wallet4 are the owners.
-  it('Should change required threshold', async function() {
+  it('Owner changes required threshold', async function() {
     // Owners already added should be equal or less than the threshold limit.
     const newThreshold = 2;
     const currentOwner = auxiliaryWeb3.eth.accounts.wallet[2];

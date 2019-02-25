@@ -33,15 +33,12 @@ class DeployContract {
     let receipt = null,
       transactionHash = null;
 
-    console.log('Deploying contract: ' + oThis.contractName);
-
     let instance = await oThis.txObject
       .send(oThis.txOptions)
       .on('receipt', function(value) {
         receipt = value;
       })
       .on('transactionHash', function(value) {
-        console.log('transaction hash for ' + oThis.contractName + ' : ' + value);
         transactionHash = value;
       })
       .on('error', function(error) {
@@ -58,9 +55,6 @@ class DeployContract {
     if (code.length <= 2) {
       return Promise.reject('Contract deployment failed. oThis.web3.eth.getCode returned empty code.');
     }
-
-    console.log('Address  :', contractAddress);
-    console.log('Gas used :', receipt.gasUsed, '\n');
 
     return Promise.resolve({
       receipt: receipt,
