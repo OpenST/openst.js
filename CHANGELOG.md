@@ -2,7 +2,9 @@
 
 ## Version 0.10.0
 
-* Integration with mosaic.js npm ([109](https://github.com/OpenSTFoundation/openst.js/pull/109))
+* PricerRule integration test and cleanup ([#114](https://github.com/OpenSTFoundation/openst.js/pull/114))
+* ProxyFactory address refactoring from createCompanyWallet method ([#113](https://github.com/OpenSTFoundation/openst.js/pull/113)
+* Integration with mosaic.js npm ([#109](https://github.com/OpenSTFoundation/openst.js/pull/109))
 * Docker Geth Integration: Using docker geth ([#108](https://github.com/OpenSTFoundation/openst.js/pull/108))
 * Delayed Recovery Module Setup ([#107](https://github.com/OpenSTFoundation/openst.js/pull/107))
 * Remove license from top of JS files ([#106](https://github.com/OpenSTFoundation/openst.js/pull/106))
