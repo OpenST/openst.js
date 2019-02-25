@@ -60,21 +60,16 @@ Before deploying contracts, please set some constants to funded addresses that y
 const Web3 = require('web3');
 const web3Provider = new Web3('http://127.0.0.1:8545');
 
-// organization owner. Doesn't need to be eth funded.
-const organizationOwner = '0xaabb1122....................';
-
 // deployer address
 const deployerAddress = '0xaabb1122....................';
-
-// Admin address. Doesn't need to be eth funded.
-const adminAddress = '0xaabb1122....................';
-
-// Relayer address
-const relayer = '0xaabb1122....................';
 
 // Worker address
 const worker = '0xaabb1122....................';
 
+// Relayer address
+const relayer = '0xaabb1122....................';
+
+// It's needed for unlock account before doing transaction.
 const passphrase = 'some passphrase.....';
 
 // Other constants
@@ -91,12 +86,14 @@ An Organization contract serves as an on-chain access control mechanism by assig
 // Deploy Organization contract
 const Mosaic = require('@openstfoundation/mosaic.js');
 const { Organization } = Mosaic.ContractInteract;
+const organizationOwner = '0xaabb1122....................';
+const admin = '0xaabb1122....................';
 const orgConfig = {
   deployer: deployerAddress,
   owner: organizationOwner,
   admin: admin,
   workers: [worker],
-  workerExpirationHeight: '20000000' // This is the block height for when the the worker is set to expire.
+  workerExpirationHeight: '200000000' // This is the block height for when the the worker is set to expire.
 };
 let organizationContractInstance;
 let organizationAddress;
@@ -112,6 +109,7 @@ Organization.setup(web3Provider, orgConfig).then(function(instance){
 To perform economy setup, you will need an EIP20Token. You can either use an existing EIP20Token contract or deploy a new one.
 
 ### Deploy TokenRules contract
+
 One TokenRules contract is deployed per Organization. Only the Organization whitelisted workers can register rule contracts in the TokenRules contract.
 
 ```js
@@ -427,7 +425,7 @@ pay();
 
 ```
 
-## Perform Wallet Operations
+## Wallet Operations
 
 ### Add Wallet
 
@@ -438,7 +436,7 @@ async function addWallet() {
       gasPrice: gasPrice,
       gas: gas
     };
-    const gnosisSafe = new GnosisSafe(gnosisSafeProxy, web3Provider);
+    const gnosisSafe = new Package.Helpers.GnosisSafe(gnosisSafeProxy, web3Provider);
     const threshold = 1;
     const ownerToAdd = '0xaabb1122....................';
     const ownerToAddWithThresholdCallData = gnosisSafe.getAddOwnerWithThresholdExecutableData(ownerToAdd, threshold);
@@ -470,13 +468,14 @@ async function authorizeSession() {
     const expirationHeight = '100000000000';
     const nullAddress = '0x0000000000000000000000000000000000000000';
     const authorizeSessionCallData = tokenHolder.getAuthorizeSessionExecutableData(sessionKeyToAuthorize, spendingLimit, expirationHeight);
-    const gnosisSafe = new GnosisSafe(gnosisSafeProxy, web3Provider);
+    const gnosisSafe = new Package.Helpers.GnosisSafe(gnosisSafeProxy, web3Provider);
     const nonce = await gnosisSafe.getNonce();
     const safeTxData = gnosisSafe.getSafeTxData(userTokenHolderProxy, 0, authorizeSessionCallData, 0, 0, 0, 0, nullAddress, nullAddress, nonce);
     const signatureObj = await owner.signEIP712TypedData(safeTxData);
     await gnosisSafe.execTransaction(userTokenHolderProxy, 0, authorizeSessionCallData, 0, 0, 0, 0, nullAddress, nullAddress, signatureObj.signature, txOptions);
 };
 authorizeSession(); 
+
 ```
 
 Similar above steps apply for revokeSession and logout operations.
