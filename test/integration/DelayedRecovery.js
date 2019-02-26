@@ -121,7 +121,7 @@ function instantiateRecoveryModuleProxy(recoveryModuleAddressProxy) {
 
 function hashRecoveryModuleDomainSeparator(recoveryModuleAddress) {
   const RECOERY_MODULE_DOMAIN_SEPARATOR_TYPEHASH = auxiliaryWeb3.utils.keccak256(
-    'EIP712Domain(address delayedRecoveryModule)'
+    'EIP712Domain(address verifyingContract)'
   );
 
   return auxiliaryWeb3.utils.keccak256(
