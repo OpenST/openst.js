@@ -1,596 +1,496 @@
 OpenST.js
 ============
 
-OpenST is a framework for building token economies. Here are steps to get started with OpenST.js. In order to view an example, please visit our example repo, [OpenST.js Examples](https://github.com/OpenSTFoundation/openst-js-examples).
+OpenST is a framework for building token economies. OpenST supports interactions with openst-contracts.
 
-#### Overview of different components:
+![Build master](https://img.shields.io/travis/OpenSTFoundation/openst.js/master.svg?label=build%20master&style=flat)
+![Build develop](https://img.shields.io/travis/OpenSTFoundation/openst.js/develop.svg?label=build%20develop&style=flat)
+![npm version](https://img.shields.io/npm/v/@openstfoundation/openst.js.svg?style=flat)
+![Discuss on Discourse](https://img.shields.io/discourse/https/discuss.openst.org/topics.svg?style=flat)
+![Chat on Gitter](https://img.shields.io/gitter/room/OpenSTFoundation/SimpleToken.svg?style=flat)
 
-1. TokenRules contract: The TokenRules contract keeps a list of all the registered rule contracts with their properties and helps in interacting with them. Each economy must have one TokenRules contract deployed.
-
-2. TokenHolder contracts: Each user in a token economy will be represented by a TokenHolder contract. The TokenHolder contract will hold the user’s tokens. It’s a multi-sig contract (i.e it can have multiple ownership keys, presumably owned by a single natural person).
-
-3. Rule contracts: These contracts contains business logic that the economy creator uses to achieve their community or business goals. 
-
-#### Below is an overview of the different steps in this file:
-
-1. [Basic setup](#basic-setup)
-2. [Setting up the developer environment](#setting-up-the-developer-environment)
-3. [Creating an OpenST object](#creating-an-openst-object)
-4. [Adding accounts](#adding-accounts)
-5. [Deploying an EIP20 contract](#deploying-an-eip20-contract)
-6. [Economy setup](#economy-setup)
-7. [User setup](#user-setup)
-8. [Balance verification: Before execute rule](#balance-verification-before-execute-rule)
-9. [Execute sample rule](#execute-sample-rule)
-10. [Balance verification: After execute rule](#balance-verification-after-execute-rule)
-
-#### Basic setup
-
-1.  Install the following packages
-
-```bash
-sudo apt-get update
-sudo apt-get install nodejs
-sudo apt-get install npm
-sudo apt-get install software-properties-common
-```
-
-2.  Install OpenST.js in your project using npm
+##  Setup
+This library assumes that nodejs and geth are installed and running. To install OpenST.js in your project using npm:
 
 ```bash
 $ npm install @openstfoundation/openst.js --save
-
-
-```
-3.  Install Geth
-
-    This code was tested with geth version: 1.7.3-stable. Other higher versions should also work.
-
-```bash
-curl https://gethstore.blob.core.windows.net/builds/geth-linux-amd64-1.7.3-4bb3c89d.tar.gz | tar xvz
-mv geth-linux-amd64-1.7.3-4bb3c89d /usr/local/bin
-ln -s /usr/local/bin/geth-linux-amd64-1.7.3-4bb3c89d/geth /usr/local/bin/geth
-export PATH="$PATH:/usr/local/bin/geth-linux-amd64-1.7.3-4bb3c89d"
 ```
 
-4.  Sync your development machine with one of the following test environments
+The code works for Ethereum Byzantium and Petersburg.
 
-    - https://ropsten.etherscan.io/
-    - https://kovan.etherscan.io/
-    - https://rinkeby.etherscan.io/
-
-5.  Create the following addresses and fund them with gas
-
-    - deployerAddress - address that deploys the EIP20Token, TokenRules, TokenHolder, and rule contracts
-    - organizationAddress - address that registers rule contracts in the TokenRules contract
-    - wallet1 - owner1 of the TokenHolder contract
-    - wallet2 - owner2 of the TokenHolder contract
-    - ephemeralKey - the key that will be authorized by owners in the TokenHolder contract; this key will sign execute rule transactions
-    - facilitatorAddress - the address that will facilitate execute rule transactions
-
-#### Setting up the developer environment
-
-###### Initialize the chain on developer machine
-
-The below command creates a json file (`~/openst-setup/config.json`) with all the needed addresses and other constants. It also starts Geth process for the chain.
-
-This is a quick-start option. You could also choose to do this step manually.
-
-```bash
-node ./node_modules/\@openstfoundation/openst.js/tools/initDevEnv.js ~
-
-
-```
-
-#### Creating an OpenST object
-OpenST.js is a thin layer over web3.js. Its constructor arguments are same as that of web3.js.
-
+## Creating an OpenST object
 
 ```js
-// Creating web3 object using the geth endpoint
-const web3Provider = 'http://127.0.0.1:8545';
+// Creating OpenST.js object
+const OpenST = require('@openstfoundation/openst.js');
 
-// Creating OpenST object
-const OpenST = require('./index.js');
-let openST = new OpenST( web3Provider );
 ```
 
-OpenST.js also provides access to the web3.js object it creates and uses.
+For deployment of Organization contract, Mosaic object is needed.
 ```js
-// fetch the web3 object to add to the wallet
-let web3 = openST.web3();
+// Create Mosaic object
+const Mosaic = require('@openstfoundation/mosaic.js');
 ```
 
-###### Sample constants
-Please use below code if you have set up development environment using init-dev-env.
+## Deploying contracts
+
+## Constants
+Before deploying contracts, please set some constants to funded addresses that you control.
 
 ```js
-const os = require('os');
-let configFilePath = os.homedir() + '/openst-setup/config.json';
-let devEnvConfig = require(configFilePath);
 
-// Deployer address
-let deployerAddress = devEnvConfig.deployerAddress;
+// Initialize web3 object using the geth endpoint
+const Web3 = require('web3');
+const web3Provider = new Web3('http://127.0.0.1:8545');
 
-// organization address
-let organizationAddress = devEnvConfig.organizationAddress;
-
-// wallet addresses
-let wallet1 = devEnvConfig.wallet1;
-let wallet2 = devEnvConfig.wallet2;
-
-let facilitatorAddress = devEnvConfig.facilitator;
-let passphrase = 'testtest';
-
-// some other constants
-const gasPrice = '0x12A05F200';
-const gas = 8000000;
-```
-
-Optionally, you can set these constants to other addresses and data that you may prefer.
-Please remember to use only addresses that you are able to access
-
-```js
 // deployer address
-let deployerAddress = '0xaabb1122....................';
+const deployerAddress = '0xaabb1122....................';
 
-// organization address
-let organizationAddress = '0xaabb1122....................';
+// Worker address
+const worker = '0xaabb1122....................';
 
-// wallet addresses
-let wallet1 = '0xaabb1122....................';
-let wallet2 = '0xaabb1122....................';
+// Relayer address
+const relayer = '0xaabb1122....................';
 
-let ephemeralKey = '0xaabb1122....................';
+// It's needed for unlock account before doing transaction.
+const passphrase = 'some passphrase.....';
 
-let facilitatorAddress = '0xaabb1122....................';
-
-let passphrase = 'some passphrase.....';
-
-// some other constants
+// Other constants
 const gasPrice = '0x12A05F200';
-const gas = 8000000;
+const gas = '7500000';
+
 ```
 
-###### ABI and BIN provider
+### Deploy Organization contract
 
-OpenST.js comes with an in-built abi-bin provider for managing abi(s) and bin(s).
-
-The abiBinProvider provides developers with following abi(s) and bin(s):
-
-* [MockToken](https://github.com/OpenSTFoundation/mosaic-contracts/blob/v0.9.3-rc1/contracts/SimpleToken/MockToken.sol) (an EIP20 contract with name 'MockToken')
-* [TokenRules](https://github.com/OpenSTFoundation/openst-contracts/blob/v0.9.4/contracts/TokenRules.sol) (a registry of rule contracts and the conduit for transfers)
-* [TokenHolder](https://github.com/OpenSTFoundation/openst-contracts/blob/v0.9.4/contracts/TokenHolder.sol) (a multi-sig wallet that can hold tokens)
-* [TransferRule](https://github.com/OpenSTFoundation/openst-contracts/blob/v0.9.4/contracts/TransferRule.sol) (a simple transfer rule contract)
+An Organization contract serves as an on-chain access control mechanism by assigning roles to a set of addresses.
 
 ```js
-// Get the MockToken ABI
-let abiBinProvider = openST.abiBinProvider();
-let mockTokenAbi = abiBinProvider.getABI('MockToken');
-```
-
-#### Adding accounts
-One can add accounts to web3 wallet or to our custom signer service. Please choose only ONE of the options described below.
-
-Remember to add all of deployerAddress, organizationAddress, wallet1, wallet2, ephemeralKey and facilitatorAddress to use the functionality given in this readme.
-
-###### Option 1: Add accounts to web3 wallets
-For adding to web3 wallet, there are 2 ways. We can add using the keystore file OR by private key. If you choose this option, you could also choose to connect to an [infura endpoint](https://infura.io/docs) rather than running a full geth node.
-
-Detailed documentation on adding accounts can be found here: https://web3js.readthedocs.io/en/1.0/web3-eth-accounts.html
-
-```js
-// Here is a sample helper method for developers to add an account to the wallet using keystore content
-// Read more about web3.eth.accounts.decrypt here: https://web3js.readthedocs.io/en/1.0/web3-eth-accounts.html#id22
-let addToWalletByKeystoreContent = function (encryptedPrivateKey, password) {
-  let account = web3.eth.accounts.decrypt(encryptedPrivateKey, password);
-  web3.eth.accounts.wallet.add(account);
+const { Organization } = Mosaic.ContractInteract;
+const organizationOwner = '0xaabb1122....................';
+const admin = '0xaabb1122....................';
+const orgConfig = {
+  deployer: deployerAddress,
+  owner: organizationOwner,
+  admin: admin,
+  workers: [worker],
+  workerExpirationHeight: '200000000' // This is the block height for when the the worker is set to expire.
 };
+let organizationContractInstance;
+let organizationAddress;
+Organization.setup(web3Provider, orgConfig).then(function(instance){
+  organizationContractInstance = instance;
+  organizationAddress = organizationContractInstance.address;
+});
+
 ```
 
-###### Option 2: OpenST Signers Service
+### Deploy EIP20Token contract
 
-You can set the signer service using `openST.signers.setSignerService` method. To use the signer service, you must have a full geth node running locally.
+To perform economy setup, you will need an EIP20Token. You can either use an existing EIP20Token contract or deploy a new one.
 
-Once the signer service is set up, you can continue to use [Contract.methods.myMethod.send](https://web3js.readthedocs.io/en/1.0/web3-eth-contract.html#methods-mymethod-send) and [web3.eth.sendTransaction](https://web3js.readthedocs.io/en/1.0/web3-eth.html#sendtransaction) without worrying about unlocking/signing the transactions.
+### Deploy TokenRules contract
 
-OpenST.js will call your service to determine the nonce of the sender, ask your service to sign the transaction and then submit the transaction.
+One TokenRules contract is deployed per Organization. Only the Organization whitelisted workers can register rule contracts in the TokenRules contract.
 
-All you need to do is provide the instance of OpenST with an object that exposes three functions:
 ```js
-let signerServiceObject = {
-  // nonce - method to provide nonce of the address
-  nonce: function ( address ) {
-    return new Promise( function (resolve, reject) {
-      // Your code here
-      // ...
-      // ...
-      // ...
-      // resolve the promise with the nonce of the address
-    });
-  },
-
-  // signTransaction - method to provide openST with signed raw transaction
-  signTransaction: function (txObj, address) {
-    // txObj - web3 transaction object
-    // address - address which needs to sign the transaction
-
-    return new Promise( function (resolve, reject) {
-      // Your code here
-      // ...
-      // ...
-      // ...
-      // resolve the promise with the signed txObj that confirms to web3 standards:
-      // https://web3js.readthedocs.io/en/1.0/web3-eth-accounts.html#id5
-      //
-      // OR
-      //
-      // resolve the promise with signed rawTransaction (String)
-    });
-  },
-  // sign - method to sign raw data
-  sign: function (dataToSign, address) {
-    // dataToSign - raw data to sign
-    // address - address that needs to sign the transaction
-    return new Promise( function (resolve, reject) {
-      // Your code here
-      // ...
-      // ...
-      // ...
-
-      // resolve the promise with the signed data
-    });
-  }
+txOptions = {
+  from: deployerAddress,
+  gasPrice: gasPrice,
+  gas: gas
 };
+const tokenRulesSetupObject = new OpenST.Setup.TokenRules(web3Provider);
+let tokenRulesAddress;
+tokenRulesSetupObject.deploy(organization, eip20Token, txOptions).then(function(response){
+  tokenRulesAddress = response.receipt.contractAddress;
+})
 
+```   
 
-```
-
-OpenST.js comes with a sample Geth signer service that you can use for development.
-
-```js
-let gethSigner = new openST.utils.GethSignerService(openST.web3());
-
-gethSigner.addAccount(deployerAddress, passphrase);
-gethSigner.addAccount(organizationAddress, passphrase);
-gethSigner.addAccount(wallet1, passphrase);
-gethSigner.addAccount(wallet2, passphrase);
-gethSigner.addAccount(facilitatorAddress, passphrase);
-
-openST.signers.setSignerService(gethSigner);
-
-
-```
-
-###### OpenST Deployer
-
-OpenST.js comes with a Deployer class that can deploy MockToken, TokenRules, TransferRule, and TokenHolder contracts.
+### Deploy TokenHolder MasterCopy
 
 ```js
-let deployerParams = {
-  "from": deployerAddress,
-  "gasPrice": gasPrice,
-  "gas": gas
+txOptions = {
+  from: deployerAddress,
+  gasPrice: gasPrice,
+  gas: gas
 };
-let deployer = new openST.Deployer( deployerParams );
-```
-
-#### Deploying an EIP20 contract
-
-To create a token economy, you will want an EIP20 contract. You can either use a pre-deployed EIP20 contract or deploy a new one as shown below (presently only deploys a new MockToken contract).
-
-```js
-// Deploy EIP20 
-// if needed (not mandatory)
-let eip20Address = null;
-deployer.deployEIP20Token().then(function( receipt ){
-  eip20Address = receipt.contractAddress;
-  console.log('eip20Address noted down:', eip20Address);
+const userSetup = new OpenST.Setup.User(web3Provider);
+let tokenHolderMasterCopyAddress;
+userSetup.deployTokenHolderMasterCopy(txOptions).then(function(response){
+  tokenHolderMasterCopyAddress = response.receipt.contractAddress;
 });
-```
 
-#### Economy setup
+```  
 
-###### Deploying the TokenRules contract
-
-One TokenRules contract is deployed per Organization. Only the Organization can register rule contracts in the TokenRules contract.
+### Deploy Gnosis MasterCopy
 
 ```js
-// Deploy TokenRules contract
-let tokenRulesAddress = null;
-deployer.deployTokenRules(organizationAddress, eip20Address).then(function( receipt ){
-  tokenRulesAddress = receipt.contractAddress;
-  console.log('tokenRulesAddress noted down:', tokenRulesAddress);
+txOptions = {
+  from: deployerAddress,
+  gasPrice: gasPrice,
+  gas: gas
+};
+const userSetup = new OpenST.Setup.User(web3Provider);
+let gnosisMasterCopyAddress;
+userSetup.deployMultiSigMasterCopy(txOptions).then(function(response){
+  gnosisMasterCopyAddress = response.receipt.contractAddress;
 });
-```
 
-###### Deploy a rule contract (TransferRule)
+```  
 
-OpenST.js comes with a TransferRule contract that transfers EIP20 tokens. We encourage you to deploy and use your own rule contracts.
-
-Here we shall deploy the TransferRule contract. Later, this rule contract will be registered in the TokenRules contract by the Organization.
+### Deploy DelayedRecoveryModule MasterCopy
 
 ```js
-// Deploy TransferRule contract
-let transferRuleAddress = null;
-
-deployer.deploySimpleTransferRule(tokenRulesAddress).then(function( receipt ){
-  transferRuleAddress = receipt.contractAddress;
-  console.log('transferRuleAddress noted down:', transferRuleAddress);
+txOptions = {
+  from: deployerAddress,
+  gasPrice: gasPrice,
+  gas: gas
+};
+const userSetup = new OpenST.Setup.User(web3Provider);
+let delayedRecoveryModuleMasterCopyAddress;
+userSetup.deployDelayedRecoveryModuleMasterCopy(txOptions).then(function(response){
+  delayedRecoveryModuleMasterCopyAddress = response.receipt.contractAddress;
 });
-```
 
-###### Register token rule using `openST.contracts.TokenRules`
+```  
+
+### Deploy CreateAndAddModules Contract
 
 ```js
+txOptions = {
+  from: deployerAddress,
+  gasPrice: gasPrice,
+  gas: gas
+};
+const userSetup = new OpenST.Setup.User(web3Provider);
+let createAndAddModulesAddress;
+userSetup.deployCreateAndAddModules(txOptions).then(function(response){
+  createAndAddModulesAddress = response.receipt.contractAddress;
+});
 
-let tokenRules = new openST.contracts.TokenRules(tokenRulesAddress);
-let ruleName = 'transferFrom1';
-let ruleAbi = JSON.stringify( openST.abiBinProvider().getABI('TransferRule') );
-tokenRules.registerRule(ruleName, transferRuleAddress, ruleAbi).send({
-    from: organizationAddress,
+```  
+
+### Deploy UserWalletFactory Contract
+
+```js
+txOptions = {
+  from: deployerAddress,
+  gasPrice: gasPrice,
+  gas: gas
+};
+const userSetup = new OpenST.Setup.User(web3Provider);
+let userWalletFactoryAddress;
+userSetup.deployUserWalletFactory(txOptions).then(function(response){
+  userWalletFactoryAddress = response.receipt.contractAddress;
+});
+
+```
+
+### Deploy ProxyFactory Contract
+
+```js
+txOptions = {
+  from: deployerAddress,
+  gasPrice: gasPrice,
+  gas: gas
+};
+const userSetup = new OpenST.Setup.User(web3Provider);
+let proxyFactoryAddress;
+userSetup.deployProxyFactory(txOptions).then(function(response){
+  proxyFactoryAddress = response.receipt.contractAddress;
+});
+
+``` 
+
+### Deploy PricerRule Contract
+
+```js
+txOptions = {
+  from: deployerAddress,
+  gasPrice: gasPrice,
+  gas: gas
+};
+const rulesSetup = new OpenST.Setup.Rules(web3Provider);
+const baseCurrencyCode = 'OST';
+const conversionRate = 10;
+const conversionRateDecimals = 5;
+const requiredPriceOracleDecimals = 18;
+let pricerRuleAddress;
+rulesSetup.deployPricerRule(baseCurrencyCode, conversionRate, conversionRateDecimals, requiredPriceOracleDecimals, txOptions).then(function(response){
+  pricerRuleAddress = response.receipt.contractAddress;
+})
+
+``` 
+
+## Registration of Rule to TokenRules
+
+```js
+txOptions = {
+  from: worker,
+  gasPrice: gasPrice,
+  gas: gas
+};
+const pricerRule = 'PricerRule';
+const tokenRules = new OpenST.Helpers.TokenRules(tokenRulesAddress, web3Provider);
+const pricerRuleAbi = abiBinProvider.getABI(pricerRule);
+tokenRules.registerRule(pricerRule, pricerRuleAddress, pricerRuleAbi.toString(), txOptions).then(function(response){
+  console.log("Successfully registered PricerRule");
+})
+
+``` 
+
+## Creating a User Wallet
+
+```js
+txOptions = {
+  from: deployerAddress,
+  gasPrice: gasPrice,
+  gas: gas
+};
+const User = new OpenST.Helpers.User(
+  tokenHolderMasterCopyAddress, 
+  gnosisMasterCopyAddress, 
+  delayedRecoveryModuleMasterCopyAddress, 
+  createAndAddModulesAddress, 
+  eip20Token, 
+  tokenRulesAddress,
+  userWalletFactoryAddress, 
+  proxyFactoryAddress, 
+  web3Provider
+);
+const owner = '0xaabb1122....................';
+const ephemeralKey = '0xaabb1122....................';
+const sessionKeySpendingLimit = '1000000';
+const sessionKeyExpirationHeight = '100000000000'; 
+const threshold = 1;
+const recoveryOwnerAddress = '0xaabb1122....................';
+const recoveryControllerAddress = '0xaabb1122....................';
+const recoveryBlockDelay = 10;
+let gnosisSafeProxy;
+let userTokenHolderProxy;
+User.createUserWallet(
+  [owner], 
+  threshold, 
+  recoveryOwnerAddress, 
+  recoveryControllerAddress, 
+  recoveryBlockDelay, 
+  [ephemeralKey], 
+  [sessionKeySpendingLimit], 
+  [sessionKeyExpirationHeight], 
+  txOptions
+).then(function(response){
+  const returnValues = response.events.UserWalletCreated.returnValues;
+  const userWalletEvent = JSON.parse(JSON.stringify(returnValues));
+  gnosisSafeProxy = userWalletEvent._gnosisSafeProxy;
+  userTokenHolderProxy = userWalletEvent._tokenHolderProxy;
+});
+
+``` 
+
+## Creating a Company Wallet
+
+```js
+txOptions = {
+  from: deployerAddress,
+  gasPrice: gasPrice,
+  gas: gas
+};
+const User = new OpenST.Helpers.User(
+  tokenHolderMasterCopyAddress,
+  null, // gnosis safe master copy address
+  null, // delayed recovery module master copy address
+  null, // create and add modules contract address
+  eip20Token,
+  tokenRulesAddress,
+  userWalletFactoryAddress,
+  proxyFactoryAddress,
+  web3Provider
+);
+const owner = '0xaabb1122....................';
+const ephemeralKey = '0xaabb1122....................';
+const sessionKeySpendingLimit = '1000000';
+const sessionKeyExpirationHeight = '100000000000'; 
+let companyTokenHolderProxy;
+User.createCompanyWallet(
+  owner,
+  [ephemeralKey],
+  [sessionKeySpendingLimit],
+  [sessionKeyExpirationHeight],
+  txOptions
+).then(function(response){
+  const returnValues = response.events.ProxyCreated.returnValues;
+  const proxyEvent = JSON.parse(JSON.stringify(returnValues));
+  companyTokenHolderProxy = proxyEvent._proxy;
+});
+
+``` 
+
+## Direct transfer of utility tokens
+
+```js
+const txOptions = {
+  from: relayer,
+  gasPrice: gasPrice,
+  gas: gas
+};
+const tokenRules = new OpenST.Helpers.TokenRules(tokenRulesAddress, web3Provider);
+const receiver = '0xaabb1122....................'; 
+const directTransferCallData = tokenRules.getDirectTransferExecutableData([receiver], [100]);
+const nonce = 0; // Ephemeral key current nonce.
+const tokenHolder = new OpenST.Helpers.TokenHolder(web3Provider, userTokenHolderProxy);
+let transaction = {
+  from: userTokenHolderProxy,
+  to: tokenRulesAddress,
+  data: directTransferCallData,
+  nonce: nonce,
+  callPrefix: tokenHolder.getTokenHolderExecuteRuleCallPrefix(),
+  value: 0,
+  gasPrice: 0,
+  gas: 0
+};
+let ephemeralKeyAccountInstance; // Construct account instance of ephemeral key
+const vrs = ephemeralKeyAccountInstance.signEIP1077Transaction(transaction);
+tokenHolder.executeRule(tokenRulesAddress, directTransferCallData, nonce, vrs.r, vrs.s, vrs.v, txOptions).then(function(response){
+  console.log("Successful transfer done!");
+})
+
+```
+
+## Setup of PriceOracle 
+
+Make sure PriceOracle contract is already deployed. Refer [PriceOracle](https://github.com/OpenSTFoundation/ost-price-oracle) npm for setup of PriceOracle contract.
+
+## Payment through PricerRule contract 
+
+```js
+async function pay() {
+   let txOptions = {
+      from: worker,
+      gasPrice: gasPrice,
+      gas: gas
+   };
+  const pricerRule = new OpenST.Helpers.Rules.PricerRule(web3Provider, pricerRuleAddress);
+  let priceOracleAddress;
+  const acceptanceMargin = '10000000000000000000';
+  await pricerRule.addPriceOracle(priceOracleAddress, txOptions); // Set PriceOracle address in PricerRule.
+  await pricerRule.setAcceptanceMargin('USD', acceptanceMargin, txOptions); // Set appropriate acceptance margin.
+       
+  txOptions = {
+    from: relayer,
     gasPrice: gasPrice,
     gas: gas
-}).then( function ( receipt ) {
-  console.log("receipt", JSON.stringify(receipt, null, 2) );
-  if ( receipt.status ) {
-    console.log(ruleName, ' registered successfully');  
-  } else {
-    console.error(ruleName, ' failed to register.');  
-  }
-});
-```
-
-###### OpenST Contracts
-
-`openST.contracts` exposes TokenHolder and TokenRules contracts interact classes.
-
-These contract interact objects are similar to [web3.eth.Contracts.methods](https://web3js.readthedocs.io/en/1.0/web3-eth-contract.html#id12).
-
-#### User setup
-
-###### Deploying a TokenHolder contract
-
-One TokenHolder contract is deployed per user. The TokenHolder contract holds tokens for the user.
-
-```js
-let wallets = [wallet1, wallet2];
-let requirement = wallets.length;
-let tokenHolderAddress = null;
-
-// Deploy TokenHolder contract
-deployer.deployTokenHolder(eip20Address, tokenRulesAddress, wallets, requirement).then(function(receipt){
-  tokenHolderAddress = receipt.contractAddress;
-  console.log('tokenHolderAddress noted down:', tokenHolderAddress);
-});
-```
-
-###### Create ephemeral key for TokenHolder contract (optional)
-
-```js
-
-  // Create a new ephemeral key
-  let ephemeralKeyAccount = openST.web3().eth.accounts.create();
-  let ephemeralKeyAddress = ephemeralKeyAccount.address;
-```
-
-###### Authorize session keys in TokenHolder
-
-Using the TokenHolder's authorize session function, owners can register an ephemeral key. Authorize session is a multi-sig operation.
-
-```js
-// Create an instance of TokenHolder contract interact
-let tokenHolder = new openST.contracts.TokenHolder(tokenHolderAddress);
-
-// Authorize ephemeral key
-let authorizeSession = async function(openST, tokenHolderAddress, ephemeralKey, wallets) {
-  const BigNumber = require('bignumber.js');
-  let currentBlockNumber = await openST.web3().eth.getBlockNumber(),
-    spendingLimit = new BigNumber('10000000000000000000000000000').toString(10),
-    expirationHeight = new BigNumber(currentBlockNumber).add('10000000000000000000000000000').toString(10);
-
-  let tokenHolder = new openST.contracts.TokenHolder(tokenHolderAddress);
-
-  let len = wallets.length - 1;
-
-  let currWallet = wallets[len];
-
-  console.log('* submitAuthorizeSession from wallet:', currWallet);
-  // Authorize an ephemeral key
-  let submitAuthorizeSessionReceipt = await tokenHolder
-    .submitAuthorizeSession(ephemeralKey, spendingLimit, expirationHeight)
-    .send({
-      from: currWallet,
-      gasPrice: gasPrice,
-      gas: gas
-    });
-
-  console.log("submitAuthorizeSessionReceipt", JSON.stringify(submitAuthorizeSessionReceipt, null, 2));
-  if ( !submitAuthorizeSessionReceipt.status ) {
-    console.log("SubmitAuthorizeSession failed.");
-    return Promise.reject('SubmitAuthorizeSession failed.');
-  }
-
-  console.log('SessionAuthorizationSubmitted Event', JSON.stringify(submitAuthorizeSessionReceipt.events.SessionAuthorizationSubmitted, null, 2));
-
-  let transactionId = submitAuthorizeSessionReceipt.events.SessionAuthorizationSubmitted.returnValues._transactionID;
-
-  while (len--) {
-    let currWallet = wallets[len];
-
-    console.log('* confirmTransaction from wallet:', currWallet);
-
-    // Authorize an ephemeral key
-    let confirmTransactionReceipt = await tokenHolder.confirmTransaction(transactionId).send({
-      from: currWallet,
-      gasPrice: gasPrice,
-      gas: gas
-    });
-
-    if (!confirmTransactionReceipt.events.TransactionConfirmed) {
-      console.log('Failed to confirm transaction', JSON.stringify(confirmTransactionReceipt, null, 2));
-      return Promise.reject('Failed to confirm transaction');
-    }
-  }
-
-  let ephemeralKeysResponse = await tokenHolder.ephemeralKeys(ephemeralKey).call({});
-  console.log('ephemeralKeysResponse', ephemeralKeysResponse);
-
-  if (ephemeralKeysResponse.status == 1 && ephemeralKeysResponse.expirationHeight > currentBlockNumber) {
-    console.log('Ephemeral key with address', ephemeralKey, 'has been successfully authorized');
-  } else {
-    console.log('Failed to authorize Ephemeral key with address', ephemeralKey);
-  }
-
-  return ephemeralKeysResponse;
-};
-authorizeSession(openST, tokenHolderAddress, ephemeralKeyAddress, wallets);
-```
-
-###### Fund EIP20 tokens
-
-The TokenHolder contract address must be funded with tokens for the transfer rule to be executed.
-
-```js
-// Fund the tokenHolderAddress with EIP20 tokens
-// If you are using MockToken, the following method can help you
-let fundEIP20Tokens = async function() {
-  const BigNumber = require('bignumber.js');
-  let amountToTransfer = new BigNumber('1000000000000000000000');
-
-  console.log('Funding EIP20 tokens to token holder:', tokenHolderAddress);
-
-  let mockToken = new (openST.web3()).eth.Contract(mockTokenAbi, eip20Address);
-
-  return mockToken.methods
-    .transfer(tokenHolderAddress, amountToTransfer.toString(10))
-    .send({
-      from: deployerAddress,
-      gasPrice: gasPrice,
-      gas: gas
-    });
-};
-fundEIP20Tokens().then(function(r) {
-  console.log('Fund EIP20 DONE!', r);
-});
-```
-
-#### Balance verification: Before execute rule
-
-```js
-let checkBalance = async function (address) {
-
-  let mockToken = new (openST.web3()).eth.Contract(mockTokenAbi, eip20Address);
-  return mockToken.methods.balanceOf(address).call({});
-};
-
-let beforeBalance = null;
-checkBalance(tokenHolderAddress).then(function (r) {
-  beforeBalance = r;
-  console.log('beforeBalance noted down:', beforeBalance);
-});
-```
-
-#### Execute sample rule
-
-Here, the executable transaction is signed by an ephemeral key. The facilitator calls the TokenHolder's execute rule method to execute a function in the rule contract.
-
-The TokenHolder approves the TokenRules to transfer some if its tokens. Transfers are performed by the TokenRules contract.
-
-```js
-let executeSampleRule = async function(tokenRulesContractAddress, tokenHolderContractAddress, ephemeralKeyAccount) {
-  const BigNumber = require('bignumber.js');
-  let ephemeralKey = ephemeralKeyAccount.address;
-
-  let tokenHolder = new openST.contracts.TokenHolder(tokenHolderContractAddress),
-    amountToTransfer = new BigNumber(100);
-
-  let tokenRules = new openST.contracts.TokenRules(tokenRulesContractAddress);
-  let transferRule = await tokenRules.getRule(ruleName);
-
-  let ruleContractAddress = transferRule.options.address;
-
-  console.log('** Fetching ephemeral key nonce from token holder contract.');
-  let keyNonce = await tokenHolder
-    .ephemeralKeys(ephemeralKey)
-    .call({})
-    .then((ephemeralKeyData) => {
-      let nonceBigNumber = (new BigNumber(ephemeralKeyData[1])).add(1);
-      return nonceBigNumber.toString(10);
-    });
-
-  console.log('** Constructing the data to sign by the ephemeral key.');
-  let methodEncodedAbi = await transferRule.methods
-    .transferFrom(
-      tokenHolderContractAddress,
-      '0x66d0be510f3cac64f30eea359bda39717569ea4b',
-      amountToTransfer.toString(10)
-    )
-    .encodeABI();
-
-  console.log('** Fetching call prefix from the token holder contract.');
-  let callPrefix = await tokenHolder.EXECUTE_RULE_CALLPREFIX().call({});
-
-  console.log('** Sign the data as per EIP 1077.');
-  let eip1077SignedData = ephemeralKeyAccount.signEIP1077Transaction({
-    from: tokenHolderContractAddress,
-    to: ruleContractAddress,
+  };
+  const tokenHolder = new OpenST.Helpers.TokenHolder(web3Provider, userTokenHolderProxy);
+  const receiver = '0xaabb1122....................'; 
+  const nonce = 0; // Ephemeral key current nonce.
+  let baseCurrencyIntendedPrice; // Current OST/USD price.
+  const pricerRulePayCallData = pricerRule.getPayExecutableData(userTokenHolderProxy, [receiver], ['1000'], 'USD', baseCurrencyIntendedPrice);
+  let transaction = {
+    from: userTokenHolderProxy,
+    to: pricerRuleAddress,
+    data: pricerRulePayCallData,
+    nonce: nonce,
+    callPrefix: tokenHolder.getTokenHolderExecuteRuleCallPrefix(),
     value: 0,
     gasPrice: 0,
-    gas: 0,
-    data: methodEncodedAbi,
-    nonce: keyNonce,
-    callPrefix: callPrefix
-  });
+    gas: 0
+  };
+  let ephemeralKeyAccountInstance;
+  const signatureObj = ephemeralKeyAccountInstance.signEIP1077Transaction(transaction);
+  tokenHolder.executeRule(pricerRuleAddress, pricerRulePayCallData, nonce, signatureObj.r, signatureObj.s, signatureObj.v, txOptions).then( function() {
+    console.log("Successful transfer done!");
+  })
+}
+pay();
 
-  console.log('** Calling executeRule on tokenHolder contract.');
-  let executeRuleResponse = await tokenHolder
-    .executeRule(
-      ruleContractAddress,
-      methodEncodedAbi,
-      keyNonce,
-      eip1077SignedData.v,
-      eip1077SignedData.r,
-      eip1077SignedData.s
-    )
-    .send({
-      from: facilitatorAddress,
-      gasPrice: gasPrice,
-      gas: gas
-    });
-
-  if(!executeRuleResponse.events.RuleExecuted) {
-    let err = 'RuleExecuted event not obtained.';
-    return Promise.reject(err);
-  }
-
-  if(!executeRuleResponse.events.RuleExecuted.returnValues._status) {
-      let err = 'Rule Executed with status false.';
-      return Promise.reject(err);
-  }
-  console.log('** Rule executed with status true.');
-};
-executeSampleRule(tokenRulesAddress, tokenHolderAddress, ephemeralKeyAccount);
 ```
 
-#### Balance verification: After execute rule
+## Wallet Operations
+
+### Add Wallet
 
 ```js
-let verifyBalance = async function () {
-  const BigNumber = require('bignumber.js');
-
-  let afterBalance = await checkBalance(tokenHolderAddress);
-  console.log('afterBalance noted down:', afterBalance);
-
-  let beforeBalanceBn = new BigNumber(beforeBalance);
-  let afterBalanceBn = new BigNumber(afterBalance);
-
-  if (beforeBalanceBn.minus(afterBalanceBn).toString(10) == '100') {
-    console.log('balance change verification DONE!');
-  } else {
-    console.log('balance change verification FAILED!');
-  }
+async function addWallet() {
+    const txOptions = {
+      from: relayer,
+      gasPrice: gasPrice,
+      gas: gas
+    };
+    const gnosisSafe = new Package.Helpers.GnosisSafe(gnosisSafeProxy, web3Provider);
+    const threshold = 1;
+    const ownerToAdd = '0xaabb1122....................';
+    const ownerToAddWithThresholdCallData = gnosisSafe.getAddOwnerWithThresholdExecutableData(ownerToAdd, threshold);
+    const nullAddress = '0x0000000000000000000000000000000000000000';
+    const nonce = await gnosisSafe.getNonce();
+    const safeTxData = await gnosisSafe.getSafeTxData(gnosisSafeProxy, 0, ownerToAddWithThresholdCallData, 0, 0, 0, 0, nullAddress, nullAddress, nonce);
+    // 2. Generate EIP712 Signature.
+    const signatureObj = await owner.signEIP712TypedData(safeTxData);
+    await gnosisSafe.execTransaction(gnosisSafeProxy, 0, ownerToAddWithThresholdCallData, 0, 0, 0, 0, nullAddress, nullAddress, signatureObj.signature, txOptions);
 };
+addWallet();    
 
-verifyBalance();
 ```
+
+Similar above steps apply for removeWallet and replaceWallet operations.
+
+### Authorize Session
+
+```js
+async function authorizeSession() {
+    const txOptions = {
+      from: relayer,
+      gasPrice: gasPrice,
+      gas: gas
+    };
+    const tokenHolder = new TokenHolder(web3Provider, userTokenHolderProxy);
+    const sessionKeyToAuthorize = '0xaabb1122....................';
+    const spendingLimit = '1000000000000';
+    const expirationHeight = '100000000000';
+    const nullAddress = '0x0000000000000000000000000000000000000000';
+    const authorizeSessionCallData = tokenHolder.getAuthorizeSessionExecutableData(sessionKeyToAuthorize, spendingLimit, expirationHeight);
+    const gnosisSafe = new Package.Helpers.GnosisSafe(gnosisSafeProxy, web3Provider);
+    const nonce = await gnosisSafe.getNonce();
+    const safeTxData = gnosisSafe.getSafeTxData(userTokenHolderProxy, 0, authorizeSessionCallData, 0, 0, 0, 0, nullAddress, nullAddress, nonce);
+    const signatureObj = await owner.signEIP712TypedData(safeTxData);
+    await gnosisSafe.execTransaction(userTokenHolderProxy, 0, authorizeSessionCallData, 0, 0, 0, 0, nullAddress, nullAddress, signatureObj.signature, txOptions);
+};
+authorizeSession(); 
+
+```
+
+Similar above steps apply for revokeSession and logout operations.
+
+## ABI and BIN provider
+
+openst.js comes with an abi-bin provider for managing abi(s) and bin(s).
+
+The abiBinProvider provides abi(s) and bin(s) for the following contracts:
+
+* [TokenHolder](https://github.com/OpenSTFoundation/openst-contracts/blob/0.10.0-alpha.1/contracts/token/TokenHolder.sol) (TokenHolder contract deployed on UtilityChain)
+* [TokenRules](https://github.com/OpenSTFoundation/openst-contracts/blob/0.10.0-alpha.1/contracts/token/TokenRules.sol) (TokenRules contract deployed on UtilityChain)
+* [PricerRule](https://github.com/OpenSTFoundation/openst-contracts/blob/0.10.0-alpha.1/contracts/rules/PricerRule.sol) (PricerRule is a rule contract deployed on UtilityChain)
+* [GnosisSafe](https://github.com/gnosis/safe-contracts/blob/v0.1.0/contracts/GnosisSafe.sol) (MultiSignature wallet with support for confirmations using signed messages)
+* [DelayedRecoveryModule](https://github.com/OpenSTFoundation/openst-contracts/blob/0.10.0-alpha.1/contracts/gnosis_safe_modules/DelayedRecoveryModule.sol) (Allows to replace an owner without Safe confirmations) 
+* [CreateAndAddModules](https://github.com/gnosis/safe-contracts/blob/v0.1.0/contracts/libraries/CreateAndAddModules.sol) (Allows to create and add multiple module in one transaction)
+* [UserWalletFactory](https://github.com/OpenSTFoundation/openst-contracts/blob/0.10.0-alpha.1/contracts/proxies/UserWalletFactory.sol) (Creates proxy for GnosisSafe, TokenHolder and DelayedRecoveryModule)
+
+```js
+
+// Fetching ABI examples.
+let abiBinProvider = new OpenST.AbiBinProvider();
+const TokenHolderAbi = abiBinProvider.getABI('TokenHolder');
+
+```
+
+## Tests
+
+Tests require docker-compose. To run the tests, execute below command from root directory.
+
+```bash
+    // For unit tests.
+    npm run test
+    // For integration tests.
+    npm run test:integration
+
+```   

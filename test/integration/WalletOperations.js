@@ -327,7 +327,7 @@ describe('Wallet operations', async function() {
   // wallet2, wallet4 are the owners.
   it('Owner authorizes a session', async function() {
     await auxiliaryWeb3.eth.accounts.wallet.create(1);
-    tokenHolderHelperObject = new TokenHolderHelper(auxiliaryWeb3, tokenRulesAddress, tokenHolderProxy);
+    tokenHolderHelperObject = new TokenHolderHelper(auxiliaryWeb3, tokenHolderProxy);
     const sessionKey = auxiliaryWeb3.eth.accounts.wallet[5].address;
     const spendingLimit = config.sessionKeySpendingLimit;
     const expirationHeight = config.sessionKeyExpirationHeight;
