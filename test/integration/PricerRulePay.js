@@ -326,7 +326,7 @@ describe('TH transfers through PricerRule Pay', async function() {
     const transferTos = [firstReceiver, secondReceiver],
       firstReceiverInitialBalance = await eip20TokenContractInstance.methods.balanceOf(firstReceiver).call(),
       secondReceiverInitialBalance = await eip20TokenContractInstance.methods.balanceOf(secondReceiver).call(),
-      transferAmountsInUSD = ['2000000000000000', '1000000000000000'];
+      transferAmountsInUSD = ['20000000000000000000', '10000000000000000000']; // $20 and $10
 
     const nonce = 0;
     const pricerRulePayExecutable = pricerRuleHelperObject.getPayExecutableData(
@@ -366,12 +366,14 @@ describe('TH transfers through PricerRule Pay', async function() {
       secondReceiverFinalBalance = await eip20TokenContractInstance.methods.balanceOf(secondReceiver).call();
 
     const firstReceiverBTAmount = PricerRuleHelper.convertPayCurrencyToToken(
+      config.eip20TokenDecimals,
       transferAmountsInUSD[0],
       config.price,
       config.conversionRate,
       config.conversionRateDecimals
     );
     const secondReceiverBTAmount = PricerRuleHelper.convertPayCurrencyToToken(
+      config.eip20TokenDecimals,
       transferAmountsInUSD[1],
       config.price,
       config.conversionRate,
