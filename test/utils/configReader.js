@@ -17,8 +17,8 @@ ConfigReader.prototype = {
   eip20TokenDecimals: '18',
   sessionKeySpendingLimit: '1000000000000000000000', //1000 ethers
   sessionKeyExpirationHeight: '1000000000000000000',
-  price: '20000000000000000', // $0.02 = 20*10^16
-  acceptanceMargin: '1000000000000000000', // $1
+  price: '20000000000000000', // $0.02 = 2*10^16
+  acceptanceMargin: '1000000000000000000', // $1 = 1*10^18
   auxiliaryPort: 8546,
   workerExpirationHeight: '20000000'
 };
