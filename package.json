@@ -1,6 +1,6 @@
 {
   "name": "@openstfoundation/openst.js",
-  "version": "0.10.0-alpha.4",
+  "version": "0.10.0-alpha.5",
   "description": "OpenST is a framework for building token economies.",
   "main": "index.js",
   "repository": {
@@ -28,7 +28,7 @@
     "pre-commit": "lint-staged"
   },
   "dependencies": {
-    "@openstfoundation/mosaic.js": "0.10.0-beta.2"
+    "@openstfoundation/mosaic.js": "0.10.0-beta.4"
   },
   "devDependencies": {
     "@babel/core": "7.1.0",
