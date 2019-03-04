@@ -4,12 +4,12 @@ const Web3 = require('web3');
 const sinon = require('sinon');
 const { assert } = require('chai');
 
-const Spy = require('../../utils/Spy');
-const Recovery = require('../../lib/ContractInteract/Recovery');
-const AssertAsync = require('../../utils/AssertAsync');
-const Utils = require('../../utils/Utils');
+const Spy = require('../../../utils/Spy');
+const Recovery = require('../../../lib/ContractInteract/Recovery');
+const AssertAsync = require('../../../utils/AssertAsync');
+const Utils = require('../../../utils/Utils');
 
-describe('Recovery.executeRecovery()', () => {
+describe('Recovery.abortRecoveryByOwner()', () => {
   let recovery;
   let web3;
 
@@ -23,19 +23,22 @@ describe('Recovery.executeRecovery()', () => {
     const prevOwner = '0x0000000000000000000000000000000000000003';
     const oldOwner = '0x0000000000000000000000000000000000000004';
     const newOwner = '0x0000000000000000000000000000000000000005';
+    const r = 'r';
+    const v = 'v';
+    const s = 's';
 
     const mockRawTx = 'mockRawTx';
 
-    const rawTx = sinon.replace(recovery, 'executeRecoveryRawTx', sinon.fake.resolves(mockRawTx));
+    const rawTx = sinon.replace(recovery, 'abortRecoveryByOwnerRawTx', sinon.fake.resolves(mockRawTx));
 
     const spySendTransaction = sinon.replace(Utils, 'sendTransaction', sinon.fake.resolves(true));
     const txOptions = {
       from: '0x0000000000000000000000000000000000000006'
     };
 
-    const response = await recovery.executeRecovery(prevOwner, oldOwner, newOwner, txOptions);
-    assert.isTrue(response, 'executeRecovery should return true');
-    Spy.assert(rawTx, 1, [[prevOwner, oldOwner, newOwner]]);
+    const response = await recovery.abortRecoveryByOwner(prevOwner, oldOwner, newOwner, r, s, v, txOptions);
+    assert.isTrue(response, 'abortRecoveryByOwner should return true');
+    Spy.assert(rawTx, 1, [[prevOwner, oldOwner, newOwner, r, s, v]]);
     Spy.assert(spySendTransaction, 1, [[mockRawTx, txOptions]]);
     sinon.restore();
   });
@@ -44,10 +47,13 @@ describe('Recovery.executeRecovery()', () => {
     const prevOwner = '0x0000000000000000000000000000000000000003';
     const oldOwner = '0x0000000000000000000000000000000000000004';
     const newOwner = '0x0000000000000000000000000000000000000005';
+    const r = 'r';
+    const v = 'v';
+    const s = 's';
     const txOptions = undefined;
 
     await AssertAsync.reject(
-      recovery.executeRecovery(prevOwner, oldOwner, newOwner, txOptions),
+      recovery.abortRecoveryByOwner(prevOwner, oldOwner, newOwner, r, s, v, txOptions),
       'Invalid transaction options: undefined.'
     );
   });
@@ -56,9 +62,12 @@ describe('Recovery.executeRecovery()', () => {
     const prevOwner = '0x0000000000000000000000000000000000000003';
     const oldOwner = '0x0000000000000000000000000000000000000004';
     const newOwner = '0x0000000000000000000000000000000000000005';
+    const r = 'r';
+    const v = 'v';
+    const s = 's';
     const txOptions = {};
     await AssertAsync.reject(
-      recovery.executeRecovery(prevOwner, oldOwner, newOwner, txOptions),
+      recovery.abortRecoveryByOwner(prevOwner, oldOwner, newOwner, r, s, v, txOptions),
       `Invalid from address ${txOptions.from} in transaction options.`
     );
   });
@@ -67,11 +76,14 @@ describe('Recovery.executeRecovery()', () => {
     const prevOwner = '0x0000000000000000000000000000000000000003';
     const oldOwner = '0x0000000000000000000000000000000000000004';
     const newOwner = '0x0000000000000000000000000000000000000005';
+    const r = 'r';
+    const v = 'v';
+    const s = 's';
     const txOptions = {
       from: '0x123'
     };
     await AssertAsync.reject(
-      recovery.executeRecovery(prevOwner, oldOwner, newOwner, txOptions),
+      recovery.abortRecoveryByOwner(prevOwner, oldOwner, newOwner, r, s, v, txOptions),
       `Invalid from address ${txOptions.from} in transaction options.`
     );
   });

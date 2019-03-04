@@ -4,11 +4,11 @@ const Web3 = require('web3');
 const sinon = require('sinon');
 const { assert } = require('chai');
 
-const Spy = require('../../utils/Spy');
-const Recovery = require('../../lib/ContractInteract/Recovery');
-const AssertAsync = require('../../utils/AssertAsync');
-const Utils = require('../../utils/Utils');
-const Contracts = require('../../lib/Contracts');
+const Spy = require('../../../utils/Spy');
+const Recovery = require('../../../lib/ContractInteract/Recovery');
+const AssertAsync = require('../../../utils/AssertAsync');
+const Utils = require('../../../utils/Utils');
+const Contracts = require('../../../lib/Contracts');
 
 describe('Recovery.constructor()', () => {
   let web3;
