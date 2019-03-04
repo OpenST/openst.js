@@ -2,6 +2,7 @@
 
 ## Version 0.10.0
 
+* Update PricerRule ABI/BIN with PricerRule:convertPayCurrencyToToken fix ([126](https://github.com/OpenSTFoundation/openst.js/pull/126))
 * PricerRule integration test and cleanup ([#114](https://github.com/OpenSTFoundation/openst.js/pull/114))
 * ProxyFactory address refactoring from createCompanyWallet method ([#113](https://github.com/OpenSTFoundation/openst.js/pull/113)
 * Integration with mosaic.js npm ([#109](https://github.com/OpenSTFoundation/openst.js/pull/109))
