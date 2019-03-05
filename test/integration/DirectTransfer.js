@@ -7,8 +7,8 @@ const MockContractsDeployer = require('./../utils/MockContractsDeployer');
 const config = require('../utils/configReader');
 const { dockerSetup, dockerTeardown } = require('./../../utils/docker');
 
+const { Contracts, Organization } = Package;
 const UserSetup = Package.Setup.User;
-const { Contracts } = Package;
 const UserHelper = Package.Helpers.User;
 
 let txOptions,
@@ -48,7 +48,6 @@ describe('Direct transfers between TH contracts', async function() {
   });
 
   it('Deploys Organization contract', async function() {
-    const { Organization } = Package;
     const orgConfig = {
       deployer: deployerAddress,
       owner: deployerAddress,

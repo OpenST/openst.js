@@ -8,9 +8,8 @@ const config = require('../utils/configReader');
 const { dockerSetup, dockerTeardown } = require('./../../utils/docker');
 const Utils = require('../../utils/Utils');
 
+const { Contracts, AbiBinProvider, Organization } = Package;
 const UserSetup = Package.Setup.User;
-const Contracts = Package.Contracts;
-const { AbiBinProvider } = Package;
 const PricerRuleHelper = Package.Helpers.Rules.PricerRule;
 
 let auxiliaryWeb3,
@@ -60,7 +59,6 @@ describe('TH transfers through PricerRule Pay', async function() {
   });
 
   it('Performs initial setup for economy', async function() {
-    const { Organization } = Package;
     const orgConfig = {
       deployer: deployerAddress,
       owner: deployerAddress,

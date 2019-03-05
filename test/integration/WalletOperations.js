@@ -8,7 +8,7 @@ const config = require('../utils/configReader');
 const { dockerSetup, dockerTeardown } = require('./../../utils/docker');
 
 const UserSetup = Package.Setup.User;
-const { Contracts } = Package;
+const { Contracts, Organization } = Package;
 const TokenHolderHelper = Package.Helpers.TokenHolder;
 const abiBinProvider = new Package.AbiBinProvider();
 
@@ -49,7 +49,6 @@ describe('Wallet operations', async function() {
   });
 
   it('Performs initial setup for economy', async function() {
-    const { Organization } = Package;
     const orgConfig = {
       deployer: deployerAddress,
       owner: deployerAddress,

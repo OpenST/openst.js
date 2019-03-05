@@ -24,8 +24,9 @@ const config = require('../utils/configReader');
 const ConfigReader = require('../utils/configReader');
 const MockContractsDeployer = require('../utils/MockContractsDeployer.js');
 
+const { Organization } = Package;
 const UserSetup = Package.Setup.User;
-const User = Package.Helpers.User;
+const UserHelper = Package.Helpers.User;
 const TokenRulesSetup = Package.Setup.TokenRules;
 
 const abiBinProvider = new Package.AbiBinProvider();
@@ -311,7 +312,6 @@ describe('Delayed Recovery', async () => {
     const mockToken = mockTokenDeployerInstance.addresses.MockToken;
 
     const organizationOwnerAddress = deployerAddress;
-    const { Organization } = Package;
     const orgConfig = {
       deployer: deployerAddress,
       owner: organizationOwnerAddress,
@@ -330,7 +330,7 @@ describe('Delayed Recovery', async () => {
     const tokenHolderMasterCopyDeployTxResponse = await userSetup.deployTokenHolderMasterCopy(txOptions);
     const tokenHolderMasterCopyAddress = tokenHolderMasterCopyDeployTxResponse.receipt.contractAddress;
 
-    userFactory = new User(
+    userFactory = new UserHelper(
       tokenHolderMasterCopyAddress,
       gnosisSafeMasterCopyAddress,
       delayedRecoveryModuleMasterCopyAddress,
