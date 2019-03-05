@@ -2,7 +2,7 @@ const Web3 = require('web3');
 const { assert } = require('chai');
 const BN = require('bn.js');
 const Package = require('../../index');
-const Mosaic = require('@openstfoundation/mosaic.js');
+
 const MockContractsDeployer = require('./../utils/MockContractsDeployer');
 const config = require('../utils/configReader');
 const { dockerSetup, dockerTeardown } = require('./../../utils/docker');
@@ -60,7 +60,7 @@ describe('TH transfers through PricerRule Pay', async function() {
   });
 
   it('Performs initial setup for economy', async function() {
-    const { Organization } = Mosaic.ContractInteract;
+    const { Organization } = Package;
     const orgConfig = {
       deployer: deployerAddress,
       owner: deployerAddress,
@@ -68,7 +68,7 @@ describe('TH transfers through PricerRule Pay', async function() {
       workers: [worker],
       workerExpirationHeight: config.workerExpirationHeight
     };
-    const organizationContractInstance = await Organization.setup(auxiliaryWeb3, orgConfig);
+    const organizationContractInstance = await Organization.setup(auxiliaryWeb3, orgConfig, txOptions);
     organizationAddress = organizationContractInstance.address;
     assert.isNotNull(organizationAddress, 'Organization contract address should not be null.');
 

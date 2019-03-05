@@ -11,11 +11,13 @@ const Rules = require('./lib/setup/Rules');
 const PricerRule = require('./lib/helper/rules/PricerRule');
 const GnosisSafe = require('./lib/helper/GnosisSafe');
 const Recovery = require('./lib/ContractInteract/Recovery');
+const Mosaic = require('@openstfoundation/mosaic.js');
 
 const SignEIP1077Extension = require('./utils/SignEIP1077Extension');
 new SignEIP1077Extension();
 
 module.exports = {
+  Organization: Mosaic.ContractInteract.Organization,
   AbiBinProvider: AbiBinProvider,
   Contracts: Contracts,
   Setup: {
