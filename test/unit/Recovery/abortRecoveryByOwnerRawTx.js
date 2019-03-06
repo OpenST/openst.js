@@ -4,11 +4,11 @@ const Web3 = require('web3');
 const sinon = require('sinon');
 const { assert } = require('chai');
 
-const Spy = require('../../utils/Spy');
-const Recovery = require('../../lib/ContractInteract/Recovery');
-const AssertAsync = require('../../utils/AssertAsync');
+const Spy = require('../../../utils/Spy');
+const Recovery = require('../../../lib/ContractInteract/Recovery');
+const AssertAsync = require('../../../utils/AssertAsync');
 
-describe('Recovery.initiateRecoveryRawTx()', () => {
+describe('Recovery.abortRecoveryByOwnerRawTx()', () => {
   let recovery;
   let web3;
 
@@ -21,7 +21,7 @@ describe('Recovery.initiateRecoveryRawTx()', () => {
   it('should return correct raw tx', async () => {
     const mockTx = 'mockTx';
 
-    const spyRawTx = sinon.replace(recovery.contract.methods, 'initiateRecovery', sinon.fake.resolves(mockTx));
+    const spyRawTx = sinon.replace(recovery.contract.methods, 'abortRecoveryByOwner', sinon.fake.resolves(mockTx));
 
     const prevOwner = '0x0000000000000000000000000000000000000003';
     const oldOwner = '0x0000000000000000000000000000000000000004';
@@ -30,7 +30,7 @@ describe('Recovery.initiateRecoveryRawTx()', () => {
     const v = 'v';
     const s = 's';
 
-    const response = await recovery.initiateRecoveryRawTx(prevOwner, oldOwner, newOwner, r, s, v);
+    const response = await recovery.abortRecoveryByOwnerRawTx(prevOwner, oldOwner, newOwner, r, s, v);
 
     assert.strictEqual(response, mockTx, 'It must return correct raw tx');
 
@@ -38,7 +38,7 @@ describe('Recovery.initiateRecoveryRawTx()', () => {
     sinon.restore();
   });
 
-  it('should throw an error when previous Owner is invalid', async () => {
+  it('should throw an error when previous owner is invalid', async () => {
     const prevOwner = undefined;
     const oldOwner = '0x0000000000000000000000000000000000000004';
     const newOwner = '0x0000000000000000000000000000000000000005';
@@ -47,7 +47,7 @@ describe('Recovery.initiateRecoveryRawTx()', () => {
     const s = 's';
 
     await AssertAsync.reject(
-      recovery.initiateRecoveryRawTx(prevOwner, oldOwner, newOwner, r, s, v),
+      recovery.abortRecoveryByOwnerRawTx(prevOwner, oldOwner, newOwner, r, s, v),
       `Mandatory Parameter 'prevOwner' is missing or invalid: ${prevOwner}.`
     );
   });
@@ -61,7 +61,7 @@ describe('Recovery.initiateRecoveryRawTx()', () => {
     const s = 's';
 
     await AssertAsync.reject(
-      recovery.initiateRecoveryRawTx(prevOwner, oldOwner, newOwner, r, s, v),
+      recovery.abortRecoveryByOwnerRawTx(prevOwner, oldOwner, newOwner, r, s, v),
       `Mandatory Parameter 'oldOwner' is missing or invalid: ${oldOwner}.`
     );
   });
@@ -75,7 +75,7 @@ describe('Recovery.initiateRecoveryRawTx()', () => {
     const s = 's';
 
     await AssertAsync.reject(
-      recovery.initiateRecoveryRawTx(prevOwner, oldOwner, newOwner, r, s, v),
+      recovery.abortRecoveryByOwnerRawTx(prevOwner, oldOwner, newOwner, r, s, v),
       `Mandatory Parameter 'newOwner' is missing or invalid: ${newOwner}.`
     );
   });
@@ -89,7 +89,7 @@ describe('Recovery.initiateRecoveryRawTx()', () => {
     const s = 's';
 
     await AssertAsync.reject(
-      recovery.initiateRecoveryRawTx(prevOwner, oldOwner, newOwner, r, s, v),
+      recovery.abortRecoveryByOwnerRawTx(prevOwner, oldOwner, newOwner, r, s, v),
       `Invalid r of signature: ${r}.`
     );
   });
@@ -103,7 +103,7 @@ describe('Recovery.initiateRecoveryRawTx()', () => {
     const s = 's';
 
     await AssertAsync.reject(
-      recovery.initiateRecoveryRawTx(prevOwner, oldOwner, newOwner, r, s, v),
+      recovery.abortRecoveryByOwnerRawTx(prevOwner, oldOwner, newOwner, r, s, v),
       `Invalid v of signature: ${v}.`
     );
   });
@@ -117,7 +117,7 @@ describe('Recovery.initiateRecoveryRawTx()', () => {
     const s = undefined;
 
     await AssertAsync.reject(
-      recovery.initiateRecoveryRawTx(prevOwner, oldOwner, newOwner, r, s, v),
+      recovery.abortRecoveryByOwnerRawTx(prevOwner, oldOwner, newOwner, r, s, v),
       `Invalid s of signature: ${s}.`
     );
   });
