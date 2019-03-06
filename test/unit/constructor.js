@@ -25,7 +25,7 @@ describe('Recovery.constructor()', () => {
 
     const instance = new Recovery(web3, recoveryAddress);
 
-    assert.strictEqual(recoveryAddress, instance.delayedRecoveryAddress, 'Address must match');
+    assert.strictEqual(recoveryAddress, instance.address, 'Address must match');
 
     assert.strictEqual(web3, instance.auxiliaryWeb3, 'Web3 instance must match');
     Spy.assert(spyContract, 1, [[web3, recoveryAddress]]);
@@ -52,7 +52,7 @@ describe('Recovery.constructor()', () => {
   it('should throw an error when recovery contract address is undefined', async () => {
     await AssertAsync.reject(
       new Recovery(web3, undefined),
-      `Mandatory Parameter 'delayedRecoveryAddress' is missing or invalid: undefined.`
+      `Mandatory Parameter 'address' is missing or invalid: undefined.`
     );
   });
 });

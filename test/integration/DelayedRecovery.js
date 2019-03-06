@@ -268,9 +268,9 @@ async function initiateAndExecuteRecovery(
 
 describe('Delayed Recovery', async () => {
   before(async () => {
-    const { rpcEndpointOrigin } = await dockerSetup();
+    const { rpcEndpoint } = await dockerSetup();
 
-    auxiliaryWeb3 = new Web3(rpcEndpointOrigin);
+    auxiliaryWeb3 = new Web3(rpcEndpoint);
 
     const accountsOrigin = await auxiliaryWeb3.eth.getAccounts();
 

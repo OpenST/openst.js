@@ -30,8 +30,8 @@ let txOptions,
 
 describe('Direct transfers between TH contracts', async function() {
   before(async function() {
-    const { rpcEndpointOrigin } = await dockerSetup();
-    auxiliaryWeb3 = new Web3(rpcEndpointOrigin);
+    const { rpcEndpoint } = await dockerSetup();
+    auxiliaryWeb3 = new Web3(rpcEndpoint);
     accountsOrigin = await auxiliaryWeb3.eth.getAccounts();
     deployerAddress = accountsOrigin[0];
     txOptions = {

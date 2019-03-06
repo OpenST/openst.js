@@ -31,8 +31,8 @@ let auxiliaryWeb3,
 
 describe('Wallet operations', async function() {
   before(async function() {
-    const { rpcEndpointOrigin } = await dockerSetup();
-    auxiliaryWeb3 = new Web3(rpcEndpointOrigin);
+    const { rpcEndpoint } = await dockerSetup();
+    auxiliaryWeb3 = new Web3(rpcEndpoint);
     const accountsOrigin = await auxiliaryWeb3.eth.getAccounts();
     deployerAddress = accountsOrigin[0];
     worker = accountsOrigin[1];
