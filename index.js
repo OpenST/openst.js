@@ -2,7 +2,7 @@
 
 const AbiBinProvider = require('./lib/AbiBinProvider');
 const Contracts = require('./lib/Contracts');
-const TokenRules = require('./lib/setup/TokenRules');
+const TokenRulesSetup = require('./lib/setup/TokenRules');
 const User = require('./lib/setup/User');
 const UserHelper = require('./lib/helper/User');
 const TokenRulesHelper = require('./lib/helper/TokenRules');
@@ -18,6 +18,7 @@ const Recovery = require('./lib/ContractInteract/Recovery');
 const UserWalletFactory = require('./lib/ContractInteract/UserWalletFactory');
 const ProxyFactory = require('./lib/ContractInteract/ProxyFactory');
 const CreateAndAddModules = require('./lib/ContractInteract/CreateAndAddModules');
+const TokenRules = require('./lib/ContractInteract/TokenRules');
 
 // OpenST Setup
 const OpenST = require('./lib/setup/Openst');
@@ -29,7 +30,7 @@ module.exports = {
   AbiBinProvider: AbiBinProvider,
   Contracts: Contracts,
   Setup: {
-    TokenRules: TokenRules,
+    TokenRules: TokenRulesSetup,
     User: User,
     Rules: Rules,
     OpenST: OpenST
@@ -50,6 +51,7 @@ module.exports = {
     Recovery: Recovery,
     UserWalletFactory: UserWalletFactory,
     ProxyFactory: ProxyFactory,
-    CreateAndAddModules: CreateAndAddModules
+    CreateAndAddModules: CreateAndAddModules,
+    TokenRules: TokenRules
   }
 };
