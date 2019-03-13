@@ -24,7 +24,7 @@ const config = require('../utils/configReader');
 const ConfigReader = require('../utils/configReader');
 const MockContractsDeployer = require('../utils/MockContractsDeployer.js');
 
-const { Organization } = Package;
+const { Organization } = Package.ContractInteract;
 const UserSetup = Package.Setup.User;
 const UserHelper = Package.Helpers.User;
 const TokenRulesSetup = Package.Setup.TokenRules;

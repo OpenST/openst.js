@@ -8,7 +8,8 @@ const config = require('../utils/configReader');
 const { dockerSetup, dockerTeardown } = require('./../../utils/docker');
 const Utils = require('../../utils/Utils');
 
-const { Contracts, AbiBinProvider, Organization } = Package;
+const { Contracts, AbiBinProvider } = Package;
+const { Organization } = Package.ContractInteract;
 const UserSetup = Package.Setup.User;
 const PricerRuleHelper = Package.Helpers.Rules.PricerRule;
 

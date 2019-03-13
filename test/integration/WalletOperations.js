@@ -8,7 +8,8 @@ const config = require('../utils/configReader');
 const { dockerSetup, dockerTeardown } = require('./../../utils/docker');
 
 const UserSetup = Package.Setup.User;
-const { Contracts, Organization } = Package;
+const { Contracts } = Package;
+const { Organization } = Package.ContractInteract;
 const TokenHolderHelper = Package.Helpers.TokenHolder;
 const abiBinProvider = new Package.AbiBinProvider();
 

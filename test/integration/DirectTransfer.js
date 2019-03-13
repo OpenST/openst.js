@@ -7,7 +7,8 @@ const MockContractsDeployer = require('./../utils/MockContractsDeployer');
 const config = require('../utils/configReader');
 const { dockerSetup, dockerTeardown } = require('./../../utils/docker');
 
-const { Contracts, Organization } = Package;
+const { Contracts } = Package;
+const { Organization } = Package.ContractInteract;
 const UserSetup = Package.Setup.User;
 const UserHelper = Package.Helpers.User;
 

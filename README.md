@@ -60,7 +60,7 @@ const gas = '7500000';
 An Organization contract serves as an on-chain access control mechanism by assigning roles to a set of addresses.
 
 ```js
-const { Organization } = OpenST;
+const { Organization } = OpenST.ContractInteract;
 const organizationOwner = '0xaabb1122....................';
 const admin = '0xaabb1122....................';
 const orgConfig = {

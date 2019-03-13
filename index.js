@@ -17,7 +17,6 @@ const SignEIP1077Extension = require('./utils/SignEIP1077Extension');
 new SignEIP1077Extension();
 
 module.exports = {
-  Organization: Mosaic.ContractInteract.Organization,
   AbiBinProvider: AbiBinProvider,
   Contracts: Contracts,
   Setup: {
@@ -34,5 +33,8 @@ module.exports = {
     Rules: {
       PricerRule: PricerRule
     }
+  },
+  ContractInteract: {
+    Organization: Mosaic.ContractInteract.Organization
   }
 };
