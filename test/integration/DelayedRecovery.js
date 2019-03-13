@@ -17,20 +17,19 @@
 const { assert } = require('chai');
 const EthUtils = require('ethereumjs-util');
 const Web3 = require('web3');
+const Package = require('../../index');
 
 const { dockerSetup, dockerTeardown } = require('./../../utils/docker');
-
 const config = require('../utils/configReader');
-
-const Mosaic = require('@openstfoundation/mosaic.js');
 const ConfigReader = require('../utils/configReader');
-const UserSetup = require('../../lib/setup/User.js');
-const User = require('../../lib/helper/User.js');
 const MockContractsDeployer = require('../utils/MockContractsDeployer.js');
-const TokenRulesSetup = require('../../lib/setup/TokenRules.js');
-const AbiBinProvider = require('../../lib/AbiBinProvider.js');
 
-const abiBinProvider = new AbiBinProvider();
+const { Organization } = Package.ContractInteract;
+const UserSetup = Package.Setup.User;
+const UserHelper = Package.Helpers.User;
+const TokenRulesSetup = Package.Setup.TokenRules;
+
+const abiBinProvider = new Package.AbiBinProvider();
 
 const GNOSIS_SAFE_CONTRACT_NAME = 'GnosisSafe';
 const DELAYED_RECOVERY_MODULE_CONTRACT_NAME = 'DelayedRecoveryModule';
@@ -313,7 +312,6 @@ describe('Delayed Recovery', async () => {
     const mockToken = mockTokenDeployerInstance.addresses.MockToken;
 
     const organizationOwnerAddress = deployerAddress;
-    const { Organization } = Mosaic.ContractInteract;
     const orgConfig = {
       deployer: deployerAddress,
       owner: organizationOwnerAddress,
@@ -321,7 +319,7 @@ describe('Delayed Recovery', async () => {
       workers: [organizationWorkerAddress],
       workerExpirationHeight: config.workerExpirationHeight
     };
-    const organizationContractInstance = await Organization.setup(auxiliaryWeb3, orgConfig);
+    const organizationContractInstance = await Organization.setup(auxiliaryWeb3, orgConfig, txOptions);
     const organizationAddress = organizationContractInstance.address;
     assert.isNotNull(organizationAddress, 'Organization contract address should not be null.');
 
@@ -332,7 +330,7 @@ describe('Delayed Recovery', async () => {
     const tokenHolderMasterCopyDeployTxResponse = await userSetup.deployTokenHolderMasterCopy(txOptions);
     const tokenHolderMasterCopyAddress = tokenHolderMasterCopyDeployTxResponse.receipt.contractAddress;
 
-    userFactory = new User(
+    userFactory = new UserHelper(
       tokenHolderMasterCopyAddress,
       gnosisSafeMasterCopyAddress,
       delayedRecoveryModuleMasterCopyAddress,
