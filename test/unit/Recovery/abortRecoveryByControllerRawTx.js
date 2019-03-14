@@ -4,9 +4,9 @@ const Web3 = require('web3');
 const sinon = require('sinon');
 const { assert } = require('chai');
 
-const Spy = require('../../utils/Spy');
-const Recovery = require('../../lib/ContractInteract/Recovery');
-const AssertAsync = require('../../utils/AssertAsync');
+const Spy = require('../../../utils/Spy');
+const Recovery = require('../../../lib/ContractInteract/Recovery');
+const AssertAsync = require('../../../utils/AssertAsync');
 
 describe('Recovery.abortRecoveryByControllerRawTx()', () => {
   let recovery;

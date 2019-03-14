@@ -2,12 +2,14 @@ const Web3 = require('web3');
 const Mosaic = require('@openstfoundation/mosaic.js');
 const { assert } = require('chai');
 const Package = require('../../index');
+
 const MockContractsDeployer = require('./../utils/MockContractsDeployer');
 const config = require('../utils/configReader');
 const { dockerSetup, dockerTeardown } = require('./../../utils/docker');
 
-const UserSetup = Package.Setup.User;
 const { Contracts } = Package;
+const { Organization } = Package.ContractInteract;
+const UserSetup = Package.Setup.User;
 const UserHelper = Package.Helpers.User;
 
 let txOptions,
@@ -30,8 +32,8 @@ let txOptions,
 
 describe('Direct transfers between TH contracts', async function() {
   before(async function() {
-    const { rpcEndpointOrigin } = await dockerSetup();
-    auxiliaryWeb3 = new Web3(rpcEndpointOrigin);
+    const { rpcEndpoint } = await dockerSetup();
+    auxiliaryWeb3 = new Web3(rpcEndpoint);
     accountsOrigin = await auxiliaryWeb3.eth.getAccounts();
     deployerAddress = accountsOrigin[0];
     txOptions = {
@@ -47,7 +49,6 @@ describe('Direct transfers between TH contracts', async function() {
   });
 
   it('Deploys Organization contract', async function() {
-    const { Organization } = Mosaic.ContractInteract;
     const orgConfig = {
       deployer: deployerAddress,
       owner: deployerAddress,
@@ -55,7 +56,7 @@ describe('Direct transfers between TH contracts', async function() {
       workers: [accountsOrigin[1]],
       workerExpirationHeight: config.workerExpirationHeight
     };
-    const organizationContractInstance = await Organization.setup(auxiliaryWeb3, orgConfig);
+    const organizationContractInstance = await Organization.setup(auxiliaryWeb3, orgConfig, txOptions);
     organizationAddress = organizationContractInstance.address;
     assert.isNotNull(organizationAddress, 'Organization contract address should not be null.');
   });

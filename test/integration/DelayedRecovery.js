@@ -25,7 +25,7 @@ const config = require('../utils/configReader');
 const Mosaic = require('@openstfoundation/mosaic.js');
 const ConfigReader = require('../utils/configReader');
 const UserSetup = require('../../lib/setup/User.js');
-const User = require('../../lib/helper/User.js');
+const User = require('../../lib/User.js');
 const MockContractsDeployer = require('../utils/MockContractsDeployer.js');
 const TokenRulesSetup = require('../../lib/setup/TokenRules.js');
 const AbiBinProvider = require('../../lib/AbiBinProvider.js');
@@ -268,9 +268,9 @@ async function initiateAndExecuteRecovery(
 
 describe('Delayed Recovery', async () => {
   before(async () => {
-    const { rpcEndpointOrigin } = await dockerSetup();
+    const { rpcEndpoint } = await dockerSetup();
 
-    auxiliaryWeb3 = new Web3(rpcEndpointOrigin);
+    auxiliaryWeb3 = new Web3(rpcEndpoint);
 
     const accountsOrigin = await auxiliaryWeb3.eth.getAccounts();
 

@@ -27,12 +27,6 @@ const OpenST = require('@openstfoundation/openst.js');
 
 ```
 
-For deployment of Organization contract, Mosaic object is needed.
-```js
-// Create Mosaic object
-const Mosaic = require('@openstfoundation/mosaic.js');
-```
-
 ## Deploying contracts
 
 ## Constants
@@ -67,7 +61,7 @@ const gas = '7500000';
 An Organization contract serves as an on-chain access control mechanism by assigning roles to a set of addresses.
 
 ```js
-const { Organization } = Mosaic.ContractInteract;
+const { Organization } = OpenST.ContractInteract;
 const organizationOwner = '0xaabb1122....................';
 const admin = '0xaabb1122....................';
 const orgConfig = {
@@ -77,9 +71,14 @@ const orgConfig = {
   workers: [worker],
   workerExpirationHeight: '200000000' // This is the block height for when the the worker is set to expire.
 };
+const txOptions = {
+  gasPrice: '0x3B9ACA00',
+  from : deployerAddress,
+  gas: '7500000', // This is an optional parameter, if not passed gas will be estimated.
+};
 let organizationContractInstance;
 let organizationAddress;
-Organization.setup(web3Provider, orgConfig).then(function(instance){
+Organization.setup(web3Provider, orgConfig, txOptions).then(function(instance){
   organizationContractInstance = instance;
   organizationAddress = organizationContractInstance.address;
 });

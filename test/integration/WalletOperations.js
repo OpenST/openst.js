@@ -2,13 +2,14 @@ const Web3 = require('web3');
 const { assert } = require('chai');
 const Package = require('../../index');
 const abiDecoder = require('abi-decoder');
+
 const MockContractsDeployer = require('../utils/MockContractsDeployer');
-const Mosaic = require('@openstfoundation/mosaic.js');
 const config = require('../utils/configReader');
 const { dockerSetup, dockerTeardown } = require('./../../utils/docker');
 
 const UserSetup = Package.Setup.User;
 const { Contracts } = Package;
+const { Organization } = Package.ContractInteract;
 const TokenHolderHelper = Package.Helpers.TokenHolder;
 const abiBinProvider = new Package.AbiBinProvider();
 
@@ -31,8 +32,8 @@ let auxiliaryWeb3,
 
 describe('Wallet operations', async function() {
   before(async function() {
-    const { rpcEndpointOrigin } = await dockerSetup();
-    auxiliaryWeb3 = new Web3(rpcEndpointOrigin);
+    const { rpcEndpoint } = await dockerSetup();
+    auxiliaryWeb3 = new Web3(rpcEndpoint);
     const accountsOrigin = await auxiliaryWeb3.eth.getAccounts();
     deployerAddress = accountsOrigin[0];
     worker = accountsOrigin[1];
@@ -49,7 +50,6 @@ describe('Wallet operations', async function() {
   });
 
   it('Performs initial setup for economy', async function() {
-    const { Organization } = Mosaic.ContractInteract;
     const orgConfig = {
       deployer: deployerAddress,
       owner: deployerAddress,
@@ -57,7 +57,7 @@ describe('Wallet operations', async function() {
       workers: [worker],
       workerExpirationHeight: config.workerExpirationHeight
     };
-    const organizationContractInstance = await Organization.setup(auxiliaryWeb3, orgConfig);
+    const organizationContractInstance = await Organization.setup(auxiliaryWeb3, orgConfig, txOptions);
     const organization = organizationContractInstance.address;
     assert.isNotNull(organization, 'Organization contract address should not be null.');
 
