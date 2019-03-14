@@ -7,52 +7,51 @@ const { assert } = require('chai');
 const Spy = require('../../../utils/Spy');
 const Recovery = require('../../../lib/ContractInteract/Recovery');
 const AssertAsync = require('../../../utils/AssertAsync');
-const Utils = require('../../../utils/Utils');
 const Contracts = require('../../../lib/Contracts');
 
 describe('Recovery.constructor()', () => {
   let web3;
-  let recoveryAddress;
+  let address;
 
   beforeEach(() => {
     web3 = new Web3();
-    recoveryAddress = '0x0000000000000000000000000000000000000002';
+    address = '0x0000000000000000000000000000000000000002';
   });
 
   it('should construct with correct parameter', async () => {
     const fakeInstance = sinon.fake();
     const spyContract = sinon.replace(Contracts, 'getDelayedRecovery', sinon.fake.returns(fakeInstance));
 
-    const instance = new Recovery(web3, recoveryAddress);
+    const instance = new Recovery(web3, address);
 
-    assert.strictEqual(recoveryAddress, instance.delayedRecoveryAddress, 'Address must match');
+    assert.strictEqual(address, instance.address, 'Address must match');
 
     assert.strictEqual(web3, instance.auxiliaryWeb3, 'Web3 instance must match');
-    Spy.assert(spyContract, 1, [[web3, recoveryAddress]]);
+    Spy.assert(spyContract, 1, [[web3, address]]);
     sinon.restore();
   });
 
   it('should throw an error when getDelayedRecovery returns undefined object', async () => {
     const spyContract = sinon.replace(Contracts, 'getDelayedRecovery', sinon.fake.returns(undefined));
 
-    const errorMessage = `Could not load recovery contract for: ${recoveryAddress}`;
-    await AssertAsync.reject(new Recovery(web3, recoveryAddress), errorMessage);
+    const errorMessage = `Could not load recovery contract for: ${address}`;
+    await AssertAsync.reject(new Recovery(web3, address), errorMessage);
 
-    Spy.assert(spyContract, 1, [[web3, recoveryAddress]]);
+    Spy.assert(spyContract, 1, [[web3, address]]);
     sinon.restore();
   });
 
   it('should throw an error when web3 object is undefined', async () => {
     await AssertAsync.reject(
-      new Recovery(undefined, recoveryAddress),
+      new Recovery(undefined, address),
       `Mandatory Parameter 'auxiliaryWeb3' is missing or invalid.`
     );
   });
 
-  it('should throw an error when recovery contract address is undefined', async () => {
+  it('should throw an error when Recovery contract address is undefined', async () => {
     await AssertAsync.reject(
       new Recovery(web3, undefined),
-      `Mandatory Parameter 'delayedRecoveryAddress' is missing or invalid: undefined.`
+      `Mandatory Parameter 'address' is missing or invalid: undefined.`
     );
   });
 });
