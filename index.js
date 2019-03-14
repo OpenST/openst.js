@@ -19,6 +19,7 @@ const UserWalletFactory = require('./lib/ContractInteract/UserWalletFactory');
 const ProxyFactory = require('./lib/ContractInteract/ProxyFactory');
 const CreateAndAddModules = require('./lib/ContractInteract/CreateAndAddModules');
 const TokenRules = require('./lib/ContractInteract/TokenRules');
+const Mosaic = require('@openstfoundation/mosaic.js');
 
 // OpenST Setup
 const OpenST = require('./lib/setup/Openst');
@@ -52,6 +53,7 @@ module.exports = {
     UserWalletFactory: UserWalletFactory,
     ProxyFactory: ProxyFactory,
     CreateAndAddModules: CreateAndAddModules,
-    TokenRules: TokenRules
+    TokenRules: TokenRules,
+    Organization: Mosaic.ContractInteract.Organization
   }
 };
