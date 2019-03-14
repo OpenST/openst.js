@@ -8,7 +8,7 @@ const UserHelper = require('./lib/User');
 const TokenRulesHelper = require('./lib/helper/TokenRules');
 const TokenHolderHelper = require('./lib/helper/TokenHolder');
 const Rules = require('./lib/setup/Rules');
-const PricerRule = require('./lib/helper/rules/PricerRule');
+const PricerRuleHelper = require('./lib/helper/rules/PricerRule');
 const GnosisSafeHelper = require('./lib/helper/GnosisSafe');
 
 // Require Contract Interacts
@@ -19,6 +19,7 @@ const UserWalletFactory = require('./lib/ContractInteract/UserWalletFactory');
 const ProxyFactory = require('./lib/ContractInteract/ProxyFactory');
 const CreateAndAddModules = require('./lib/ContractInteract/CreateAndAddModules');
 const TokenRules = require('./lib/ContractInteract/TokenRules');
+const PricerRule = require('./lib/ContractInteract/PricerRule');
 const Mosaic = require('@openstfoundation/mosaic.js');
 
 // OpenST Setup
@@ -43,7 +44,7 @@ module.exports = {
     GnosisSafe: GnosisSafeHelper,
     Recovery: Recovery,
     Rules: {
-      PricerRule: PricerRule
+      PricerRule: PricerRuleHelper
     }
   },
   ContractInteract: {
@@ -54,6 +55,7 @@ module.exports = {
     ProxyFactory: ProxyFactory,
     CreateAndAddModules: CreateAndAddModules,
     TokenRules: TokenRules,
+    PricerRule: PricerRule,
     Organization: Mosaic.ContractInteract.Organization
   }
 };
