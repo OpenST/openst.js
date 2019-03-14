@@ -19,7 +19,7 @@ describe('TokenHolder.executeRuleRawTx()', () => {
 
   it('should construct with correct parameters', async () => {
     const to = '0x0000000000000000000000000000000000000003';
-    const data = null;
+    const data = 'somedata';
     const nonce = 1;
     const r = '0xdfc2f04f19e6d253cd3980e663f57600f33fc1a16697f5e9703e8dc23d2d1c1760';
     const s = '0xdfc2f04f19e6d253cd3980e663f57600f33fc1a16697f5e9703e8dc23d2d1c1';
@@ -39,11 +39,31 @@ describe('TokenHolder.executeRuleRawTx()', () => {
 
   it('should throw an error when to address is undefined', async () => {
     const to = undefined;
-    const data = null;
+    const data = 'somedata';
     const nonce = 1;
     const r = '0xdfc2f04f19e6d253cd3980e663f57600f33fc1a16697f5e9703e8dc23d2d1c1760';
     const s = '0xdfc2f04f19e6d253cd3980e663f57600f33fc1a16697f5e9703e8dc23d2d1c1';
     const v = 28;
     await AssertAsync.reject(tokenHolder.executeRuleRawTx(to, data, nonce, r, s, v), `Invalid to address: undefined.`);
+  });
+
+  it('should throw an error when data is undefined', async () => {
+    const to = '0x0000000000000000000000000000000000000003';
+    const data = undefined;
+    const nonce = 1;
+    const r = '0xdfc2f04f19e6d253cd3980e663f57600f33fc1a16697f5e9703e8dc23d2d1c1760';
+    const s = '0xdfc2f04f19e6d253cd3980e663f57600f33fc1a16697f5e9703e8dc23d2d1c1';
+    const v = 28;
+    await AssertAsync.reject(tokenHolder.executeRuleRawTx(to, data, nonce, r, s, v), `Invalid data: undefined.`);
+  });
+
+  it('should throw an error when nonce is undefined', async () => {
+    const to = '0x0000000000000000000000000000000000000003';
+    const data = 'somedata';
+    const nonce = undefined;
+    const r = '0xdfc2f04f19e6d253cd3980e663f57600f33fc1a16697f5e9703e8dc23d2d1c1760';
+    const s = '0xdfc2f04f19e6d253cd3980e663f57600f33fc1a16697f5e9703e8dc23d2d1c1';
+    const v = 28;
+    await AssertAsync.reject(tokenHolder.executeRuleRawTx(to, data, nonce, r, s, v), `Invalid nonce: undefined.`);
   });
 });
