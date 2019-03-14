@@ -5,7 +5,7 @@ const Package = require('../../index');
 const config = require('../utils/configReader');
 const { dockerSetup, dockerTeardown } = require('./../../utils/docker');
 
-const { OpenST } = Package.Setup;
+const { SetupOpenst } = Package;
 
 let auxiliaryWeb3;
 let deployerAddress;
@@ -30,8 +30,7 @@ describe('OpenST Setup', async function() {
     dockerTeardown();
   });
 
-  it('Performs openst setup', async function() {
-    const openst = new OpenST(auxiliaryWeb3);
+  it('Performs setup of openst', async function() {
     const {
       tokenHolder,
       gnosisSafe,
@@ -39,7 +38,7 @@ describe('OpenST Setup', async function() {
       userWalletFactory,
       proxyFactory,
       createAndAddModules
-    } = await openst.setup(txOptions, txOptions, txOptions, txOptions, txOptions, txOptions);
+    } = await SetupOpenst(auxiliaryWeb3, txOptions, txOptions, txOptions, txOptions, txOptions, txOptions);
     assert.isNotNull(tokenHolder.address, 'TokenHolder contract address should not be null.');
     assert.isNotNull(gnosisSafe.address, 'GnosisSafe contract address should not be null.');
     assert.isNotNull(recovery.address, 'Recovery contract address should not be null.');

@@ -22,7 +22,7 @@ const TokenRules = require('./lib/ContractInteract/TokenRules');
 const Mosaic = require('@openstfoundation/mosaic.js');
 
 // OpenST Setup
-const OpenST = require('./lib/setup/Openst');
+const SetupOpenst = require('./lib/Setup');
 
 const SignEIP1077Extension = require('./utils/SignEIP1077Extension');
 new SignEIP1077Extension();
@@ -30,11 +30,11 @@ new SignEIP1077Extension();
 module.exports = {
   AbiBinProvider: AbiBinProvider,
   Contracts: Contracts,
+  SetupOpenst: SetupOpenst,
   Setup: {
     TokenRules: TokenRulesSetup,
     User: User,
-    Rules: Rules,
-    OpenST: OpenST
+    Rules: Rules
   },
   Helpers: {
     User: UserHelper,
