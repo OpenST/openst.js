@@ -2,19 +2,19 @@ OpenST.js
 ============
 
 OpenST is a framework for building token economies. OpenST supports interactions with openst-contracts.
-It requires [openst-contracts](https://github.com/OpenSTFoundation/openst-contracts) for ABIs and BINs of contracts.
+It requires [openst-contracts](https://github.com/openst/openst-contracts) for ABIs and BINs of contracts.
 
-![Build master](https://img.shields.io/travis/OpenSTFoundation/openst.js/master.svg?label=build%20master&style=flat)
-![Build develop](https://img.shields.io/travis/OpenSTFoundation/openst.js/develop.svg?label=build%20develop&style=flat)
-![npm version](https://img.shields.io/npm/v/@openstfoundation/openst.js.svg?style=flat)
+![Build master](https://img.shields.io/travis/openst/openst.js/master.svg?label=build%20master&style=flat)
+![Build develop](https://img.shields.io/travis/openst/openst.js/develop.svg?label=build%20develop&style=flat)
+![npm version](https://img.shields.io/npm/v/@openst/openst.js.svg?style=flat)
 ![Discuss on Discourse](https://img.shields.io/discourse/https/discuss.openst.org/topics.svg?style=flat)
-![Chat on Gitter](https://img.shields.io/gitter/room/OpenSTFoundation/SimpleToken.svg?style=flat)
+![Chat on Gitter](https://img.shields.io/gitter/room/openst/SimpleToken.svg?style=flat)
 
 ##  Setup
 This library assumes that nodejs and geth are installed and running. To install OpenST.js in your project using npm:
 
 ```bash
-$ npm install @openstfoundation/openst.js --save
+$ npm install @openst/openst.js --save
 ```
 
 The code works for Ethereum Byzantium and Petersburg.
@@ -23,7 +23,7 @@ The code works for Ethereum Byzantium and Petersburg.
 
 ```js
 // Creating OpenST.js object
-const OpenST = require('@openstfoundation/openst.js');
+const OpenST = require('@openst/openst.js');
 
 ```
 
@@ -359,7 +359,7 @@ tokenHolder.executeRule(tokenRulesAddress, directTransferCallData, nonce, vrs.r,
 
 ## Setup of PriceOracle 
 
-Make sure PriceOracle contract is already deployed. Refer [PriceOracle](https://github.com/OpenSTFoundation/ost-price-oracle) npm for setup of PriceOracle contract.
+Make sure PriceOracle contract is already deployed. Refer [PriceOracle](https://github.com/openst/ost-price-oracle) npm for setup of PriceOracle contract.
 
 ## Payment through PricerRule contract 
 
@@ -467,13 +467,13 @@ openst.js comes with an abi-bin provider for managing abi(s) and bin(s).
 
 The abiBinProvider provides abi(s) and bin(s) for the following contracts:
 
-* [TokenHolder](https://github.com/OpenSTFoundation/openst-contracts/blob/0.10.0-alpha.1/contracts/token/TokenHolder.sol) (TokenHolder contract deployed on UtilityChain)
-* [TokenRules](https://github.com/OpenSTFoundation/openst-contracts/blob/0.10.0-alpha.1/contracts/token/TokenRules.sol) (TokenRules contract deployed on UtilityChain)
-* [PricerRule](https://github.com/OpenSTFoundation/openst-contracts/blob/0.10.0-alpha.1/contracts/rules/PricerRule.sol) (PricerRule is a rule contract deployed on UtilityChain)
+* [TokenHolder](https://github.com/openst/openst-contracts/blob/0.10.0-alpha.1/contracts/token/TokenHolder.sol) (TokenHolder contract deployed on UtilityChain)
+* [TokenRules](https://github.com/openst/openst-contracts/blob/0.10.0-alpha.1/contracts/token/TokenRules.sol) (TokenRules contract deployed on UtilityChain)
+* [PricerRule](https://github.com/openst/openst-contracts/blob/0.10.0-alpha.1/contracts/rules/PricerRule.sol) (PricerRule is a rule contract deployed on UtilityChain)
 * [GnosisSafe](https://github.com/gnosis/safe-contracts/blob/v0.1.0/contracts/GnosisSafe.sol) (MultiSignature wallet with support for confirmations using signed messages)
-* [DelayedRecoveryModule](https://github.com/OpenSTFoundation/openst-contracts/blob/0.10.0-alpha.1/contracts/gnosis_safe_modules/DelayedRecoveryModule.sol) (Allows to replace an owner without Safe confirmations) 
+* [DelayedRecoveryModule](https://github.com/openst/openst-contracts/blob/0.10.0-alpha.1/contracts/gnosis_safe_modules/DelayedRecoveryModule.sol) (Allows to replace an owner without Safe confirmations) 
 * [CreateAndAddModules](https://github.com/gnosis/safe-contracts/blob/v0.1.0/contracts/libraries/CreateAndAddModules.sol) (Allows to create and add multiple module in one transaction)
-* [UserWalletFactory](https://github.com/OpenSTFoundation/openst-contracts/blob/0.10.0-alpha.1/contracts/proxies/UserWalletFactory.sol) (Creates proxy for GnosisSafe, TokenHolder and DelayedRecoveryModule)
+* [UserWalletFactory](https://github.com/openst/openst-contracts/blob/0.10.0-alpha.1/contracts/proxies/UserWalletFactory.sol) (Creates proxy for GnosisSafe, TokenHolder and DelayedRecoveryModule)
 
 ```js
 
