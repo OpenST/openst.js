@@ -5,9 +5,10 @@ const sinon = require('sinon');
 const { assert } = require('chai');
 
 const Spy = require('../../../utils/Spy');
+const AssertAsync = require('../../../utils/AssertAsync');
 const TokenHolder = require('../../../lib/ContractInteract/TokenHolder');
 
-describe('TokenHolder.getLogoutExecutableData()', () => {
+describe('TokenHolder.getSessionKeyData()', () => {
   let tokenHolder;
 
   beforeEach(() => {
@@ -17,17 +18,24 @@ describe('TokenHolder.getLogoutExecutableData()', () => {
   });
 
   it('should construct with correct parameters', async () => {
+    const sessionKey = '0x0000000000000000000000000000000000000003';
+
     const mockSessionKeyData = 'mockSessionKeyData';
-    const logoutSpy = sinon.replace(
+    const sessionKeyDataSpy = sinon.replace(
       tokenHolder.contract.methods,
       'sessionKeys',
       sinon.fake.returns({
         call: () => Promise.resolve(mockSessionKeyData)
       })
     );
-    const response = await tokenHolder.getSessionKeyData();
+    const response = await tokenHolder.getSessionKeyData(sessionKey);
 
     assert.strictEqual(response, mockSessionKeyData);
-    Spy.assert(logoutSpy, 1, [[]]);
+    Spy.assert(sessionKeyDataSpy, 1, [[sessionKey]]);
+  });
+
+  it('should throw an error when to address is undefined', async () => {
+    const sessionKey = undefined;
+    await AssertAsync.reject(tokenHolder.getSessionKeyData(sessionKey), `Invalid sessionKey address: undefined.`);
   });
 });
