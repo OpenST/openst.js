@@ -2,8 +2,9 @@
 
 ## Version 0.10.0
 
+* ABIs and BINs are now accessed as a dependency on openst-contracts ([137](https://github.com/OpenSTFoundation/openst.js/pull/137))
 * Update PricerRule ABI/BIN with PricerRule:convertPayCurrencyToToken fix ([126](https://github.com/OpenSTFoundation/openst.js/pull/126))
-* ABIs and BINs are now accessed as a dependency on [openst-contracts](https://github.com/OpenSTFoundation/openst-contracts) ([#116](https://github.com/OpenSTFoundation/openst.js/pull/116))
+* Recovery contract interaction fixes ([#116](https://github.com/OpenSTFoundation/openst.js/pull/116))
 * PricerRule integration test and cleanup ([#114](https://github.com/OpenSTFoundation/openst.js/pull/114))
 * ProxyFactory address refactoring from createCompanyWallet method ([#113](https://github.com/OpenSTFoundation/openst.js/pull/113)
 * Integration with mosaic.js npm ([#109](https://github.com/OpenSTFoundation/openst.js/pull/109))
