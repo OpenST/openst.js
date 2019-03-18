@@ -1,11 +1,11 @@
 {
-  "name": "@openstfoundation/openst.js",
+  "name": "@openst/openst.js",
   "version": "0.10.0-alpha.5",
   "description": "OpenST is a framework for building token economies.",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/OpenSTFoundation/openst.js.git"
+    "url": "https://github.com/openst/openst.js.git"
   },
   "keywords": [
     "OpenST",
@@ -20,7 +20,7 @@
   "author": "OpenST Limited.",
   "license": "LGPL-3.0-only",
   "bugs": {
-    "url": "https://github.com/OpenSTFoundation/openst.js/issues"
+    "url": "https://github.com/openst/openst.js/issues"
   },
   "scripts": {
     "test": "mocha --recursive --timeout 120000 test/unit --exit",
