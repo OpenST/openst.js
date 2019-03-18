@@ -1,12 +1,11 @@
 'use strict';
 
-//__NOT_FOR_WEB__BEGIN__
-const fs = require('fs'),
-  path = require('path');
-//__NOT_FOR_WEB__END__
+const path = require('path');
+const fs = require('fs');
 
-const AbiBinProvider = require('./../../lib/AbiBinProvider');
+const Package = require('../../index');
 
+const { AbiBinProvider } = Package;
 const mockAbiFolder = path.resolve(__dirname, './mock-contracts/abi');
 const mockBinFolder = path.resolve(__dirname, './mock-contracts/bin');
 
@@ -57,12 +56,12 @@ class MockContractsDeployer {
    */
   deploy(contractName, web3, args = [], txOptions) {
     const oThis = this;
-    web3 = web3 || oThis.web3;
-    const abiBinProvider = oThis.abiBinProvider;
+    const web3Provider = web3 || oThis.web3;
+    const { abiBinProvider } = oThis;
     const abi = abiBinProvider.getABI(contractName);
     const bin = abiBinProvider.getBIN(contractName);
 
-    let defaultOptions = {
+    const defaultOptions = {
       from: oThis.deployer,
       gas: '7500000',
       gasPrice: '0x5B9ACA00'
@@ -72,8 +71,9 @@ class MockContractsDeployer {
       Object.assign(defaultOptions, txOptions);
     }
     txOptions = defaultOptions;
-    const contract = new web3.eth.Contract(abi, null, txOptions);
-    let tx = contract.deploy(
+
+    const contract = new web3Provider.eth.Contract(abi, null, txOptions);
+    const tx = contract.deploy(
       {
         data: bin,
         arguments: args
@@ -100,10 +100,35 @@ class MockContractsDeployer {
   /**
    * Static method to get the instance of AbiBinProvider.
    *
-   * @returns {OpenSTAbiBinProvider}
+   * @returns {abiBinProvider}
    */
   static abiBinProvider() {
-    return new AbiBinProvider(mockAbiFolder, mockBinFolder);
+    const abiBinProvider = new AbiBinProvider();
+    MockContractsDeployer.loadContracts(abiBinProvider, mockAbiFolder, mockBinFolder);
+    return abiBinProvider;
+  }
+
+  static loadContracts(provider, abiFolderPath, binFolderPath) {
+    if (!path.isAbsolute(abiFolderPath)) {
+      throw new Error('"abiFolderPath" is not Absolute. Please provide absolute path.');
+    }
+    if (!path.isAbsolute(binFolderPath)) {
+      throw new Error('"binFolderPath" is not Absolute. Please provide absolute path.');
+    }
+
+    // add all ABIs from abiFolderPath
+    fs.readdirSync(abiFolderPath).forEach((abiFile) => {
+      const contractName = path.basename(abiFile, path.extname(abiFile));
+      const contractAbi = JSON.parse(fs.readFileSync(path.join(abiFolderPath, abiFile)));
+      provider.addABI(contractName, contractAbi);
+    });
+
+    // add all bins from binFolderPath
+    fs.readdirSync(binFolderPath).forEach((binFile) => {
+      const contractName = path.basename(binFile, path.extname(binFile));
+      const contractBin = fs.readFileSync(path.join(binFolderPath, binFile), 'utf8');
+      provider.addBIN(contractName, contractBin);
+    });
   }
 }
 
