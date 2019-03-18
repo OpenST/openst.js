@@ -2,6 +2,7 @@ OpenST.js
 ============
 
 OpenST is a framework for building token economies. OpenST supports interactions with openst-contracts.
+It requires [openst-contracts](https://github.com/OpenSTFoundation/openst-contracts) for ABIs and BINs of contracts.
 
 ![Build master](https://img.shields.io/travis/OpenSTFoundation/openst.js/master.svg?label=build%20master&style=flat)
 ![Build develop](https://img.shields.io/travis/OpenSTFoundation/openst.js/develop.svg?label=build%20develop&style=flat)
