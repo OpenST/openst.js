@@ -2,15 +2,15 @@ const Web3 = require('web3');
 const { assert } = require('chai');
 const BN = require('bn.js');
 const Package = require('../../index');
-const Mosaic = require('@openstfoundation/mosaic.js');
+
 const MockContractsDeployer = require('./../utils/MockContractsDeployer');
 const config = require('../utils/configReader');
 const { dockerSetup, dockerTeardown } = require('./../../utils/docker');
 const Utils = require('../../utils/Utils');
 
+const { Contracts, AbiBinProvider } = Package;
+const { Organization } = Package.ContractInteract;
 const UserSetup = Package.Setup.User;
-const Contracts = Package.Contracts;
-const { AbiBinProvider } = Package;
 const PricerRuleHelper = Package.Helpers.Rules.PricerRule;
 
 let auxiliaryWeb3,
@@ -40,8 +40,8 @@ let auxiliaryWeb3,
 
 describe('TH transfers through PricerRule Pay', async function() {
   before(async function() {
-    const { rpcEndpointOrigin } = await dockerSetup();
-    auxiliaryWeb3 = new Web3(rpcEndpointOrigin);
+    const { rpcEndpoint } = await dockerSetup();
+    auxiliaryWeb3 = new Web3(rpcEndpoint);
     accountsOrigin = await auxiliaryWeb3.eth.getAccounts();
     deployerAddress = accountsOrigin[0];
     priceOracleOwner = accountsOrigin[0];
@@ -60,7 +60,6 @@ describe('TH transfers through PricerRule Pay', async function() {
   });
 
   it('Performs initial setup for economy', async function() {
-    const { Organization } = Mosaic.ContractInteract;
     const orgConfig = {
       deployer: deployerAddress,
       owner: deployerAddress,
@@ -68,7 +67,7 @@ describe('TH transfers through PricerRule Pay', async function() {
       workers: [worker],
       workerExpirationHeight: config.workerExpirationHeight
     };
-    const organizationContractInstance = await Organization.setup(auxiliaryWeb3, orgConfig);
+    const organizationContractInstance = await Organization.setup(auxiliaryWeb3, orgConfig, txOptions);
     organizationAddress = organizationContractInstance.address;
     assert.isNotNull(organizationAddress, 'Organization contract address should not be null.');
 

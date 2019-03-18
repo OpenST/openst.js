@@ -24,7 +24,7 @@ const dockerSetup = () => {
   return Promise.all([waitForOriginNode])
     .then(() => asyncSleep(5000))
     .then(() => ({
-      rpcEndpointOrigin: `http://localhost:${config.auxiliaryPort}`
+      rpcEndpoint: `http://localhost:${config.auxiliaryPort}`
     }));
 };
 
