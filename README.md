@@ -470,9 +470,9 @@ The abiBinProvider provides abi(s) and bin(s) for the following contracts:
 * [TokenHolder](https://github.com/openst/openst-contracts/blob/0.10.0-alpha.1/contracts/token/TokenHolder.sol) (TokenHolder contract deployed on UtilityChain)
 * [TokenRules](https://github.com/openst/openst-contracts/blob/0.10.0-alpha.1/contracts/token/TokenRules.sol) (TokenRules contract deployed on UtilityChain)
 * [PricerRule](https://github.com/openst/openst-contracts/blob/0.10.0-alpha.1/contracts/rules/PricerRule.sol) (PricerRule is a rule contract deployed on UtilityChain)
-* [GnosisSafe](https://github.com/gnosis/safe-contracts/blob/v0.1.0/contracts/GnosisSafe.sol) (MultiSignature wallet with support for confirmations using signed messages)
+* [GnosisSafe](https://github.com/gnosis/safe-contracts/blob/v0.10.0/contracts/GnosisSafe.sol) (MultiSignature wallet with support for confirmations using signed messages)
 * [DelayedRecoveryModule](https://github.com/openst/openst-contracts/blob/0.10.0-alpha.1/contracts/gnosis_safe_modules/DelayedRecoveryModule.sol) (Allows to replace an owner without Safe confirmations) 
-* [CreateAndAddModules](https://github.com/gnosis/safe-contracts/blob/v0.1.0/contracts/libraries/CreateAndAddModules.sol) (Allows to create and add multiple module in one transaction)
+* [CreateAndAddModules](https://github.com/gnosis/safe-contracts/blob/v0.10.0/contracts/libraries/CreateAndAddModules.sol) (Allows to create and add multiple module in one transaction)
 * [UserWalletFactory](https://github.com/openst/openst-contracts/blob/0.10.0-alpha.1/contracts/proxies/UserWalletFactory.sol) (Creates proxy for GnosisSafe, TokenHolder and DelayedRecoveryModule)
 
 ```js
