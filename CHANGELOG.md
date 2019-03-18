@@ -2,6 +2,7 @@
 
 ## Version 0.10.0
 
+* Deprecation of setup and helper files ([141](https://github.com/openst/openst.js/pull/141))
 * ABIs and BINs are now accessed as a dependency on openst-contracts ([137](https://github.com/openst/openst.js/pull/137))
 * Update PricerRule ABI/BIN with PricerRule:convertPayCurrencyToToken fix ([126](https://github.com/openst/openst.js/pull/126))
 * Recovery contract interaction fixes ([#116](https://github.com/openst/openst.js/pull/116))

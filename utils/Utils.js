@@ -27,6 +27,17 @@ class Utils {
         .catch((exception) => onReject(exception));
     });
   }
+
+  /**
+   * Prints a deprecation warning for deprecated code.
+   *
+   * @param {string} object Identifier of what has been deprecated.
+   * @param {string} message Message that has instructions on how to migrate.
+   *
+   */
+  static deprecationNotice(object, message) {
+    console.warn(`⚠️ '${object}' has been deprecated. ${message}`);
+  }
 }
 
 module.exports = Utils;
