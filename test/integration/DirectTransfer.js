@@ -1,5 +1,5 @@
 const Web3 = require('web3');
-const Mosaic = require('@openstfoundation/mosaic.js');
+const Mosaic = require('@openst/mosaic.js');
 const { assert } = require('chai');
 const Package = require('../../index');
 

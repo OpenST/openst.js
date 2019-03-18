@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "@openst/openst-contracts": "0.10.0-rc.1",
-    "@openstfoundation/mosaic.js": "0.10.0-beta.4"
+    "@openst/mosaic.js": "0.10.0-beta.5"
   },
   "devDependencies": {
     "@babel/core": "7.1.0",
