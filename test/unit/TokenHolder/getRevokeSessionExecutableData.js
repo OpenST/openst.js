@@ -34,7 +34,7 @@ describe('TokenHolder.getAuthorizeSessionWithExecutableData()', () => {
     Spy.assert(revokeSessionSpy, 1, [[sessionKey]]);
   });
 
-  it('should throw an error when to address is undefined', async () => {
+  it('should throw an error when sessoinKey address is undefined', async () => {
     const sessionKey = undefined;
     await AssertAsync.reject(tokenHolder.getSessionKeyData(sessionKey), `Invalid sessionKey address: undefined.`);
   });
