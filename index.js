@@ -20,7 +20,7 @@ const ProxyFactory = require('./lib/ContractInteract/ProxyFactory');
 const CreateAndAddModules = require('./lib/ContractInteract/CreateAndAddModules');
 const TokenRules = require('./lib/ContractInteract/TokenRules');
 const PricerRule = require('./lib/ContractInteract/PricerRule');
-const Mosaic = require('@openstfoundation/mosaic.js');
+const Mosaic = require('@openst/mosaic.js');
 
 // OpenST Setup
 const SetupOpenst = require('./lib/Setup');
