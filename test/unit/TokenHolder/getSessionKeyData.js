@@ -8,7 +8,7 @@ const Spy = require('../../../utils/Spy');
 const AssertAsync = require('../../../utils/AssertAsync');
 const TokenHolder = require('../../../lib/ContractInteract/TokenHolder');
 
-describe('TokenHolder.getAuthorizeSessionWithExecutableData()', () => {
+describe('TokenHolder.getSessionKeyData()', () => {
   let tokenHolder;
 
   beforeEach(() => {
@@ -20,18 +20,18 @@ describe('TokenHolder.getAuthorizeSessionWithExecutableData()', () => {
   it('should construct with correct parameters', async () => {
     const sessionKey = '0x0000000000000000000000000000000000000003';
 
-    const mockRevokeSession = 'mockRevokeSession';
-    const revokeSessionSpy = sinon.replace(
+    const mockSessionKeyData = 'mockSessionKeyData';
+    const sessionKeyDataSpy = sinon.replace(
       tokenHolder.contract.methods,
-      'revokeSession',
+      'sessionKeys',
       sinon.fake.returns({
-        encodeABI: () => Promise.resolve(mockRevokeSession)
+        call: () => Promise.resolve(mockSessionKeyData)
       })
     );
-    const response = await tokenHolder.getRevokeSessionExecutableData(sessionKey);
+    const response = await tokenHolder.getSessionKeyData(sessionKey);
 
-    assert.strictEqual(response, mockRevokeSession);
-    Spy.assert(revokeSessionSpy, 1, [[sessionKey]]);
+    assert.strictEqual(response, mockSessionKeyData);
+    Spy.assert(sessionKeyDataSpy, 1, [[sessionKey]]);
   });
 
   it('should throw an error when sessoinKey address is undefined', async () => {
