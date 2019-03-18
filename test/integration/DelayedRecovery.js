@@ -22,7 +22,7 @@ const { dockerSetup, dockerTeardown } = require('./../../utils/docker');
 
 const config = require('../utils/configReader');
 
-const Mosaic = require('@openstfoundation/mosaic.js');
+const Mosaic = require('@openst/mosaic.js');
 const ConfigReader = require('../utils/configReader');
 const UserSetup = require('../../lib/setup/User.js');
 const User = require('../../lib/User.js');
