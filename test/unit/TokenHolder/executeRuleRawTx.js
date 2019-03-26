@@ -35,6 +35,7 @@ describe('TokenHolder.executeRuleRawTx()', () => {
 
     assert.strictEqual(response, mockExecuteRule);
     Spy.assert(executeRuleSpy, 1, [[to, data, nonce, r, s, v]]);
+    sinon.restore();
   });
 
   it('should throw an error when to address is undefined', async () => {

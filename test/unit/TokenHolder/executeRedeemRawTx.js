@@ -34,6 +34,7 @@ describe('TokenHolder.executeRedemptionRawTx()', () => {
 
     assert.strictEqual(response, mockExecuteRedeem);
     Spy.assert(executeRedeemSpy, 1, [[to, data, nonce, r, s, v]]);
+    sinon.restore();
   });
 
   it('should throw an error when to address is undefined', async () => {
