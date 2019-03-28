@@ -1,67 +1,61 @@
 'use strict';
 
-/**
- * Load openST Platform module
- */
+const AbiBinProvider = require('./lib/AbiBinProvider');
+const Contracts = require('./lib/Contracts');
+const TokenRulesSetup = require('./lib/setup/TokenRules');
+const User = require('./lib/setup/User');
+const UserHelper = require('./lib/helper/User');
+const TokenRulesHelper = require('./lib/helper/TokenRules');
+const TokenHolderHelper = require('./lib/helper/TokenHolder');
+const Rules = require('./lib/setup/Rules');
+const PricerRuleHelper = require('./lib/helper/rules/PricerRule');
+const GnosisSafeHelper = require('./lib/helper/GnosisSafe');
 
-const InstanceComposer = require('./instance_composer');
-const version = require('./package.json').version;
+// Require Contract Interacts
+const TokenHolder = require('./lib/ContractInteract/TokenHolder');
+const GnosisSafe = require('./lib/ContractInteract/GnosisSafe');
+const Recovery = require('./lib/ContractInteract/Recovery');
+const UserWalletFactory = require('./lib/ContractInteract/UserWalletFactory');
+const ProxyFactory = require('./lib/ContractInteract/ProxyFactory');
+const CreateAndAddModules = require('./lib/ContractInteract/CreateAndAddModules');
+const TokenRules = require('./lib/ContractInteract/TokenRules');
+const PricerRule = require('./lib/ContractInteract/PricerRule');
+const Mosaic = require('@openst/mosaic.js');
+
+// OpenST Setup
+const SetupOpenst = require('./lib/Setup');
+
 const SignEIP1077Extension = require('./utils/SignEIP1077Extension');
-const AbiBinProvider = require('./utils/AbiBinProvider');
+new SignEIP1077Extension();
 
-require('./lib/providers/web3/ChainWeb3');
-require('./lib/Signers');
-require('./lib/Deployer');
-require('./lib/Contracts');
-
-const OpenST = function(provider, net, options) {
-  const oThis = this;
-  oThis.version = version;
-
-  oThis.configurations = Object.assign(
-    {},
-    {
-      web3Provider: provider,
-      web3Net: net
-    },
-    options || {}
-  );
-
-  const _instanceComposer = new InstanceComposer(oThis.configurations);
-
-  oThis.ic = function() {
-    return _instanceComposer;
-  };
-
-  let abiBinProvider = new AbiBinProvider();
-  InstanceComposer.registerObject(abiBinProvider, 'abiBinProvider');
-
-  oThis.abiBinProvider = function() {
-    return abiBinProvider;
-  };
-
-  let _web3 = oThis.ic().chainWeb3();
-  oThis.web3 = function() {
-    return _web3;
-  };
-
-  oThis.contracts = oThis.ic().Contracts();
-
-  oThis.Deployer = oThis.ic().Deployer();
-
-  oThis.signers = oThis.ic().Signers();
-
-  oThis.utils = OpenST.utils;
+module.exports = {
+  AbiBinProvider: AbiBinProvider,
+  Contracts: Contracts,
+  SetupOpenst: SetupOpenst,
+  Setup: {
+    TokenRules: TokenRulesSetup,
+    User: User,
+    Rules: Rules
+  },
+  Helpers: {
+    User: UserHelper,
+    TokenRules: TokenRulesHelper,
+    TokenHolder: TokenHolderHelper,
+    GnosisSafe: GnosisSafeHelper,
+    Recovery: Recovery,
+    Rules: {
+      PricerRule: PricerRuleHelper
+    }
+  },
+  ContractInteract: {
+    TokenHolder: TokenHolder,
+    GnosisSafe: GnosisSafe,
+    Recovery: Recovery,
+    UserWalletFactory: UserWalletFactory,
+    ProxyFactory: ProxyFactory,
+    CreateAndAddModules: CreateAndAddModules,
+    TokenRules: TokenRules,
+    PricerRule: PricerRule,
+    Organization: Mosaic.ContractInteract.Organization
+  }
 };
-
-OpenST.prototype = {
-  constructor: OpenST,
-  configurations: null
-};
-
-OpenST.utils = {
-  GethSignerService: require('./utils/GethSignerService'),
-  AbiBinProvider: AbiBinProvider
-};
-
-module.exports = OpenST;

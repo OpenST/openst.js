@@ -1,23 +1,20 @@
 'use strict';
+
 const _ = require('underscore'),
   Account = require('eth-lib/lib/account'),
   Accounts = require('web3-eth-accounts'),
-  utils = require('web3-utils'),
-  Bytes = require('eth-lib/lib/bytes'),
-  helpers = require('web3-core-helpers'),
-  Hash = require('eth-lib/lib/hash');
+  web3Utils = require('web3-utils'),
+  helpers = require('web3-core-helpers');
 
-const DEBUG = false;
-
-utils.toEIP1077TransactionHash = (transaction, version) => {
+web3Utils.toEIP1077TransactionHash = (transaction) => {
   transaction = helpers.formatters.inputCallFormatter(transaction);
 
-  transaction.value = utils.toBN(transaction.value || '0').toString();
-  transaction.gasPrice = utils.toBN(transaction.gasPrice || '0').toString();
-  transaction.gas = utils.toBN(transaction.gas || '0').toString();
-  transaction.gasToken = utils.toBN(transaction.gasToken || '0').toString();
-  transaction.operationType = utils.toBN(transaction.operationType || '0').toString();
-  transaction.nonce = utils.toBN(transaction.nonce || '0').toString();
+  transaction.value = web3Utils.toBN(transaction.value || '0').toString();
+  transaction.gasPrice = web3Utils.toBN(transaction.gasPrice || '0').toString();
+  transaction.gas = web3Utils.toBN(transaction.gas || '0').toString();
+  transaction.gasToken = web3Utils.toBN(transaction.gasToken || '0').toString();
+  transaction.operationType = web3Utils.toBN(transaction.operationType || '0').toString();
+  transaction.nonce = web3Utils.toBN(transaction.nonce || '0').toString();
   transaction.to = transaction.to || '0x';
   transaction.data = transaction.data || '0x';
   transaction.extraHash = transaction.extraHash || '0x00';
@@ -40,14 +37,15 @@ utils.toEIP1077TransactionHash = (transaction, version) => {
    );
    **/
 
-  version = version || '0x00';
-  let txHash = utils.soliditySha3(
+  // Version is 0 as per EIP1077: https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1077.md
+  const version = '0x00';
+  const txHash = web3Utils.soliditySha3(
     { t: 'bytes', v: '0x19' }, // prefix
     { t: 'bytes', v: version }, // version control
     { t: 'address', v: transaction.from }, //from
     { t: 'address', v: transaction.to }, //to
     { t: 'uint8', v: transaction.value }, //value
-    { t: 'bytes', v: utils.soliditySha3(transaction.data) }, //dataHash
+    { t: 'bytes', v: web3Utils.soliditySha3(transaction.data) }, //dataHash
     { t: 'uint256', v: transaction.nonce }, //nonce
     { t: 'uint8', v: transaction.gasPrice }, //gasPrice
     { t: 'uint8', v: transaction.gas }, //gas
@@ -59,7 +57,7 @@ utils.toEIP1077TransactionHash = (transaction, version) => {
   return txHash;
 };
 
-Accounts.prototype.signEIP1077Transaction = (transaction, privateKey, callback, version) => {
+Accounts.prototype.signEIP1077Transaction = (transaction, privateKey, callback) => {
   if (transaction.nonce < 0 || transaction.gas < 0 || transaction.gasPrice < 0) {
     let error = new Error('Gas, gasPrice or nonce is lower than 0');
     callback && callback(error);
@@ -68,7 +66,7 @@ Accounts.prototype.signEIP1077Transaction = (transaction, privateKey, callback, 
 
   let result;
   try {
-    let txHash = utils.toEIP1077TransactionHash(transaction, version);
+    let txHash = web3Utils.toEIP1077TransactionHash(transaction);
     let signature = Account.sign(txHash, privateKey);
     let vrs = Account.decodeSignature(signature);
     result = {
@@ -92,8 +90,8 @@ Accounts.prototype._addAccountFunctions = function(account) {
   const oAccounts = this;
   account = org_addAccountFunctions.apply(oAccounts, arguments);
 
-  account.signEIP1077Transaction = function(transaction, callback, version) {
-    return oAccounts.signEIP1077Transaction(transaction, account.privateKey, callback, version);
+  account.signEIP1077Transaction = function(transaction, callback) {
+    return oAccounts.signEIP1077Transaction(transaction, account.privateKey, callback);
   };
 
   return account;
