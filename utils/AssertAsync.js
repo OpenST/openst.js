@@ -3,7 +3,7 @@
 const { assert } = require('chai');
 
 /**
- * This class includes the utitity assert function
+ * This class includes the utility assert function
  */
 class AssertAsync {
   static async reject(promise, message) {
