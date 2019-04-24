@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@openst/openst-contracts": ">=0.10.0 <0.11.0",
+    "@openst/mosaic-contracts": ">=0.10.0 < 0.11.0",
     "@openst/mosaic.js": ">=0.10.0 <0.11.0"
   },
   "devDependencies": {
