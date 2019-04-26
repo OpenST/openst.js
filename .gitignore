@@ -1,7 +1,11 @@
 # OSX
 .DS_Store
 
+# IDEs
 .idea/
+.vscode/
+*.swp
+tags
 
 # Vagrant
 .vagrant/
