@@ -14,7 +14,7 @@ describe('TokenHolder.getCoGatewayRedeemExecutableData()', () => {
     tokenHolder = new TokenHolder(web3, address);
   });
 
-  it('should construct with correct parameters', async () => {
+  it('should create the correct abi encoded data', async () => {
     const amount = '100';
     const beneficiary = '0x0000000000000000000000000000000000000005';
     const gasPrice = '300';

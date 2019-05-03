@@ -16,7 +16,7 @@ describe('TokenHolder.getLogoutExecutableData()', () => {
     tokenHolder = new TokenHolder(web3, address);
   });
 
-  it('should construct with correct parameters', async () => {
+  it('should create the correct abi encoded data', async () => {
     const mockLogout = 'mockLogout';
     const logoutSpy = sinon.replace(
       tokenHolder.contract.methods,
