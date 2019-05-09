@@ -16,7 +16,7 @@ describe('TokenHolder.getAuthorizeSessionWithExecutableData()', () => {
     tokenHolder = new TokenHolder(web3, address);
   });
 
-  it('should construct with correct parameters', async () => {
+  it('should create the correct abi encoded data', async () => {
     const sessionKey = '0x0000000000000000000000000000000000000003';
     const spendingLimit = 10000000000;
     const expirationHeight = 2000000000;
